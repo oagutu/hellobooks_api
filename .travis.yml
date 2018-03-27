@@ -8,4 +8,4 @@ install:
   - pip install -r requirements.txt
 
 script:
-  - python run.py
+  - python test_helloapi.py
