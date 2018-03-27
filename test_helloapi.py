@@ -85,6 +85,38 @@ class ApiEndpoint(unittest.TestCase):
         result = self.client.post('/api/users/books/1', data=self.book_details)
         self.assertIn('returned', str(result.data))
 
+    def test_create_user_account(self):
+        '''tests create_user_account() functionality'''
+
+        result = self.client.post('/api/auth/register',
+                                  data=self.user_details)
+        self.assertEqual(result.status_code, 201)
+        self.assertIn('John Doe', str(result.data))
+
+    def test_user_login_logout(self):
+        '''tests user_login() functionality'''
+
+        self.assertEqual(self.client.post('/api/auth/register',
+                                          data=self.user_details).status_code, 201)
+        result = self.client.post(' /api/auth/login', 
+                                  data = {'username':'Jane Doe', 'password':'qwerty'})
+        self.assertIn('Successfully logged in', str(result.data))
+
+        result = self.client.post('/api/auth/logout')
+        self.assertIn('Successfully logged out', str(result.data))
+
+    def test_reset_password(self):
+        '''tests reset_password() functionality'''
+
+        self.assertEqual(self.client.post('/api/auth/register',
+                                          data=self.user_details).status_code, 201)
+        self.client.post(' /api/auth/login',
+                         data={'username': 'Jane Doe', 'password': 'qwerty'})
+        result = self.client.post('/api/auth/reset-password', data = {'password':'new_password'})
+        self.assertEqual(result.status_code, 201)
+        self.assertNotIn(self.user_details['password'], str(result.data))
+        #checks to see new password not equal to old password
+
 
 if __name__ == '__main__':
     unittest.main()
