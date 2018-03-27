@@ -29,11 +29,25 @@ class Book(object):
         return self.library
         
 
+class User(object):
+    def __init__(self):
+        self.uid = None
+        self.name = None
+        self.username = None
+        self.password = None
+        self.acc_type = None
+        self.register = {}
+
+    def add_to_reg(self, key, user_details):
+        '''adds books to library dict'''
+        self.register[key] = user_details
+        
 
 value_list = ['bk_id', 'title', 'code', 'author', 'synopsis'
     'genre', 'sub_genre', 'status']
 
 book = Book()
+user = User()
     
 
 @app.route('/api/books', methods= ['POST'])
@@ -150,8 +164,37 @@ def borrow_return_book():
                 resp = jsonify(bk)
 
                 return resp
-                
+
             bk['status'] = 'returned'
             resp = jsonify(bk)
+
+            return resp
+
+
+@app.route('/api/auth/register', methods=['POST'])
+def create_user_account():
+    '''adds new user'''
+
+    if request.method == "POST":
+    
+        r = request.get_json()
+        user.uid = r.get('user_id')
+        user.name = r.get('name')
+        user.username = r.get('username')
+        user.password = r.get('password')
+        user.acc_type = r.get('acc_type')
+
+        if r:
+            resp = jsonify({
+                'user_id': user.uid,
+                'name': user.name,
+                'username': user.username,
+                'password': user.password,
+                'acc_type':  user.acc_type,
+            }
+            )
+            user.add_to_reg(user.uid, resp.data)
+            #adds new user entry to reister
+            resp.status_code = 201
 
             return resp
