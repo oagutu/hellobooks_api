@@ -36,6 +36,7 @@ class User(object):
         self.password = None
         self.acc_type = None
         self.register = {}
+        self.borrowed = {}
 
     def add_to_reg(self, key, user_details):
         '''adds books to library dict'''

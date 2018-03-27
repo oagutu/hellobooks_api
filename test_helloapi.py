@@ -17,7 +17,8 @@ class ApiEndpoint(unittest.TestCase):
         self.book_details = {'id': 1, 'title': 'book title', 'code': 12345, 'author': 'mary writer', 'synopsis': "iwehn owueh owunef ohew ouweq...",
                              'genre': 'fiction', 'sub_genre': 'xyz', 'status': 'available'}
         self.user_details = {'name': 'John Doe', 'user_id': '123456',
-                             'username': 'Jane Doe', 'password': 'qwerty', 'acc_type': 'member'}
+                             'username': 'Jane Doe', 'password': 'qwerty', 'acc_type': 'member',
+                             'borrowed_books': {}}
 
     def test_add_book(self):
         '''
@@ -66,7 +67,7 @@ class ApiEndpoint(unittest.TestCase):
 
         self.assertEqual(self.client.post(
             'api/books', data=self.book_details).status_code, 201)
-        result = self.client.get('/api/books/1')
+        result = self.client.get('/api/books/1', data=self.book_details['id'])
         self.assertEqual(result.status_code, 200)
         self.assertIn('book title', str(result.data))
         # only 1 item/book should be returned
