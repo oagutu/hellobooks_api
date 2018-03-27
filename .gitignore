@@ -1,0 +1,8 @@
+
+
+#directories to ignore
+
+hb/
+.vscode/
+
+#file extensions
