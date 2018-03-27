@@ -1,3 +1,9 @@
 langauge: python
+<<<<<<< HEAD
 python: 
 3.6.1
+=======
+rvm: 
+3.6.1
+
+>>>>>>> 7f1460f316cb89a5d0a2d98d4358e1d73090fbc4
