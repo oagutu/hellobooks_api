@@ -1,5 +1,8 @@
 # hellobooks_api
 
+[![Coverage Status](https://coveralls.io/repos/github/oagutu/hellobooks_api/badge.svg?branch=master)](https://coveralls.io/github/oagutu/hellobooks_api?branch=master)
+
+
 API endpoints for the Hello Books Flask web app project
 
 Setup:
