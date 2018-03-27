@@ -1,6 +1,6 @@
 '''holds api endpoints'''
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, session, flash
 
 from app import create_app
 
@@ -34,6 +34,7 @@ class User(object):
         self.uid = None
         self.name = None
         self.username = None
+        self.eaddress = None
         self.password = None
         self.acc_type = None
         self.register = {}
@@ -41,6 +42,10 @@ class User(object):
     def add_to_reg(self, key, user_details):
         '''adds books to library dict'''
         self.register[key] = user_details
+
+    def get_all_users(self):
+
+        return self.register
         
 
 value_list = ['bk_id', 'title', 'code', 'author', 'synopsis'
@@ -180,6 +185,7 @@ def create_user_account():
         r = request.get_json()
         user.uid = r.get('user_id')
         user.name = r.get('name')
+        user.eaddress = r.get('email')
         user.username = r.get('username')
         user.password = r.get('password')
         user.acc_type = r.get('acc_type')
@@ -198,3 +204,26 @@ def create_user_account():
             resp.status_code = 201
 
             return resp
+
+
+@app.route('/api/auth/login', methods = ['POST'])
+def login():
+    '''facilitates user login'''
+
+    if request.method == 'POST':
+        r = request.get_json()
+        user.username = r.get('username')
+        user.password = r.get('password')
+
+        for u in user.get_all_users():
+            if u['username'] == user.username and u['password'] == user.password:
+                session['logged in'] =True
+                flash('Successfully logged in', category = 'info')
+
+
+@app.route('/api/auth/logout', methods=['POST'])
+def logout():
+    '''facilitates user logout'''
+    if request.method == 'POST':
+        session.pop('logged_in', None)
+        flash('Successfully logged out', category='info')
