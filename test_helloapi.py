@@ -15,7 +15,7 @@ class ApiEndpoint(unittest.TestCase):
         self.app_context = self.app.app_context().push()
 
         self.book_details = {'id': 1, 'title': 'book title', 'code': 12345, 'author': 'mary writer', 'synopsis': "iwehn owueh owunef ohew ouweq...",
-                             'genre': 'fiction', 'sub-genre': 'xyz', 'status': 'available'}
+                             'genre': 'fiction', 'sub_genre': 'xyz', 'status': 'available'}
         self.user_details = {'name': 'John Doe', 'user_id': '123456',
                              'username': 'Jane Doe', 'password': 'qwerty', 'acc_type': 'member'}
 
@@ -24,7 +24,8 @@ class ApiEndpoint(unittest.TestCase):
             Tests add_book() functionality
             verifies: database correctly updated
         '''
-        result = self.client.post('/api/books', data=self.book_details)
+        result = self.client.post('/api/books/', data=self.book_details)
+        print(result)
         self.assertEqual(result.status_code, 201)
         self.assertIn(self.book_details['title'], result.data)
         self.assertIn(self.book_details['code'], str(result.data))
