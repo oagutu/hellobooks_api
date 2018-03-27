@@ -1,9 +1,11 @@
 langauge: python
-<<<<<<< HEAD
 python: 
-3.6.1
-=======
-rvm: 
-3.6.1
+- '3.6'
+- '3.5'
+- '3.4'
 
->>>>>>> 7f1460f316cb89a5d0a2d98d4358e1d73090fbc4
+install:
+  - pip install -r requirements.txt
+
+script:
+  - python run.py
