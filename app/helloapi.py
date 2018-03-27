@@ -61,17 +61,17 @@ def add_book():
    
     if request.method == "POST":
 
-        r = request.get_json()
-        book.bk_id = r.get('bk_id')
-        book.title = r.get('title')
-        book.code = r.get('code')
-        book.author = r.get('author')
-        book.synopsis = r.get('synopsis')
-        book.genre = r.get('genre')
-        book.sub_genre = r.get('sub_genre')
-        book.status = r.get('status')
+        data = request.get_json()
+        book.bk_id = data.get('bk_id')
+        book.title = data.get('title')
+        book.code = data.get('code')
+        book.authodata= data.get('author')
+        book.synopsis = data.get('synopsis')
+        book.genre = data.get('genre')
+        book.sub_genre = data.get('sub_genre')
+        book.status = data.get('status')
 
-        if r:
+        if data:
             resp = jsonify({
                 'bk_id' : book.bk_id,
                 'title' : book.title,
@@ -95,14 +95,14 @@ def update_book():
 
     if request.method == "PUT":
         
-        r = request.get_json()
-        temp_r = {}
+        data= request.get_json()
+        temp_data= {}
         
         for val in value_list:
-            if r.get(val) in r:
-                book.val = r.get(val)
-                temp_r[val] = book.val
-        resp = jsonify(temp_r)
+            if data.get(val) in data:
+                book.val = data.get(val)
+                temp_data[val] = book.val
+        resp = jsonify(temp_data)
         
         return resp
 
@@ -111,8 +111,8 @@ def update_book():
 def remove_book():
     
     if request.method == 'DELETE':
-        r = request.get_json()
-        book.bk_id = r.get('bk_id')
+        data= request.get_json()
+        book.bk_id = data.get('bk_id')
         del book.library[book.bk_id]
 
         resp = jsonify({'bk_id': book.bk_id,
@@ -142,10 +142,10 @@ def get_book():
     '''gets specific book'''
 
     if request.method == 'GET':
-        r = request.get_json()
-        book.book_id = r.get('bk_id')
+        data= request.get_json()
+        book.book_id = data.get('bk_id')
         
-        if r:
+        if data:
             for bk in book.get_all_books():
                 if bk['bk_id'] == book.book_id:
                     resp = jsonify(bk)
@@ -160,8 +160,8 @@ def borrow_return_book():
     '''allows borrowing/returning of books'''
 
     if request.method == 'POST':
-        r = request.get_json()
-        book.book_id = r.get('bk_id')
+        data= request.get_json()
+        book.book_id = data.get('bk_id')
 
         for bk in book.get_all_books():
             if bk['bk_id'] == book.book_id and bk['status'] == 'available':
@@ -182,15 +182,15 @@ def create_user_account():
 
     if request.method == "POST":
     
-        r = request.get_json()
-        user.uid = r.get('user_id')
-        user.name = r.get('name')
-        user.eaddress = r.get('email')
-        user.username = r.get('username')
-        user.password = r.get('password')
-        user.acc_type = r.get('acc_type')
+        data= request.get_json()
+        user.uid = data.get('user_id')
+        user.name = data.get('name')
+        user.eaddress = data.get('email')
+        user.username = data.get('username')
+        user.password = data.get('password')
+        user.acc_type = data.get('acc_type')
 
-        if r:
+        if data:
             resp = jsonify({
                 'user_id': user.uid,
                 'name': user.name,
@@ -211,9 +211,9 @@ def login():
     '''facilitates user login'''
 
     if request.method == 'POST':
-        r = request.get_json()
-        user.username = r.get('username')
-        user.password = r.get('password')
+        data= request.get_json()
+        user.username = data.get('username')
+        user.password = data.get('password')
 
         for u in user.get_all_users():
             if u['username'] == user.username and u['password'] == user.password:
