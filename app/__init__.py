@@ -22,54 +22,25 @@ def create_app(config_name):
         '''adds specified book to library'''
 
         if request.method == "POST":
+            
             data = request.get_json()
-            book_id = data['book_id']
-            title = data['title']
-            author = data['author']
+            book_info = [
+                data['book_id'],
+                data['title'],
+                data['author'],
+                data['book_code'],
+                data['synopsis'],
+                data['genre'],
+                data['subgenre'],
+                data['status']
+            ]
 
-            book_details = book.set_book(book_id, title, author)
+            book_details = book.set_book(book_info)
             #returns dictionary with book details
 
             response = jsonify(book_details)
 
             return response
-
-        
-
-    # @app.route('/api/books', methods=['POST'])
-    # def add_book():
-    #     '''adds book to library'''
-
-    #     if request.method == "POST":
-
-    #         data = request.get_json()
-            
-    #         book.bk_id = data['bk_id']
-    #         book.title = data['title']
-    #         book.code = data['code']
-    #         book.author = data['author']
-    #         book.synopsis = data['synopsis']
-    #         book.genre = data['genre']
-    #         book.sub_genre = data['sub_genre']
-    #         book.status = data['status']
-
-    #         if data:
-    #             resp = jsonify({
-    #                 'bk_id': book.bk_id,
-    #                 'title': book.title,
-    #                 'code': book.code,
-    #                 'author': book.author,
-    #                 'synopsis': book.synopsis,
-    #                 'genre': book.genre,
-    #                 'sub_genre': book.sub_genre,
-    #                 'status': book.status
-    #             }
-    #             )
-    #             book.add_to_lib(book.bk_id, resp.data)
-    #             #adds new book entry to lib
-    #             resp.status_code = 201
-
-    #             return resp
 
 
     @app.route('/api/books/<int:bk_id>', methods=['PUT'])

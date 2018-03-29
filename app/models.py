@@ -4,6 +4,7 @@ class Book(object):
     '''holds book objects'''
 
     def __init__(self):
+        '''initializes book object'''
         self.bk_id = None
         self.title = None
         self.code = None
@@ -14,17 +15,17 @@ class Book(object):
         self.status = None
         self.library = {}
 
-    def set_book(self, book_id, title, author):
+    def set_book(self, book_info):
         '''sets value of a book object'''
-        
-        self.book_id = book_id
-        self.title = title
-        self.author = author
 
-        book_details = {
-            "book_id" : self.book_id,
-            "title" : self.title,
-            "author" : self.author,}
+        bk_params = ["book_id", "title", "author", "book_code", "synopsis",
+                      "genre", "subgenre", "status"]
+        book_details = {}
+
+        if len(bk_params) == len(book_info):
+
+            for val, detail in enumerate(bk_params):
+                book_details[detail] = book_info[val]
 
         return book_details
 
