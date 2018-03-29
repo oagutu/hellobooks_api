@@ -1,97 +1,75 @@
+'''app/__init__.py'''
+
 from flask_api import FlaskAPI
 from flask import Flask, request, jsonify, session, flash
 
 from config import app_config
-
-
-class Book(object):
-    '''holds book objects'''
-
-    def __init__(self):
-        self.bk_id = None
-        self.title = None
-        self.code = None
-        self.author = None
-        self. synopsis = None
-        self.genre = None
-        self.sub_genre = None
-        self.status = None
-        self.library = {}
-
-    def add_to_lib(self, key, book_details):
-        '''adds books to library dict'''
-        self.library[key] = book_details
-
-    def get_all_books(self):
-
-        return self.library
-
-
-class User(object):
-    def __init__(self):
-        self.uid = None
-        self.name = None
-        self.username = None
-        self.eaddress = None
-        self.password = None
-        self.acc_type = None
-        self.register = {}
-        self.borrowed = {}
-
-    def add_to_reg(self, key, user_details):
-        '''adds books to library dict'''
-        self.register[key] = user_details
-
-    def get_all_users(self):
-
-        return self.register
+from . import models
 
 
 value_list = ['bk_id', 'title', 'code', 'author', 'synopsis'
               'genre', 'sub_genre', 'status']
 
-book = Book()
-user = User()
+book = models.Book()
+user = models.User()
 
 def create_app(config_name):
     app = FlaskAPI(__name__, instance_relative_config=True)
     app.config.from_object(app_config[config_name])
 
-
     @app.route('/api/books', methods=['POST'])
     def add_book():
-        '''adds book to library'''
+        '''adds specified book to library'''
 
         if request.method == "POST":
-
             data = request.get_json()
+            book_id = data['book_id']
+            title = data['title']
+            author = data['author']
+
+            book_details = book.set_book(book_id, title, author)
+            #returns dictionary with book details
+
+            response = jsonify(book_details)
+
+            return response
+
+        
+
+    # @app.route('/api/books', methods=['POST'])
+    # def add_book():
+    #     '''adds book to library'''
+
+    #     if request.method == "POST":
+
+    #         data = request.get_json()
             
-            book.bk_id = data['bk_id']
-            book.title = data['title']
-            book.code = data['code']
-            book.author = data['author']
-            book.synopsis = data['synopsis']
-            book.genre = data['genre']
-            book.sub_genre = data['sub_genre']
-            book.status = data['status']
+    #         book.bk_id = data['bk_id']
+    #         book.title = data['title']
+    #         book.code = data['code']
+    #         book.author = data['author']
+    #         book.synopsis = data['synopsis']
+    #         book.genre = data['genre']
+    #         book.sub_genre = data['sub_genre']
+    #         book.status = data['status']
 
-            if data:
-                resp = jsonify({
-                    'bk_id': book.bk_id,
-                    'title': book.title,
-                    'code': book.code,
-                    'author': book.author,
-                    'synopsis': book.synopsis,
-                    'genre': book.genre,
-                    'sub_genre': book.sub_genre,
-                    'status': book.status
-                }
-                )
-                book.add_to_lib(book.bk_id, resp.data)
-                #adds new book entry to lib
-                resp.status_code = 201
+    #         if data:
+    #             resp = jsonify({
+    #                 'bk_id': book.bk_id,
+    #                 'title': book.title,
+    #                 'code': book.code,
+    #                 'author': book.author,
+    #                 'synopsis': book.synopsis,
+    #                 'genre': book.genre,
+    #                 'sub_genre': book.sub_genre,
+    #                 'status': book.status
+    #             }
+    #             )
+    #             book.add_to_lib(book.bk_id, resp.data)
+    #             #adds new book entry to lib
+    #             resp.status_code = 201
 
-                return resp
+    #             return resp
 
 
     @app.route('/api/books/<int:bk_id>', methods=['PUT'])
