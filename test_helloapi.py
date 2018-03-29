@@ -38,7 +38,10 @@ class ApiEndpoint(unittest.TestCase):
         '''
         self.assertEqual(self.client.post(
             'api/books', data=self.book_details).status_code, 201)
-        result = self.client.put('/api/books/1', data={'code': 54321})
+        result = self.client.put('/api/books/v1/1', data = {"book_id": 13})
+        self.assertEqual(result.status_code, 404)
+        result = self.client.put('/api/books/v1/1', data={'code': 54321})
+        self.assertEqual(result.status_code, 202)
         self.assertIn(self.book_details['title'], str(result.data))
         self.assertIn(54321, str(result.data))
 

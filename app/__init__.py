@@ -17,7 +17,7 @@ def create_app(config_name):
     app = FlaskAPI(__name__, instance_relative_config=True)
     app.config.from_object(app_config[config_name])
 
-    @app.route('/api/books', methods=['POST'])
+    @app.route('/api/v1/books', methods=['POST'])
     def add_book():
         '''adds specified book to library'''
 
@@ -40,40 +40,78 @@ def create_app(config_name):
 
             response = jsonify(book_details)
 
+            response.status_code = 201
+
             return response
 
 
-    @app.route('/api/books/<int:bk_id>', methods=['PUT'])
-    def update_book():
+    @app.route('/api/v1/books/<int:book_id>', methods=['PUT'])
+    def update_book(book_id):
+        '''updates book entry in library'''
 
         if request.method == "PUT":
 
             data = request.get_json()
-            temp_data = {}
 
-            for val in value_list:
-                if data.get(val) in data:
-                    book.val = data[val]
-                    temp_data[val] = book.val
-            resp = jsonify(temp_data)
+            try:
+                del book.library[book_id]
 
-            return resp
+                book_info = [
+                    data['book_id'],
+                    data['title'],
+                    data['author'],
+                    data['book_code'],
+                    data['synopsis'],
+                    data['genre'],
+                    data['subgenre'],
+                    data['status']
+                ]
 
+                book_details = book.set_book(book_info)
 
-    @app.route('/api/books/<int:bk_id>', methods=['DELETE'])
-    def remove_book(bk_id):
+                response = jsonify(book_details)
+
+                response.status_code = 202
+
+                return response
+
+            except KeyError:
+                book_details = {"msg":"Entry not available"}
+
+                response= jsonify(book_details)
+                response.status_code = 404
+
+                return response
+            
+            
+    @app.route('/api/books/v1/<int:b00k_id>', methods=['DELETE'])
+    def remove_book(book_id):
 
         if request.method == 'DELETE':
+            
             data = request.get_json()
-            book.bk_id = data['bk_id']
-            del book.library[book.bk_id]
 
-            resp = jsonify({'bk_id': book.bk_id,
-                            'title': book.title, })
+            try:
+                del book.library[book_id]
 
-            resp.msg = 'Book entry deleted'
+                book_info = [
+                    data['book_id'],
+                    data['title'],
+                    data['author'],
+                    data['book_code'],
+                    data['synopsis'],
+                    data['genre'],
+                    data['subgenre'],
+                    data['status']
+                ]
 
-            return resp
+            except KeyError:
+                book_details = {"msg": "Entry not available"}
+
+                response = jsonify(book_details)
+                response.status_code = 404
+
+                return response
 
 
     @app.route('/api/books', methods=['GET'])

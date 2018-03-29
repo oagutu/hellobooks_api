@@ -27,6 +27,8 @@ class Book(object):
             for val, detail in enumerate(bk_params):
                 book_details[detail] = book_info[val]
 
+        self.add_to_lib(book_details["book_id"] ,book_details)
+
         return book_details
 
     def add_to_lib(self, key, book_details):
