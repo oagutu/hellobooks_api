@@ -1,5 +1,7 @@
 '''endpoint models'''
 
+from datetime import datetime, timedelta
+
 class Book(object):
     '''holds book objects'''
 
@@ -22,7 +24,7 @@ class Book(object):
             "synopsis": "iwehn owueh owunef ohew ouweq...",
             "genre": "fiction",
             "sub_genre": "xyz",
-            "status": "available"}
+            "status": "borrowed"}
             }
 
     def set_book(self, book_info):
@@ -57,6 +59,7 @@ class Book(object):
 
 class User(object):
     def __init__(self):
+        '''initializes user object'''
         self.uid = None
         self.name = None
         self.username = None
@@ -64,7 +67,37 @@ class User(object):
         self.password = None
         self.acc_type = None
         self.register = {}
-        self.borrowed = {}
+        self.borrowed_books = {
+            23:{
+                "borrow_date" : "25/04/2018 02:30",
+                "return_date" : "1/05/2018 02:30",
+                "fee_owed" : 0,
+                "borrow_status": "valid"
+            }
+        }
+
+    def set_borrowed(self, book_status, book_id):
+        '''provdes borrow/return book functionality'''
+
+        book_info = {}
+            
+        book_info["borrow_date"] = datetime.now().strftime("%d-%m-%Y %H:%M")
+        book_info["return_date"] = (datetime.now() + timedelta(days=10)).strftime(
+            "%d-%m-%Y %H:%M")
+        book_info["fee_owed"] = 0
+        book_info["status"] = "valid"
+
+        return book_info
+            
+            
+    def get_borrowed(self, book_id):
+        '''gets a book from the list of borrowed books by id'''
+        if self.borrowed_books[book_id]:
+            return self.borrowed_books[book_id]
+        
+    def add_to_borrowed(self, key, details):
+        '''adds borrowed book to borrowed_books dictionary'''
+        self.borrowed_books[key] = details
 
     def add_to_reg(self, key, user_details):
         '''adds books to library dict'''

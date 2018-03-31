@@ -6,6 +6,8 @@ from flask import Flask, request, jsonify, session, flash
 from config import app_config
 from . import models
 
+from datetime import datetime, timedelta
+
 
 value_list = ['bk_id', 'title', 'code', 'author', 'synopsis'
               'genre', 'sub_genre', 'status']
@@ -54,7 +56,8 @@ def create_app(config_name):
             data = request.get_json()
 
             try:
-                del book.library[book_id]
+                library = book.get_all_books()
+                del library[book_id]
 
                 book_info = [
                     data['book_id'],
@@ -145,25 +148,88 @@ def create_app(config_name):
                 return response
 
 
-    @app.route('/api/users/books/<int:id>', methods=['POST'])
-    def borrow_return_book(bk_id):
+    @app.route('/api/v1/users/books/<int:book_id>', methods=['POST'])
+    def borrow_return_book(book_id):
         '''allows borrowing/returning of books'''
 
         if request.method == 'POST':
-            data = request.get_json(force=True)
-            book.book_id = data['bk_id']
+            data = request.get_json()
 
-            for bk in book.get_all_books():
-                if bk['bk_id'] == book.book_id and bk['status'] == 'available':
-                    bk['status'] = 'borrowed'
-                    resp = jsonify(bk)
+            book_info = {}
+            try:
+                book_details = book.get_book(book_id)
+                book_status = book_details["status"]
+                if data["acc_type"] == "member" and book_status == "available":
+                   
+                    book_info = user.set_borrowed( book_status, book_id)
+                    book_info["book_id"] = book_id
+                    book_info["borrower_id"] = data["user_id"]
+                    user.add_to_borrowed(book_id, book_info)
 
-                    return resp
+                    book.get_book(book_id)["status"] = "borrowed"
 
-                bk['status'] = 'returned'
-                resp = jsonify(bk)
+                    response = jsonify(book_info)
+                    response.status_code = 201
 
-                return resp
+                    return response
+
+                elif data["acc_type"] == "member" and book_status == "borrowed":
+                    if book_id in user.borrowed_books:
+                        borrowed_book = user.borrowed_books[book_id]
+                        current_day = datetime.now()
+                        return_day = datetime.strptime(
+                            borrowed_book["return_date"],  '%d/%m/%Y %H:%M')
+                        borrow_period = int(str(current_day - return_day).split(' ')[0])
+                        print(current_day, return_day, borrow_period)
+                        if borrow_period > 0:
+                            borrowed_book["fee_owed"] = borrow_period * 30
+                            borrowed_book["borrow_status"] = "unreturned"
+
+                        book.get_book(book_id)["status"] = "returned"
+                        response = jsonify(borrowed_book)
+
+                        return response
+
+                    response = jsonify(
+                        {"msg": "Book not available for borrowing"})
+
+                    return response
+
+                elif data["acc_type"] == "member" and book_id in user.borrowed_books:
+                    book_info = user.set_borrowed(book_status, book_id)
+
+                elif data["acc_type"] != "member":
+                    response = jsonify(
+                        {"msg": "Member currently not authorised to borrow book"})
+
+                    return response
+                    
+            except KeyError:
+                response = jsonify({"msg": "Book not avialable"})
+                response.status_code = 404
+
+                return response
+
+        if request.method == 'POST':
+            
+            try:
+                book_details = book.get_book(book_id)
+                if book_details["status"] == "available":
+                    book_details["status"] = "borrowed"
+                else:
+                    book_details["available"]
+
+                response = jsonify(book_details)
+                response.status_code = 202
+
+                return response
+
+
+            except KeyError:
+                response = jsonify({"msg": "Book not avialable"})
+                response.status_code = 404
+
+                return response
 
 
     @app.route('/api/auth/register', methods=['POST'])
