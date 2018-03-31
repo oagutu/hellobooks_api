@@ -76,7 +76,7 @@ def create_app(config_name):
                 return response
 
             except KeyError:
-                book_details = {"msg":"Entry not available"}
+                book_details = {"msg":"Book entry not available"}
 
                 response= jsonify(book_details)
                 response.status_code = 404
@@ -84,8 +84,9 @@ def create_app(config_name):
                 return response
             
             
-    @app.route('/api/books/v1/<int:b00k_id>', methods=['DELETE'])
+    @app.route('/api/v1/books/<int:book_id>', methods=['DELETE'])
     def remove_book(book_id):
+        '''delete book entry from library'''
 
         if request.method == 'DELETE':
             
@@ -94,19 +95,15 @@ def create_app(config_name):
             try:
                 del book.library[book_id]
 
-                book_info = [
-                    data['book_id'],
-                    data['title'],
-                    data['author'],
-                    data['book_code'],
-                    data['synopsis'],
-                    data['genre'],
-                    data['subgenre'],
-                    data['status']
-                ]
+                book_details = {"msg": "Book entry deleted"}
+
+                response = jsonify(book_details)
+                response.status_code = 200
+
+                return response
 
             except KeyError:
-                book_details = {"msg": "Entry not available"}
+                book_details = {"msg": "Book entry not available"}
 
                 response = jsonify(book_details)
                 response.status_code = 404
@@ -114,7 +111,7 @@ def create_app(config_name):
                 return response
 
 
-    @app.route('/api/books', methods=['GET'])
+    @app.route('/api/v1/books', methods=['GET'])
     def retrieve_all_books():
         '''retieves all books in library'''
 
