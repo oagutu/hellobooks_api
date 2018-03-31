@@ -4,20 +4,18 @@ from flask_api import FlaskAPI
 from flask import Flask, request, jsonify, session, flash
 
 from config import app_config
-from . import models
+from app.models import User, Book
 
 from datetime import datetime, timedelta
 
 
-value_list = ['bk_id', 'title', 'code', 'author', 'synopsis'
-              'genre', 'sub_genre', 'status']
-
-book = models.Book()
-user = models.User()
-
 def create_app(config_name):
     app = FlaskAPI(__name__, instance_relative_config=True)
     app.config.from_object(app_config[config_name])
+
+
+    book = Book()
+    user = User()
 
     @app.route('/api/v1/books', methods=['POST'])
     def add_book():
@@ -159,7 +157,7 @@ def create_app(config_name):
             try:
                 book_details = book.get_book(book_id)
                 book_status = book_details["status"]
-                if data["acc_type"] == "member" and book_status == "available":
+                if data["acc_status"] == "member" and book_status == "available":
                    
                     book_info = user.set_borrowed( book_status, book_id)
                     book_info["book_id"] = book_id
@@ -167,13 +165,14 @@ def create_app(config_name):
                     user.add_to_borrowed(book_id, book_info)
 
                     book.get_book(book_id)["status"] = "borrowed"
+                    book_info['status'] = "borrowed"
 
                     response = jsonify(book_info)
                     response.status_code = 201
 
                     return response
 
-                elif data["acc_type"] == "member" and book_status == "borrowed":
+                elif data["acc_status"] == "member" and book_status == "borrowed":
                     if book_id in user.borrowed_books:
                         borrowed_book = user.borrowed_books[book_id]
                         current_day = datetime.now()
@@ -191,40 +190,17 @@ def create_app(config_name):
                         return response
 
                     response = jsonify(
-                        {"msg": "Book not available for borrowing"})
+                        {"msg": "Book not available for borrowing",
+                        "status": "Borrowed"})
 
                     return response
 
-                elif data["acc_type"] == "member" and book_id in user.borrowed_books:
-                    book_info = user.set_borrowed(book_status, book_id)
-
-                elif data["acc_type"] != "member":
+                elif data["acc_status"] != "member":
                     response = jsonify(
                         {"msg": "Member currently not authorised to borrow book"})
 
                     return response
                     
-            except KeyError:
-                response = jsonify({"msg": "Book not avialable"})
-                response.status_code = 404
-
-                return response
-
-        if request.method == 'POST':
-            
-            try:
-                book_details = book.get_book(book_id)
-                if book_details["status"] == "available":
-                    book_details["status"] = "borrowed"
-                else:
-                    book_details["available"]
-
-                response = jsonify(book_details)
-                response.status_code = 202
-
-                return response
-
-
             except KeyError:
                 response = jsonify({"msg": "Book not avialable"})
                 response.status_code = 404
@@ -244,7 +220,7 @@ def create_app(config_name):
             user.eaddress = data['email']
             user.username = data['username']
             user.password = data['password']
-            user.acc_type = data['acc_type']
+            user.acc_status = data['acc_status']
 
             if data:
                 resp = jsonify({
@@ -252,7 +228,7 @@ def create_app(config_name):
                     'name': user.name,
                     'username': user.username,
                     'password': user.password,
-                    'acc_type':  user.acc_type,
+                    'acc_status':  user.acc_status,
                 }
                 )
                 user.add_to_reg(user.uid, resp.data)

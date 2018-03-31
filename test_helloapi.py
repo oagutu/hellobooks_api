@@ -3,19 +3,29 @@
 import unittest
 from app import create_app
 
+from app.models import User, Book
 
-class ApiEndpoint(unittest.TestCase):
+
+class ApiEndpointTestCase(unittest.TestCase):
     '''Class holds the api endpoint test functions '''
 
     def setUp(self):
-        '''sets up necessary variables before each test case'''
+        '''sets up testing environment'''
 
         self.app = create_app('development')
         self.client = self.app.test_client()
         self.app_context = self.app.app_context().push()
 
-        self.book_details = {'id': 1, 'title': 'book title', 'code': 12345, 'author': 'mary writer', 'synopsis': "iwehn owueh owunef ohew ouweq...",
-                             'genre': 'fiction', 'sub_genre': 'xyz', 'status': 'available'}
+        self.book_details = {
+            "id": 1,
+            "title": "book title",
+            "code": 12345,
+            "author": "mary writer", 
+            "synopsis": "iwehn owueh owunef ohew ouweq...",
+            "genre": "fiction",
+            "sub_genre": "xyz",
+            "status": "available"
+            }
         self.user_details = {'name': 'John Doe', 'user_id': '123456',
                              'username': 'Jane Doe', 'password': 'qwerty', 'acc_type': 'member',
                              'borrowed_books': {}}
@@ -25,7 +35,9 @@ class ApiEndpoint(unittest.TestCase):
             Tests add_book() functionality
             verifies: database correctly updated
         '''
-        result = self.client.post('/api/books/', data=self.book_details)
+        self.app = create_app('development')
+        self.client = self.app.test_client()
+        result = self.client.post('/api/v1/books/', data=self.book_details)
         print(result)
         self.assertEqual(result.status_code, 201)
         self.assertIn(self.book_details['title'], result.data)

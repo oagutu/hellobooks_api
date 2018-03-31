@@ -15,6 +15,7 @@ class Config(object):
 class DevelopmentConfig(Config):
     '''development config settings'''
     DEBUG = True
+    TESTING = True
 
 
 class ProductionConfig(Config):

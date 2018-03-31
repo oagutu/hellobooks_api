@@ -65,7 +65,7 @@ class User(object):
         self.username = None
         self.eaddress = None
         self.password = None
-        self.acc_type = None
+        self.acc_status = None
         self.register = {}
         self.borrowed_books = {
             23:{
