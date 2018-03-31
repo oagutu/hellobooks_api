@@ -89,11 +89,10 @@ def create_app(config_name):
         '''delete book entry from library'''
 
         if request.method == 'DELETE':
-            
-            data = request.get_json()
 
             try:
-                del book.library[book_id]
+                library = book.get_all_books()
+                del library[book_id]
 
                 book_details = {"msg": "Book entry deleted"}
 
@@ -117,27 +116,33 @@ def create_app(config_name):
 
         if request.method == 'GET':
 
-            for indv_book in book.get_all_books():
-                resp = jsonify(indv_book)
-            resp.status_code = 200
+            library = book.get_all_books()
+            response = jsonify(library)
 
-            return resp
+            response.status_code = 200
+
+            return response
 
 
-    @app.route('/api/books/<int:bk_id>', methods=['GET'])
-    def get_book(bk_id):
-        '''gets specific book'''
+    @app.route('/api/v1/books/<int:book_id>', methods=['GET'])
+    def get_book(book_id):
+        '''gets specific book using book_id'''
 
         if request.method == 'GET':
+            
+            try:
+                book_details = book.get_book(book_id)
 
-            for bk in book.get_all_books():
-                if bk['bk_id'] == bk_id:
-                    resp = jsonify(bk)
+                response = jsonify(book_details)
+                response.status_code = 200
 
-                    resp.status_code = 200
+                return response
 
-                    return resp
+            except KeyError:
+                response = jsonify({"msg":"Book not avialable"})
+                response.status_code = 404
 
+                return response
 
 
     @app.route('/api/users/books/<int:id>', methods=['POST'])

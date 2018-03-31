@@ -13,7 +13,17 @@ class Book(object):
         self.genre = None
         self.sub_genre = None
         self.status = None
-        self.library = {}
+        self.library = {
+            23: {
+            "book_id": 1,
+            "title": "book title",
+            "book_code": 12345,
+            "author": "mary writer",
+            "synopsis": "iwehn owueh owunef ohew ouweq...",
+            "genre": "fiction",
+            "sub_genre": "xyz",
+            "status": "available"}
+            }
 
     def set_book(self, book_info):
         '''sets value of a book object'''
@@ -34,6 +44,11 @@ class Book(object):
     def add_to_lib(self, key, book_details):
         '''adds books to library dict'''
         self.library[key] = book_details
+
+    def get_book(self, book_id):
+        '''gets book by id'''
+        if self.library[book_id]:
+            return self.library[book_id]
 
     def get_all_books(self):
 
