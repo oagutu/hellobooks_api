@@ -9,6 +9,7 @@ import json
 from app import create_app
 
 class BookEndpointsTestCase(unittest.TestCase):
+    '''Tests book API endpoints'''
     
     def setUp(self):
         '''sets up testing environment'''
@@ -41,7 +42,6 @@ class BookEndpointsTestCase(unittest.TestCase):
             "/api/v1/books",
             data = json.dumps(self.book_details),
             headers = {"content-type":"application/json"})
-        print(str(result.data))
         self.assertEqual(result.status_code, 201)
         self.assertIn(b'book title', result.data)
         self.assertIn(b'12345', result.data)

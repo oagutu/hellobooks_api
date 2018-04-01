@@ -43,9 +43,9 @@ def create_user_account():
 
             return response
         else:
-            book_details = {"msg": "User ID not available. Already in use"}
+            user_details = {"msg": "User ID not available. Already in use"}
 
-            response = jsonify(book_details)
+            response = jsonify(user_details)
             response.status_code = 404
 
             return response
@@ -69,9 +69,9 @@ def login():
                 return response
 
             else:
-                reponse = jsonify({"message": "Incorrect password"})
+                response = jsonify({"message": "Incorrect password"})
 
-                return reponse
+                return response
 
         except KeyError:
             reponse = jsonify({"message": "Account not available"})
@@ -109,6 +109,7 @@ def reset_password():
             flash('Successfully changed password', category='info')
 
             response = jsonify({"message": "Successfully changed password"})
+            response.status_code = 202
             return response
         else:
             response = jsonify({"message": "Current password incorrect"})
