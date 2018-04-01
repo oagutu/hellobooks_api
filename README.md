@@ -1,7 +1,7 @@
 # hellobooks_api
 API endpoints for the Hello Books Flask web app project. It should allow for accessing of book and user information.
 
-## Supported API endpoints
+### Supported API endpoints:
 
 * add book: POST  /api/v1/books
 
@@ -26,20 +26,44 @@ API endpoints for the Hello Books Flask web app project. It should allow for acc
 
 ## Setup:
 
-*clone repo to local machine:
+* clone repo to local machine:
 ---
 $ git clone https://github.com/oagutu/hellobooks_api
 ---
 
-*Install requirement packages via 'requirements.txt': 
+* Install requirement packages/ dependencies via 'requirements.txt': 
 ---
 $ pip install -r requirments.txt
 ---
 
-*Navigate to main directory and run server:
+* Navigate to main directory and run server:
 ---
 $ python run.py
 ---
+
+##Running
+
+You could use postman to test API endpoints:
+
+* Download [postman](https://www.getpostman.com/apps)
+
+* Run Postman
+
+For the endpoints, requests submitted using JSON. Example of JSON request:
+
+---
+{       
+        "book_id": 1,
+        "title": "book title",
+        "book_code": 12345,
+        "author": "mary writer",
+        "synopsis": "Iwehn owueh owunef ohew ouweq...",
+        "genre": "fiction",
+        "subgenre": "xyz",
+        "status": "available"
+}
+---
+
 
 ## Testing
 * With nosetests, navigate to main project directory and run nosetests:
@@ -52,10 +76,6 @@ nosetests
 cd tests
 
 python test_books.py
+
 python test_users.py
-
-* You could also use postman to test API endpoints:
-
-        * Download [postman](https://www.getpostman.com/apps)
-
-        * Run Postman
+---

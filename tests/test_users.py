@@ -62,6 +62,7 @@ class UserEndpointsTestCase(unittest.TestCase):
             headers={"content-type": "application/json"})
         self.assertIn(b'Account not available', result.data)
 
+        #password reset test
         result = self.client.post(
             'api/v1/reset-password',
             data=json.dumps({'username': 'JD', 'current_password': 'rose', 'new_password' : "09876"}),
@@ -74,8 +75,7 @@ class UserEndpointsTestCase(unittest.TestCase):
             headers = {"content-type": "application/json"})
         self.assertIn(b'Current password incorrect', result.data)
 
-
-
+        #logout test
         result = self.client.post(
             'api/v1/logout')
         self.assertIn(b'Successfully logged out', result.data)
