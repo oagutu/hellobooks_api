@@ -2,6 +2,19 @@
 
 from datetime import datetime, timedelta
 
+
+register = {
+    "John": {
+        "user_id": 2334,
+        "name": "John Paul",
+        "username": "John",
+        "email": "qwert@keyboard.com",
+        "password": "1234",
+        "acc_status": "member"
+    }
+}
+
+
 class Book(object):
     '''holds book objects'''
 
@@ -16,7 +29,7 @@ class Book(object):
         self.sub_genre = None
         self.status = None
         self.library = {
-            23: {
+            1 : {
             "book_id": 1,
             "title": "book title",
             "book_code": 12345,
@@ -58,15 +71,18 @@ class Book(object):
 
 
 class User(object):
+    '''hold user objects'''
+
+    
     def __init__(self):
         '''initializes user object'''
-        self.uid = None
+        self.user_id = None
         self.name = None
         self.username = None
-        self.eaddress = None
+        self.email = None
         self.password = None
         self.acc_status = None
-        self.register = {}
+        
         self.borrowed_books = {
             23:{
                 "borrow_date" : "25/04/2018 02:30",
@@ -75,6 +91,37 @@ class User(object):
                 "borrow_status": "valid"
             }
         }
+
+    def set_user(self, user_info):
+        '''sets value of a book object'''
+
+        user_params = ["user_id", "name", "email", "username", "password", "acc_status",
+                     "borrowed_books"]
+        user_details = {}
+
+        if len(user_params) == len(user_info):
+
+            for val, detail in enumerate(user_params):
+                user_details[detail] = user_info[val]
+
+        self.add_to_reg(user_details["username"], user_details)
+
+        return user_details
+    
+    def set_password(self, user_info):
+        '''
+        sets user paxsword
+        user_info: list -> [username, current_password, new_password]
+        '''
+        if register[user_info[0]]['password'] != user_info[2]:
+            user_details = register[user_info[0]]
+            user_details['password'] = user_info[2]
+        
+
+    def get_user(self, username):
+        '''fetches user details from registrer'''
+        global register
+        return register[username]
 
     def set_borrowed(self, book_status, book_id):
         '''provdes borrow/return book functionality'''
@@ -101,8 +148,11 @@ class User(object):
 
     def add_to_reg(self, key, user_details):
         '''adds books to library dict'''
-        self.register[key] = user_details
+        global register
+        register[key] = user_details
 
-    def get_all_users(self):
+    def get_register(self):
+        '''returns all users'''
+        global register
 
-        return self.register
+        return register

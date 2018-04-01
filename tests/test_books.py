@@ -1,3 +1,8 @@
+'''
+    tests/test_books.py
+    Provides testing for book endpoints 
+'''
+
 import unittest
 import json
 

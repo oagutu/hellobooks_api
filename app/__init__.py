@@ -1,10 +1,9 @@
 '''app/__init__.py'''
 
 from flask_api import FlaskAPI
-from flask import Flask, request, jsonify, session, flash
+
 
 from config import app_config
-from app.models import User, Book
 
 from datetime import datetime, timedelta
 
@@ -17,7 +16,6 @@ def create_app(config_name):
     from app.books.routes import books_blueprint
 
     app.register_blueprint(books_blueprint, url_prefix='/api/v1')
-    app.register_blueprint(users_blueprint) 
-
+    app.register_blueprint(users_blueprint,  url_prefix='/api/v1/auth')
 
     return app

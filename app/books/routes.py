@@ -1,9 +1,14 @@
+'''
+    app/users/routes.py
+    Holds book API endpoints
+'''
+
 from flask import Blueprint
 from flask import Flask, request, jsonify
 
 from app.models import User, Book
 
-from datetime import datetime, timedelta
+from datetime import datetime
 
 
 

@@ -9,7 +9,7 @@ class Config(object):
 
     DEBUG = False
     CSRF_ENABLED = True
-    SECRET = os.getenv('SECRET')
+    SECRET_KEY = "oj3099834$#!)_(efqkp-034r9jp4jorfpo//2_$@*epok"
 
 
 class DevelopmentConfig(Config):
