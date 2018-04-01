@@ -47,7 +47,7 @@ You could use postman to test API endpoints:
 
 * Download [postman](https://www.getpostman.com/apps)
 
-* Run Postman
+* Send requests using Postman
 
 For the endpoints, requests submitted using JSON. Example of JSON request:
 
