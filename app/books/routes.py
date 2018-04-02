@@ -175,19 +175,19 @@ def borrow_return_book(book_id):
                         borrowed_book["return_date"],  '%d/%m/%Y %H:%M')
                     borrow_period = int(
                         str(current_day - return_day).split(' ')[0])
-                    print(current_day, return_day, borrow_period)
                     if borrow_period > 0:
                         borrowed_book["fee_owed"] = borrow_period * 30
                         borrowed_book["borrow_status"] = "unreturned"
 
                     book.get_book(book_id)["status"] = "returned"
+                    borrowed_book["status"] = "returned"
                     response = jsonify(borrowed_book)
 
                     return response
 
                 response = jsonify(
                     {"msg": "Book not available for borrowing",
-                        "status": "Borrowed"})
+                        "status": "borrowed"})
 
                 return response
 

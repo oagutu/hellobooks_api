@@ -128,9 +128,9 @@ class User(object):
 
         book_info = {}
             
-        book_info["borrow_date"] = datetime.now().strftime("%d-%m-%Y %H:%M")
+        book_info["borrow_date"] = datetime.now().strftime("%d/%m/%Y %H:%M")
         book_info["return_date"] = (datetime.now() + timedelta(days=10)).strftime(
-            "%d-%m-%Y %H:%M")
+            "%d/%m/%Y %H:%M")
         book_info["fee_owed"] = 0
         book_info["status"] = "valid"
 

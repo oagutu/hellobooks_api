@@ -43,7 +43,7 @@ def create_user_account():
 
             return response
         else:
-            user_details = {"msg": "User ID not available. Already in use"}
+            user_details = {"msg": "User not available. Already in use"}
 
             response = jsonify(user_details)
             response.status_code = 404

@@ -27,19 +27,18 @@ API endpoints for the Hello Books Flask web app project. It should allow for acc
 ## Setup:
 
 * clone repo to local machine:
----
+```
 $ git clone https://github.com/oagutu/hellobooks_api
----
-
+```
 * Install requirement packages/ dependencies via 'requirements.txt': 
----
+```
 $ pip install -r requirments.txt
----
+```
 
 * Navigate to main directory and run server:
----
+```
 $ python run.py
----
+```
 
 ##Running
 
@@ -51,7 +50,7 @@ You could use postman to test API endpoints:
 
 For the endpoints, requests submitted using JSON. Example of JSON request:
 
----
+```
 {       
         "book_id": 1,
         "title": "book title",
@@ -62,20 +61,19 @@ For the endpoints, requests submitted using JSON. Example of JSON request:
         "subgenre": "xyz",
         "status": "available"
 }
----
+```
 
 
 ## Testing
 * With nosetests, navigate to main project directory and run nosetests:
----
+```
 nosetests
---- 
-
+```
 * Without nosetests, navigate to tests directory in main project directory:
----
+```
 cd tests
 
 python test_books.py
 
 python test_users.py
----
+```
