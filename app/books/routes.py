@@ -186,7 +186,7 @@ def borrow_return_book(book_id):
                     return response
 
                 response = jsonify(
-                    {"msg": "Book not available for borrowing",
+                    {"msg": "cannot return book. Not borrowed by user",
                         "status": "borrowed"})
 
                 return response

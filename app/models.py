@@ -37,7 +37,16 @@ class Book(object):
             "synopsis": "iwehn owueh owunef ohew ouweq...",
             "genre": "fiction",
             "sub_genre": "xyz",
-            "status": "borrowed"}
+            "status": "borrowed"},
+            2 :{
+                "book_id": 2,
+                "title": "Catch-22",
+                "book_code": 6753,
+                "author": "Heller",
+                "synopsis": "iwehn owueh owunef ohew ouweq...",
+                "genre": "fiction",
+                "sub_genre": "xyz",
+                "status": "borrowed"},
             }
 
     def set_book(self, book_info):
@@ -89,6 +98,12 @@ class User(object):
                 "return_date" : "1/05/2018 02:30",
                 "fee_owed" : 0,
                 "borrow_status": "valid"
+            },
+            24:{
+                "borrow_date" : "25/03/2018 02:30",
+                "return_date" : "1/04/2018 02:30",
+                "fee_owed" : 0,
+                "borrow_status": "pending"
             }
         }
 

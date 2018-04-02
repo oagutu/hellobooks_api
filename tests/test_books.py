@@ -138,6 +138,13 @@ class BookEndpointsTestCase(unittest.TestCase):
             headers={"content-type": "application/json"})
         self.assertIn(b'borrowed', result.data)
 
+        #test case: returning book not borrowed by user
+        result = self.client.post(
+             '/api/v1/users/books/2',
+             data=json.dumps(self.user_details),
+             headers={"content-type": "application/json"})
+        self.assertIn(b'cannot return book. Not borrowed by user', result.data)
+
         #test case: user banned/suspended
         result = self.client.post(
             '/api/v1/users/books/1',
