@@ -1,4 +1,7 @@
+[![Coverage Status](https://coveralls.io/repos/github/oagutu/hellobooks_api/badge.svg?branch=feature-endpoints)](https://coveralls.io/github/oagutu/hellobooks_api?branch=feature-endpoints)
+
 # hellobooks_api
+---
 API endpoints for the Hello Books Flask web app project. It should allow for accessing of book and user information.
 
 ### Supported API endpoints:
@@ -25,6 +28,7 @@ API endpoints for the Hello Books Flask web app project. It should allow for acc
 
 
 ## Setup:
+---
 
 * clone repo to local machine:
 ```
@@ -41,6 +45,7 @@ $ python run.py
 ```
 
 ##Running
+---
 
 You could use postman to test API endpoints:
 
