@@ -1,8 +1,12 @@
 
 
-#directories to ignore
+#untracked directories
 
 hb/
 .vscode/
+
+
+#untracked files
+temp.py
 
 #file extensions
