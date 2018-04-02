@@ -62,10 +62,6 @@ For the endpoints, requests submitted using JSON. Example of JSON request:
         "status": "available"
 }
 ```
-<<<<<<< HEAD
-
-=======
->>>>>>> d386b250736812847a2110bcabec092b27e7ab80
 
 ## Testing
 * With nosetests, navigate to main project directory and run nosetests:

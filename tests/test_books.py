@@ -35,6 +35,14 @@ class BookEndpointsTestCase(unittest.TestCase):
             'acc_status': 'member',
             'borrowed_books': {}}
 
+        self.user_details_two = {
+            'name': 'Baba',
+            'user_id': '1234',
+            'username': 'thatguy',
+            'password': 'qwerty',
+            'acc_status': 'suspended',
+            'borrowed_books': {}}
+
     def test_add_book(self):
         '''tests add book functionality'''
 
@@ -107,6 +115,13 @@ class BookEndpointsTestCase(unittest.TestCase):
         self.assertEqual(result.status_code, 200)
         self.assertIn('book title', str(result.data))
 
+        #test case: book not in library
+        self.assertEqual(self.client.get(
+            '/api/v1/books/10',
+            data=json.dumps(self.book_details),
+            headers={"content-type": "application/json"}).status_code, 404)
+        
+
     def test_borrow_return_book(self):
         '''
             tests borrow_return_book() functionality
@@ -123,11 +138,31 @@ class BookEndpointsTestCase(unittest.TestCase):
             headers={"content-type": "application/json"})
         self.assertIn(b'borrowed', result.data)
 
+        #test case: user banned/suspended
+        result = self.client.post(
+            '/api/v1/users/books/1',
+        data = json.dumps(self.user_details_two),
+        headers = {"content-type": "application/json"})
+        self.assertIn(
+                b'Member currently not authorised to borrow book', result.data)
+
+        #test case: book not in library
+        result = self.client.post(
+            '/api/v1/users/books/11',
+        data=json.dumps(self.user_details),
+        headers={"content-type": "application/json"})
+        self.assertIn(b'Book not avialable', result.data)
+        self.assertEqual(result.status_code, 404)
+
+
+        #test case: return book 
         result = self.client.post(
             '/api/v1/users/books/1',
             data=json.dumps(self.user_details),
             headers={"content-type": "application/json"})
         self.assertIn(b'returned', result.data)
+
+
 
 
 

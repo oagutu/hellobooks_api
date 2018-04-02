@@ -8,10 +8,6 @@ from app.models import User
 
 users_blueprint = Blueprint('users', __name__)
 
-@users_blueprint.route('/index/')
-def index():
-    return "<h1>Hello World</h1>"
-
 
 user = User()
 
