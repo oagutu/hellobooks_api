@@ -1,5 +1,4 @@
 [![Build Status](https://travis-ci.org/oagutu/hellobooks_api.svg?branch=master)](https://travis-ci.org/oagutu/hellobooks_api)
-
 [![Coverage Status](https://coveralls.io/repos/github/oagutu/hellobooks_api/badge.svg?branch=feature-endpoints)](https://coveralls.io/github/oagutu/hellobooks_api?branch=feature-endpoints)
 
 # hellobooks_api
