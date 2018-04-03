@@ -6,7 +6,8 @@
 from flask import Blueprint
 from flask import Flask, request, jsonify
 
-from app.models import User, Book
+from app.users.models import User
+from app.books.models import Book 
 
 from datetime import datetime
 

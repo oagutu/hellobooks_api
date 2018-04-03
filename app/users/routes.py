@@ -4,7 +4,7 @@
 '''
 from flask import Flask, Blueprint, request, jsonify, session, flash
 
-from app.models import User
+from app.users.models import User
 
 users_blueprint = Blueprint('users', __name__)
 
