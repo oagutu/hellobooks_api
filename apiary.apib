@@ -1,80 +1,175 @@
 FORMAT: 1A
-HOST: http://polls.apiblueprint.org/
+HOST: https://fast-stream-12738.herokuapp.com/
 
 # hellobooks
 
-Polls is a simple API allowing consumers to view polls and vote in them.
+Hellobooks is a simple api for managing library books and users. It is built on the Flask microframework.
 
-## Questions Collection [/questions]
+### Create New User Account [/api/v1/auth/register]
 
-### List All Questions [GET]
-
-+ Response 200 (application/json)
-
-        [
-            {
-                "question": "Favourite programming language?",
-                "published_at": "2015-08-05T08:40:51.620Z",
-                "choices": [
-                    {
-                        "choice": "Swift",
-                        "votes": 2048
-                    }, {
-                        "choice": "Python",
-                        "votes": 1024
-                    }, {
-                        "choice": "Objective-C",
-                        "votes": 512
-                    }, {
-                        "choice": "Ruby",
-                        "votes": 256
-                    }
-                ]
-            }
-        ]
-
-### Create a New Question [POST]
-
-You may create your own question using this action. It takes a JSON
-object containing a question and a collection of answers in the
-form of choices.
+#### Create New User Account [POST]
 
 + Request (application/json)
 
         {
-            "question": "Favourite programming language?",
-            "choices": [
-                "Swift",
-                "Python",
-                "Objective-C",
-                "Ruby"
-            ]
+            "name": "John Doe",
+            "user_id": 123456,
+            "username": "Jane Doe",
+            "password": "qwerty",
+            "email": "abc@gfg.com",
+            "acc_status": "member",
+            "borrowed_books": {}
         }
 
 + Response 201 (application/json)
 
-    + Headers
+        {
+            "name": "John Doe",
+            "user_id": 123456,
+            "username": "Jane Doe",
+            "password": "qwerty",
+            "email": "abc@gfg.com",
+            "acc_status": "member",
+            "borrowed_books": {}
+        }
+ 
+        
+### Login [/api/v1/auth/login]
 
-            Location: /questions/2
+#### Login [POST]
 
-    + Body
++ Request (application/json)
 
-            {
-                "question": "Favourite programming language?",
-                "published_at": "2015-08-05T08:40:51.620Z",
-                "choices": [
-                    {
-                        "choice": "Swift",
-                        "votes": 0
-                    }, {
-                        "choice": "Python",
-                        "votes": 0
-                    }, {
-                        "choice": "Objective-C",
-                        "votes": 0
-                    }, {
-                        "choice": "Ruby",
-                        "votes": 0
-                    }
-                ]
-            }
+        {
+            "username": "Jane Doe",
+            "password": "qwerty",
+        }
+        
++ Response 200 (applcation/json)
+
+        {
+            "message": "Successfully logged in",
+        }
+
+
+### Reset Password [/api/v1/auth/reset-password]
+        
+#### Reset Password [POST]
+
++ Request (application/json)
+
+        {
+            "username": "Jane Doe",
+            "current_password": "qwerty",
+            "new_password" : "09876"
+        }
+
++ Response 202 (application/json)
+
+        {
+            "message": "Successfully changed password"
+        }
+
+
+### Get All Books [/api/v1/books]
+
+#### Get All Books [GET]
+
++ Response 200 (application/json)
+
+        {
+            1 :{
+                    "book_id": 1,
+                    "title": "book title",
+                    "book_code": 12345,
+                    "author": "mary writer",
+                    "synopsis": "iwehn owueh owunef ohew ouweq...",
+                    "genre": "fiction",
+                    "sub_genre": "xyz",
+                    "status": "borrowed"},
+        }
+
+### Get Specific Book [/api/v1/books/1]
+
+#### Get Book By ID [GET]
+
++ Request (application/json)
+
++ Response 200 (application/json)
+
+        {
+            "book_id": 1,
+            "title": "book title",
+            "book_code": 12345,
+            "author": "mary writer",
+            "synopsis": "iwehn owueh owunef ohew ouweq...",
+            "genre": "fiction",
+            "sub_genre": "xyz",
+            "status": "borrowed"
+        }
+        
+### Modify Book [/api/v1/books/2]
+        
+#### Modify Book [PUT]
+
++ Request (application/json)
+
+        {
+            "book_id": 2,
+            "title": "Catch-22",
+            "book_code": 6753,
+            "author": "Heller",
+            "synopsis": "iwehn owueh owunef ohew ouweq...",
+            "genre": "fiction",
+            "sub_genre": "xyz",
+            "status": "borrowed"},
+        }
+
+        
++ Response 202 (application/json)
+
+        {
+            "book_id": 1,
+            "title": "Updated Book Title",
+            "book_code": 12345,
+            "author": "mary writer",
+            "synopsis": "iwehn owueh owunef ohew ouweq...",
+            "genre": "fiction",
+            "sub_genre": "romance",
+            "status": "borrowed"
+        }
+        
+### Remove Book [/api/v1/books/3]
+
+#### Remove a Book [DELETE]
+
++ Response 204 (application/json)
+
+
+### Borrow a Book [/api/v1/users/books/1]
+
+### Borrow a Book [POST]
+
++ Request (applcation/json)
+
+
+        {
+            "name": "John Doe",
+            "user_id": 123456,
+            "username": "Jane Doe",
+            "password": "qwerty",
+            "email": "abc@gfg.com",
+            "acc_status": "member",
+            "borrowed_books": {}
+        }
+        
++ Response 201 (application/json)
+
+        {
+            "book_id" : 1
+            "borrower_id": 123456
+            "borrow_date" : "25/04/2018 02:30",
+            "return_date" : "1/05/2018 02:30",
+            "fee_owed" : 0,
+            "borrow_status": "valid"
+        }
