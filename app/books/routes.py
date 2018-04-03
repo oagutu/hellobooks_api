@@ -96,7 +96,7 @@ def remove_book(book_id):
             book_details = {"msg": "Book entry deleted"}
 
             response = jsonify(book_details)
-            response.status_code = 200
+            response.status_code = 204
 
             return response
 

@@ -84,7 +84,7 @@ class BookEndpointsTestCase(unittest.TestCase):
         result = self.client.delete('/api/v1/books/3')
         self.assertEqual(result.status_code, 404)
         result = self.client.delete('/api/v1/books/1')
-        self.assertEqual(result.status_code, 200)
+        self.assertEqual(result.status_code, 204)
         self.assertNotIn(b'book title', result.data)
 
     def test_retrieve_all_books(self):
