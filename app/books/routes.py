@@ -141,7 +141,7 @@ def borrow_return_book(book_id):
             book_status = book_details["status"]
             if data["acc_status"] == "member" and book_status == "available":
 
-                book_info = user.set_borrowed(book_status, book_id)
+                book_info = user.set_borrowed()
                 book_info["book_id"] = book_id
                 book_info["borrower_id"] = data["user_id"]
                 user.add_to_borrowed(book_id, book_info)

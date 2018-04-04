@@ -48,13 +48,14 @@ class UserEndpointsTestCase(unittest.TestCase):
         self.assertEqual(result.status_code, 201)
         self.assertIn(b'JD', result.data)
         self.assertIn(b'123456', result.data)
-
+        
         #test case: user name already in use
         result = self.client.post(
             "/api/v1/auth/register",
             data=json.dumps(self.user_details_two),
             headers={"content-type": "application/json"})
-        self.assertIn(b'User not available. Already in use', result.data)
+        self.assertEqual(result.status_code, 409)
+        self.assertIn(b'Username not available. Already in use', result.data)
 
     def test_login_reset_logout(self):
         '''tests login(), reset_password() and logout() functionality'''
