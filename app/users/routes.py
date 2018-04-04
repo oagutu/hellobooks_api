@@ -1,19 +1,21 @@
-'''
-    app/users/routes.py
-    Holds user/auth API endpoints
-'''
+"""
+app/users/routes.py
+Holds user/auth API endpoints.
+"""
+
 from flask import Flask, Blueprint, request, jsonify, session, flash
 
 from app.users.models import User
 
 users_blueprint = Blueprint('users', __name__)
 
-
 user = User()
+
 
 @users_blueprint.route('/register', methods=['POST'])
 def create_user_account():
-    '''adds new user'''
+    """
+    Adds new user."""
 
     if request.method == "POST":
 
@@ -33,22 +35,18 @@ def create_user_account():
             user_details = user.set_user(user_info)
             #returns dictionary with book details
 
-            response = jsonify(user_details)
+            return jsonify(user_details), 201
 
-            response.status_code = 201
-
-            return response
         else:
-            user_details = {"msg": "User not available. Already in use"}
+            user_details = {"msg": "Username not available. Already in use"}
 
-            response = jsonify(user_details)
-            response.status_code = 404
+            return jsonify(user_details), 409
 
-            return response
 
 @users_blueprint.route('/login', methods=['POST'])
 def login():
-    '''facilitates user login'''
+    """
+    Facilitates user login."""
 
     if request.method == 'POST':
 
@@ -61,36 +59,34 @@ def login():
                 session['logged_in'] = True
                 flash('Successfully logged in', category='info')
 
-                response = jsonify({"message": "Successfully logged in"})
-                return response
+                return jsonify({"message" : "Successfully logged in"})
 
             else:
-                response = jsonify({"message": "Incorrect password"})
-
-                return response
+                return jsonify({"message" : "Incorrect password"})
 
         except KeyError:
-            reponse = jsonify({"message": "Account not available"})
-
-            return reponse
-            
+            return jsonify({"message" : "Account not available"})
+ 
 
 @users_blueprint.route('/logout', methods=['POST'])
 def logout():
-    '''facilitates user logout'''
-    if request.method == 'POST' and session['logged_in'] == True:
+    """
+    Facilitates user logout."""
+
+    if request.method == 'POST' and session['logged_in']:
         session.pop('username', None)
         session.pop('logged_in', None)
         flash('Successfully logged out', category='info')
 
-        response = jsonify({"message": "Successfully logged out"})
-        return response
+        return jsonify({"message" : "Successfully logged out"})
 
 
 @users_blueprint.route('/reset-password', methods=['POST'])
 def reset_password():
-    '''resets user password'''
-    if request.method == 'POST' and session['logged_in'] == True:
+    """
+    Resets user password."""
+
+    if request.method == 'POST' and session['logged_in']:
         
         data = request.get_json()
         user_info = [
@@ -104,10 +100,7 @@ def reset_password():
             user.set_password(user_info)
             flash('Successfully changed password', category='info')
 
-            response = jsonify({"message": "Successfully changed password"})
-            response.status_code = 202
-            return response
+            return jsonify({"message" : "Successfully changed password"}), 202
+
         else:
-            response = jsonify({"message": "Current password incorrect"})
-            return response
-        
+            return jsonify({"message" : "Current password incorrect"})
