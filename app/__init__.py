@@ -6,16 +6,19 @@ from flask_api import FlaskAPI
 
 from config import app_config
 
-from datetime import datetime, timedelta
-
 
 def create_app(config_name):
+    """
+    Creates instance of flask app."""
+
     app = FlaskAPI(__name__, instance_relative_config=True)
     app.config.from_object(app_config[config_name])
 
     @app.route('/')
     def index():
-        '''loads up documentation.html as app landing page'''
+        """
+        Loads up documentation.html as app landing page."""
+
         return render_template('documentation.html')
 
     from app.users.routes import users_blueprint
