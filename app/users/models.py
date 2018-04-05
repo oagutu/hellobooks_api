@@ -6,12 +6,20 @@ from datetime import datetime, timedelta
 
 register = {
     "John": {
-        "user_id" : 2334,
-        "name" : "John Paul",
-        "username" : "John",
-        "email" : "qwert@keyboard.com",
-        "password" : "1234",
-        "acc_status" : "member"
+        "user_id": 2334,
+        "name": "John Paul",
+        "username": "John",
+        "email": "qwert@keyboard.com",
+        "password": "1234",
+        "acc_status": "member"
+    },
+    "Jane": {
+        "user_id": 4887,
+        "name": "Jane Doe",
+        "username": "Jane",
+        "email": "wasd@keyboard.com",
+        "password": "1234",
+        "acc_status": "admin"
     }
 }
 
@@ -32,20 +40,19 @@ class User(object):
         self.acc_status = None
 
         self.borrowed_books = {
-            23 : {
-                "borrow_date" : "25/04/2018 02:30",
-                "return_date" : "1/05/2018 02:30",
-                "fee_owed" : 0,
-                "borrow_status" : "valid"
+            23: {
+                "borrow_date": "25/04/2018 02:30",
+                "return_date": "1/05/2018 02:30",
+                "fee_owed": 0,
+                "borrow_status": "valid"
             },
-            24 : {
-                "borrow_date" : "25/03/2018 02:30",
-                "return_date" : "1/04/2018 02:30",
-                "fee_owed" : 0,
-                "borrow_status" : "pending"
+            24: {
+                "borrow_date": "25/03/2018 02:30",
+                "return_date": "1/04/2018 02:30",
+                "fee_owed": 0,
+                "borrow_status": "pending"
             }
         }
-
 
     def set_user(self, user_info):
         """
@@ -55,13 +62,12 @@ class User(object):
                        "borrowed_books"]
         user_details = {}
 
-        if len(user_params) == len(user_info):
-
-            for val, detail in enumerate(user_params):
-                user_details[detail] = user_info[val]
+        for detail in user_params:
+            if detail in user_info:
+                user_details[detail] = user_info[detail]
 
         self.add_to_reg(user_details)
-
+        print(user_details)
         return user_details
 
 
@@ -97,7 +103,6 @@ class User(object):
         book_info["status"] = "valid"
 
         return book_info
-
 
     def get_borrowed(self, book_id):
         """

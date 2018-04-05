@@ -13,30 +13,30 @@ class UserEndpointsTestCase(unittest.TestCase):
     """
     Tests user API endpoints."""
 
-
     def setUp(self):
-        '''sets up testing environment variables'''
+        """
+        Sets up testing environment variables"""
 
         self.app = create_app('development')
         self.client = self.app.test_client()
-        self.user_details ={
-            "name" : "Jane Doe",
-            "user_id" : 123456,
-            "username" : "JD",
-            "password" : "qwerty",
-            "email" : "abc@gfg.com",
-            "acc_status" : "member",
-            "borrowed_books" : {}
+        self.user_details = {
+            "name": "Jane Doe",
+            "user_id": 123456,
+            "username": "JD",
+            "password": "qwerty",
+            "email": "abc@gfg.com",
+            "acc_status": "member",
+            "borrowed_books": {}
         }
 
         self.user_details_two = {
-            "name" : "Baba'",
-            "user_id" : "1234",
-            "username" : "John",
-            "password" : "qwerty",
-            "email" : "qwerty@keyboard.com",
-            "acc_status" : "suspended",
-            "borrowed_books" : {}}
+            "name": "Baba'",
+            "user_id": "1234",
+            "username": "John",
+            "password": "qwerty",
+            "email": "qwerty@keyboard.com",
+            "acc_status": "suspended",
+            "borrowed_books": {}}
 
         self.tokens = {}
 
@@ -45,7 +45,6 @@ class UserEndpointsTestCase(unittest.TestCase):
             data=json.dumps({'username': 'JD', 'password': 'qwerty'}),
             headers={"content-type": "application/json"})
 
-
     def test_create_user_account(self):
         """
         Tests create_user_account functionality."""
@@ -53,12 +52,11 @@ class UserEndpointsTestCase(unittest.TestCase):
         result = self.client.post(
             "/api/v1/auth/register",
             data=json.dumps(self.user_details),
-            headers={"content-type" : "application/json"})
+            headers={"content-type": "application/json"})
         print(result.data)
         self.assertEqual(result.status_code, 201)
         self.assertIn(b'JD', result.data)
         self.assertIn(b'123456', result.data)
-        
 
     def test_create_user_account_with_conflict(self):
         """
@@ -67,7 +65,7 @@ class UserEndpointsTestCase(unittest.TestCase):
         result = self.client.post(
             "/api/v1/auth/register",
             data=json.dumps(self.user_details_two),
-            headers={"content-type" : "application/json"})
+            headers={"content-type": "application/json"})
         self.assertEqual(result.status_code, 409)
         self.assertIn(b'Username not available. Already in use', result.data)
 
@@ -111,7 +109,7 @@ class UserEndpointsTestCase(unittest.TestCase):
 
         result = self.client.post(
             'api/v1/auth/reset-password',
-            data=json.dumps({'username': 'JD', 'current_password': 'qwerty', 'new_password' : '09876'}),
+            data=json.dumps({'username': 'JD', 'current_password': 'qwerty', 'new_password': '09876'}),
             headers={"content-type": "application/json",
                      'Authorization': 'Bearer {}'.format(self.tokens["John"])})
         self.assertEqual(result.status_code, 202)
@@ -119,11 +117,10 @@ class UserEndpointsTestCase(unittest.TestCase):
         
         result = self.client.post(
             'api/v1/auth/reset-password',
-            data=json.dumps({'username' : 'JD', 'current_password' : 'pass123', 'new_password' : '09876'}),
+            data=json.dumps({'username': 'JD', 'current_password': 'pass123', 'new_password': '09876'}),
             headers={"content-type": "application/json",
                      'Authorization': 'Bearer {}'.format(self.tokens['John'])})
         self.assertIn(b'Current password incorrect', result.data)
-
 
     def test_logout(self):
         """

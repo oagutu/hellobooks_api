@@ -25,15 +25,15 @@ def create_user_account():
 
         data = request.get_json()
 
-        user_info = [
-            data['user_id'],
-            data['name'],
-            data['email'],
-            data['username'],
-            data['password'],
-            data['acc_status'],
-            data['borrowed_books']
-        ]
+        user_info = {
+            "user_id": data['user_id'],
+            "name": data['name'],
+            "email": data['email'],
+            "username": data['username'],
+            "password": data['password'],
+            "acc_status": data['acc_status'],
+            "borrowed_books": data['borrowed_books']
+        }
 
         if data['username'] not in user.get_register():
             user_details = user.set_user(user_info)
