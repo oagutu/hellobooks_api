@@ -16,6 +16,7 @@ class DevelopmentConfig(Config):
     '''development config settings'''
     DEBUG = True
     TESTING = True
+    SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:@postgresadmin@localhost/hb_dev_db'
 
 
 class ProductionConfig(Config):

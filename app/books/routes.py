@@ -5,12 +5,12 @@
 
 from flask import Blueprint
 from flask import Flask, request, jsonify
+import sqlalchemy
 
 from app.users.models import User
 from app.books.models import Book 
 
 from datetime import datetime
-
 
 
 books_blueprint = Blueprint('books', __name__)
@@ -27,20 +27,45 @@ def add_book():
     if request.method == "POST":
 
         data = request.get_json()
-        book_info = [
-            data['book_id'],
-            data['title'],
-            data['author'],
-            data['book_code'],
-            data['synopsis'],
-            data['genre'],
-            data['subgenre'],
-            data['status']
-        ]
+        book_details = {
+            "title" : data['title'],
+            "author" : data['author'],
+            "book_code" : data['book_code'],
+            "genre" : data['genre'],
+        }
+        try:
+            if 'status' in data:
+                book_info = Book(
+                    title=data['title'],
+                    author=data['author'],
+                    book_code=data['book_code'],
+                    genre=data['genre'],
+                    synopsis=data['synopsis']
+                )
+            elif 'subgenre' in data:
+                book_info = Book(
+                    title=data['title'],
+                    author=data['author'],
+                    book_code=data['book_code'],
+                    genre=data['genre'],
+                    synopsis=data['synopsis'],
+                    subgenre=data['subgenre']
+                )
 
-        book_details = book.set_book(book_info)
+            else:
+                book_info = Book(
+                    title=data['title'],
+                    author=data['author'],
+                    book_code=data['book_code'],
+                    genre=data['genre']
+                )
 
-        return jsonify(book_details), 201
+            book.save(book_info)
+
+            return jsonify(book_details), 201
+
+        except sqlalchemy.exc.IntegrityError:
+            return jsonify({"msg":"Book code already in use"})
 
 
 @books_blueprint.route('/books/<int:book_id>', methods=['PUT'])

@@ -13,6 +13,7 @@ Flask==0.12.2
 Flask-API==1.0
 Flask-JWT-Extended==3.7.2
 Flask-Migrate==2.1.1
+Flask-Script==2.0.6
 Flask-SQLAlchemy==2.3.2
 gunicorn==19.7.1
 idna==2.6
@@ -31,7 +32,7 @@ pylint==1.8.3
 python-dateutil==2.7.2
 python-editor==1.0.3
 requests==2.18.4
-six
+six==1.11.0
 SQLAlchemy==1.2.6
 urllib3==1.22
 Werkzeug==0.14.1
