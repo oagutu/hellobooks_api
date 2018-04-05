@@ -60,14 +60,12 @@ class Book(object):
 
         return book_details
 
-
     def add_to_lib(self, book_details):
         """
         Adds books to library dict."""
 
         global library
         library[book_details['book_id']] = book_details
-
 
     def get_book(self, book_id):
         """
@@ -76,7 +74,6 @@ class Book(object):
         global library
         if library[book_id]:
             return library[book_id]
-
 
     def get_all_books(self):
         """

@@ -1,4 +1,6 @@
-'''app/__init__.py'''
+"""
+app/__init__.py
+Creates new app and loads config settings."""
 
 from flask import render_template
 from flask_api import FlaskAPI

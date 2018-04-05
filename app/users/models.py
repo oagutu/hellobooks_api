@@ -70,7 +70,6 @@ class User(object):
         print(user_details)
         return user_details
 
-
     def set_password(self, user_info):
         """
         Sets user password.
@@ -81,7 +80,6 @@ class User(object):
             user_details = register[user_info[0]]
             user_details['password'] = user_info[2]
 
-
     def get_user(self, username):
         """
         Fetches user details from register."""
@@ -89,12 +87,11 @@ class User(object):
         global register
         return register[username]
 
-
     def set_borrowed(self):
         """
         Provides borrow/return book functionality."""
 
-        book_info = {}
+        book_info = dict()
 
         book_info["borrow_date"] = datetime.now().strftime("%d/%m/%Y %H:%M")
         book_info["return_date"] = (datetime.now() + timedelta(days=10)).strftime(

@@ -7,7 +7,7 @@ Hellobooks is a simple api for managing library books and users. It is built on 
 
 ### Create New User Account [/api/v1/auth/register]
 
-#### Create New User Account [POST]
+#### Create New User Account [POST /api/v1/auth/register]
 
 + Request (application/json)
 
@@ -36,7 +36,7 @@ Hellobooks is a simple api for managing library books and users. It is built on 
         
 ### Login [/api/v1/auth/login]
 
-#### Login [POST]
+#### Login [POST /api/v1/auth/login]
 
 + Request (application/json)
 
@@ -54,7 +54,7 @@ Hellobooks is a simple api for managing library books and users. It is built on 
 
 ### Reset Password [/api/v1/auth/reset-password]
         
-#### Reset Password [POST]
+#### Reset Password [POST /api/v1/auth/reset-password]
 
 + Request (application/json)
 
@@ -73,7 +73,7 @@ Hellobooks is a simple api for managing library books and users. It is built on 
 
 ### Get All Books [/api/v1/books]
 
-#### Get All Books [GET]
+#### Get All Books [GET /api/v1/books]
 
 + Response 200 (application/json)
 
@@ -91,7 +91,7 @@ Hellobooks is a simple api for managing library books and users. It is built on 
 
 ### Get Specific Book [/api/v1/books/1]
 
-#### Get Book By ID [GET]
+#### Get Book By ID [GET /api/v1/books/1]
 
 + Request (application/json)
 
@@ -110,7 +110,7 @@ Hellobooks is a simple api for managing library books and users. It is built on 
         
 ### Modify Book [/api/v1/books/2]
         
-#### Modify Book [PUT]
+#### Modify Book [PUT /api/v1/books/2]
 
 + Request (application/json)
 
@@ -141,14 +141,14 @@ Hellobooks is a simple api for managing library books and users. It is built on 
         
 ### Remove Book [/api/v1/books/3]
 
-#### Remove a Book [DELETE]
+#### Remove a Book [DELETE /api/v1/books/3]
 
 + Response 204 (application/json)
 
 
 ### Borrow a Book [/api/v1/users/books/1]
 
-### Borrow a Book [POST]
+### Borrow a Book [POST /api/v1/users/books/1]
 
 + Request (applcation/json)
 

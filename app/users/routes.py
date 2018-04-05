@@ -3,7 +3,7 @@ app/users/routes.py
 Holds user/auth API endpoints.
 """
 
-from flask import Blueprint, request, jsonify, session, flash
+from flask import Blueprint, request, jsonify, flash
 from flask_jwt_extended import (
     jwt_required, create_access_token, get_raw_jwt
 )
