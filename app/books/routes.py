@@ -4,14 +4,15 @@
 """
 
 from flask import Blueprint
-from flask import Flask, request, jsonify
+from flask import request, jsonify
+from flask_jwt_extended import (
+    jwt_required, get_jwt_identity
+)
 
 from app.users.models import User
 from app.books.models import Book 
 
 from datetime import datetime
-
-
 
 books_blueprint = Blueprint('books', __name__)
 
@@ -20,35 +21,49 @@ user = User()
 
 
 @books_blueprint.route('/books', methods=['POST'])
+@jwt_required
 def add_book():
     """
     Adds specified book to library."""
 
-    if request.method == "POST":
+    try:
+        acc_type = user.get_user(get_jwt_identity())
 
-        data = request.get_json()
-        book_info = [
-            data['book_id'],
-            data['title'],
-            data['author'],
-            data['book_code'],
-            data['synopsis'],
-            data['genre'],
-            data['subgenre'],
-            data['status']
-        ]
+        if request.method == "POST" and acc_type["acc_status"] == "admin":
 
-        book_details = book.set_book(book_info)
+            data = request.get_json()
+            book_info = {
+                "book_id": data['book_id'],
+                "title": data['title'],
+                "author": data['author'],
+                "book_code": data['book_code'],
+                "genre": data['genre']
+            }
+            if "synopsis" in data:
+                book_info["synopsis"] = data["synopsis"]
 
-        return jsonify(book_details), 201
+            if "subgenre" in data:
+                book_info["subgenre"] = data["subgenre"]
+
+            book_details = book.set_book(book_info)
+
+            return jsonify(book_details), 201
+
+        else:
+            return jsonify({"msg": "Account not authorised to perform selected function"})
+    except KeyError:
+        return jsonify({"msg": "user account unavailable"})
 
 
 @books_blueprint.route('/books/<int:book_id>', methods=['PUT'])
+@jwt_required
 def update_book(book_id):
     """
     Updates book entry in library."""
 
-    if request.method == "PUT":
+    acc_type = user.get_user(get_jwt_identity())
+
+    if request.method == "PUT" and acc_type["acc_status"] == "admin":
 
         data = request.get_json()
 
@@ -56,50 +71,54 @@ def update_book(book_id):
             library = book.get_all_books()
             del library[book_id]
 
-            book_info = [
-                data['book_id'],
-                data['title'],
-                data['author'],
-                data['book_code'],
-                data['synopsis'],
-                data['genre'],
-                data['subgenre'],
-                data['status']
-            ]
+            book_info = {
+                "book_id": data['book_id'],
+                "title": data['title'],
+                "author": data['author'],
+                "book_code": data['book_code'],
+                "genre": data['genre']
+            }
+            if data["synopsis"]:
+                book_info["synopsis"] = data["synopsis"]
+            if data["subgenre"]:
+                book_info["subgenre"] = data["subgenre"]
 
             book_details = book.set_book(book_info)
 
             return jsonify(book_details), 202
 
-
         except KeyError:
-            book_details = {"msg" : "Book entry not available"}
+            book_details = {"msg": "Book entry not available"}
 
             return jsonify(book_details), 404
 
 
 @books_blueprint.route('/books/<int:book_id>', methods=['DELETE'])
+@jwt_required
 def remove_book(book_id):
     """
     Delete book entry from library."""
 
-    if request.method == 'DELETE':
+    acc_type = user.get_user(get_jwt_identity())
+
+    if request.method == 'DELETE' and acc_type["acc_status"] == "admin":
 
         try:
             library = book.get_all_books()
             del library[book_id]
 
-            book_details = {"msg" : "Book entry deleted"}
+            book_details = {"msg": "Book entry deleted"}
 
             return jsonify(book_details), 204
 
         except KeyError:
-            book_details = {"msg" : "Book entry not available"}
+            book_details = {"msg": "Book entry not available"}
 
             return jsonify(book_details), 404
 
 
 @books_blueprint.route('/books', methods=['GET'])
+@jwt_required
 def retrieve_all_books():
     """
     Retieves all books in library."""
@@ -111,6 +130,7 @@ def retrieve_all_books():
 
 
 @books_blueprint.route('/books/<int:book_id>', methods=['GET'])
+@jwt_required
 def get_book(book_id):
     """
     Gets specific book using book_id."""
@@ -124,10 +144,11 @@ def get_book(book_id):
 
         except KeyError:
 
-            return jsonify({"msg" : "Book not avialable"}), 404
+            return jsonify({"msg": "Book not avialable"}), 404
 
 
 @books_blueprint.route('/users/books/<int:book_id>', methods=['POST'])
+@jwt_required
 def borrow_return_book(book_id):
     """
     Allows borrowing/returning of books."""
@@ -170,15 +191,15 @@ def borrow_return_book(book_id):
 
                 return jsonify(
                     {
-                        "msg" : "cannot return book. Not borrowed by user",
-                        "status" : "borrowed"})
+                        "msg": "cannot return book. Not borrowed by user",
+                        "status": "borrowed"})
 
             elif data["acc_status"] != "member":
 
                 return jsonify(
                     {
-                        "msg" : "Member currently not authorised to borrow book"})
+                        "msg": "Member currently not authorised to borrow book"})
 
         except KeyError:
 
-            return jsonify({"msg" : "Book not avialable"}), 404
+            return jsonify({"msg": "Book not avialable"}), 404

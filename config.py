@@ -1,11 +1,12 @@
-'''instance/config.py
-specifies default environment settings'''
-
-import os
+"""
+config.py
+Specifies default environment settings.
+"""
 
 
 class Config(object):
-    '''main config class'''
+    """
+    Main config class"""
 
     DEBUG = False
     CSRF_ENABLED = True
@@ -13,13 +14,17 @@ class Config(object):
 
 
 class DevelopmentConfig(Config):
-    '''development config settings'''
+    """
+    Development config settings"""
+
     DEBUG = True
     TESTING = True
 
 
 class ProductionConfig(Config):
-    """Configurations for Production."""
+    """
+    Production config settings"""
+
     DEBUG = False
     TESTING = False
 

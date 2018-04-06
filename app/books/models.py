@@ -48,18 +48,17 @@ class Book(object):
         Sets value of a book object."""
 
         bk_params = ["book_id", "title", "author", "book_code", "synopsis",
-                     "genre", "subgenre", "status"]
+                     "genre", "subgenre"]
         book_details = {}
 
-        if len(bk_params) == len(book_info):
+        for detail in bk_params:
+            if detail in book_info:
+                book_details[detail] = book_info[detail]
 
-            for val, detail in enumerate(bk_params):
-                book_details[detail] = book_info[val]
-
+        book_details["status"] = "available"
         self.add_to_lib(book_details)
 
         return book_details
-
 
     def add_to_lib(self, book_details):
         """
@@ -68,7 +67,6 @@ class Book(object):
         global library
         library[book_details['book_id']] = book_details
 
-
     def get_book(self, book_id):
         """
         Gets book by book_id."""
@@ -76,7 +74,6 @@ class Book(object):
         global library
         if library[book_id]:
             return library[book_id]
-
 
     def get_all_books(self):
         """
