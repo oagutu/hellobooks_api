@@ -5,8 +5,9 @@ Holds user/auth API endpoints.
 
 from flask import Blueprint, request, jsonify, flash
 from flask_jwt_extended import (
-    jwt_required, create_access_token, get_raw_jwt
+    jwt_required, create_access_token, get_raw_jwt, get_jwt_identity
 )
+import re
 
 from app.users.models import User
 
@@ -25,14 +26,23 @@ def create_user_account():
 
         data = request.get_json()
 
+        if len(data['password'].strip()) < 1:
+            return jsonify({"msg": "Invalid Password"}), 400
+
+        if len(data['username'].strip()) < 1:
+            return jsonify({"msg": "Invalid Username"}), 400
+
+        pattern = r"^[a-z0-9]+(\.*-*[a-z0-9]*)*@[a-z0-9]+(\.*-*[a-z0-9]*)*(\.[a-z0-9]+)+$"
+        match = re.search(pattern, data['email'])
+        if not match:
+            return jsonify({"msg": "Invalid Email"}), 400
+
         user_info = {
             "user_id": data['user_id'],
             "name": data['name'],
             "email": data['email'],
             "username": data['username'],
-            "password": data['password'],
-            "acc_status": data['acc_status'],
-            "borrowed_books": data['borrowed_books']
+            "password": data['password']
         }
 
         if data['username'] not in user.get_register():
@@ -99,12 +109,12 @@ def reset_password():
         
         data = request.get_json()
         user_info = [
-            data['username'],
+            get_jwt_identity(),
             data['current_password'],
             data['new_password']
         ]
 
-        user_details = user.get_user(data['username'])
+        user_details = user.get_user(get_jwt_identity())
         if user_details['password'] == data['current_password']:
             user.set_password(user_info)
             flash('Successfully changed password', category='info')

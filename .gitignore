@@ -4,7 +4,7 @@
 
 hb/
 .vscode/
-
+.idea/
 
 #untracked files
 temp.py
