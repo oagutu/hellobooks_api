@@ -32,15 +32,16 @@ def create_user_account():
         if len(data['username'].strip()) < 1:
             return jsonify({"msg": "Invalid Username"}), 400
 
+        email = data['email'].lower()
         pattern = r"^[a-z0-9]+(\.*-*[a-z0-9]*)*@[a-z0-9]+(\.*-*[a-z0-9]*)*(\.[a-z0-9]+)+$"
-        match = re.search(pattern, data['email'])
+        match = re.search(pattern, email)
         if not match:
             return jsonify({"msg": "Invalid Email"}), 400
 
         user_info = {
             "user_id": data['user_id'],
             "name": data['name'],
-            "email": data['email'],
+            "email": email,
             "username": data['username'],
             "password": data['password']
         }

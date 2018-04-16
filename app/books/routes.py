@@ -9,6 +9,8 @@ from flask_jwt_extended import (
     jwt_required, get_jwt_identity
 )
 
+import re
+
 from app.users.models import User
 from app.books.models import Book 
 
@@ -32,6 +34,20 @@ def add_book():
         if request.method == "POST" and acc_type["acc_status"] == "admin":
 
             data = request.get_json()
+
+            if len(data['title'].strip()) < 1:
+                return jsonify({"msg": "Invalid title"}), 400
+
+            if len(data['author'].strip()) < 1:
+                return jsonify({"msg": "Invalid author"}), 400
+
+            print(data)
+            # Checks if given book code follows Dewey Decimal Classification.
+            pattern = r"^[\d][\d][\d](\.*[\d])*$"
+            match = re.search(pattern, data['book_code'])
+            if not match:
+                return jsonify({"msg": "Invalid book code. Use DDC standards."}), 400
+
             book_info = {
                 "book_id": data['book_id'],
                 "title": data['title'],
@@ -202,4 +218,4 @@ def borrow_return_book(book_id):
 
         except KeyError:
 
-            return jsonify({"msg": "Book not avialable"}), 404
+            return jsonify({"msg": "Book not available"}), 404

@@ -23,7 +23,7 @@ class BookEndpointsTestCase(unittest.TestCase):
         self.book_details = {
             "book_id": 1,
             "title": "book title",
-            "book_code": 12345,
+            "book_code": "123.45",
             "author": "mary writer",
             "synopsis": "Iwehn owueh owunef ohew ouweq...",
             "genre": "fiction",
@@ -71,7 +71,61 @@ class BookEndpointsTestCase(unittest.TestCase):
                      'Authorization': 'Bearer {}'.format(self.tokens["Jane"])})
         self.assertEqual(result.status_code, 201)
         self.assertIn(b'book title', result.data)
-        self.assertIn(b'12345', result.data)
+        self.assertIn(b'123.45', result.data)
+
+    def test_add_book_invalid_title(self):
+        """
+        Tests add book functionality for an invalid title."""
+
+        result = self.client.post(
+            "/api/v1/books",
+            data=json.dumps({
+                "book_id": 1,
+                "title": " ",
+                "book_code": "123.45",
+                "author": "mary writer",
+                "genre": "fiction",
+            }),
+            headers={'content-type': 'application/json',
+                     'Authorization': 'Bearer {}'.format(self.tokens["Jane"])})
+        self.assertEqual(result.status_code, 400)
+        self.assertIn(b'Invalid title', result.data)
+
+    def test_add_book_invalid_author(self):
+        """
+        Tests add book functionality for an invalid author."""
+
+        result = self.client.post(
+            "/api/v1/books",
+            data=json.dumps({
+                "book_id": 1,
+                "title": "book title here",
+                "book_code": "123.45",
+                "author": "",
+                "genre": "fiction",
+            }),
+            headers={'content-type': 'application/json',
+                     'Authorization': 'Bearer {}'.format(self.tokens["Jane"])})
+        self.assertEqual(result.status_code, 400)
+        self.assertIn(b'Invalid author', result.data)
+
+    def test_add_book_invalid_book_code(self):
+        """
+        Tests add book functionality for an invalid book_code."""
+
+        result = self.client.post(
+            "/api/v1/books",
+            data=json.dumps({
+                "book_id": 1,
+                "title": "yyy",
+                "book_code": "pp",
+                "author": "mary writer",
+                "genre": "fiction",
+            }),
+            headers={'content-type': 'application/json',
+                     'Authorization': 'Bearer {}'.format(self.tokens["Jane"])})
+        self.assertEqual(result.status_code, 400)
+        self.assertIn(b'Invalid book code', result.data)
 
     def test_update_book_not_in_library(self):
         """
@@ -93,7 +147,7 @@ class BookEndpointsTestCase(unittest.TestCase):
                                           'Authorization': 'Bearer {}'.format(self.tokens["Jane"])})
         self.assertEqual(result.status_code, 202)
         self.assertIn(b'book title', result.data)
-        self.assertIn(b'12345', result.data)
+        self.assertIn(b'123.45', result.data)
 
     def test_remove_book(self):
         """
@@ -211,7 +265,7 @@ class BookEndpointsTestCase(unittest.TestCase):
             data=json.dumps(self.user_details),
             headers={"content-type": "application/json",
                      'Authorization': 'Bearer {}'.format(self.tokens["Jane"])})
-        self.assertIn(b'Book not avialable', result.data)
+        self.assertIn(b'Book not available', result.data)
         self.assertEqual(result.status_code, 404)
 
 
