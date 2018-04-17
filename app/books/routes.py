@@ -9,6 +9,8 @@ from flask_jwt_extended import (
     jwt_required, get_jwt_identity
 )
 
+import re
+
 from app.users.models import User
 from app.books.models import Book 
 
@@ -27,11 +29,25 @@ def add_book():
     Adds specified book to library."""
 
     try:
-        acc_type = user.get_user(get_jwt_identity())
+        acc = user.get_user(get_jwt_identity())
 
-        if request.method == "POST" and acc_type["acc_status"] == "admin":
+        if request.method == "POST" and acc["acc_status"] == "admin":
 
             data = request.get_json()
+
+            if len(data['title'].strip()) < 1:
+                return jsonify({"msg": "Invalid title"}), 400
+
+            if len(data['author'].strip()) < 1:
+                return jsonify({"msg": "Invalid author"}), 400
+
+            print(data)
+            # Checks if given book code follows Dewey Decimal Classification.
+            pattern = r"^[\d][\d][\d](\.*[\d])*$"
+            match = re.search(pattern, data['book_code'])
+            if not match:
+                return jsonify({"msg": "Invalid book code. Use DDC standards."}), 400
+
             book_info = {
                 "book_id": data['book_id'],
                 "title": data['title'],
@@ -158,13 +174,14 @@ def borrow_return_book(book_id):
 
         book_info = {}
         try:
+            acc = user.get_user(get_jwt_identity())
             book_details = book.get_book(book_id)
             book_status = book_details["status"]
-            if data["acc_status"] == "member" and book_status == "available":
+            if acc["acc_status"] != "suspended" and book_status == "available":
 
                 book_info = user.set_borrowed()
                 book_info["book_id"] = book_id
-                book_info["borrower_id"] = data["user_id"]
+                book_info["borrower_id"] = acc["user_id"]
                 user.add_to_borrowed(book_id, book_info)
 
                 book.get_book(book_id)["status"] = "borrowed"
@@ -172,7 +189,7 @@ def borrow_return_book(book_id):
 
                 return jsonify(book_info), 201
 
-            elif data["acc_status"] == "member" and book_status == "borrowed":
+            elif acc["acc_status"] != "suspended" and book_status == "borrowed":
                 if book_id in user.borrowed_books:
                     borrowed_book = user.borrowed_books[book_id]
                     current_day = datetime.now()
@@ -194,7 +211,7 @@ def borrow_return_book(book_id):
                         "msg": "cannot return book. Not borrowed by user",
                         "status": "borrowed"})
 
-            elif data["acc_status"] != "member":
+            elif acc["acc_status"] == "suspended":
 
                 return jsonify(
                     {
@@ -202,4 +219,4 @@ def borrow_return_book(book_id):
 
         except KeyError:
 
-            return jsonify({"msg": "Book not avialable"}), 404
+            return jsonify({"msg": "Book not available"}), 404

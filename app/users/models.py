@@ -20,6 +20,14 @@ register = {
         "email": "wasd@keyboard.com",
         "password": "1234",
         "acc_status": "admin"
+    },
+    "thatguy": {
+        'name': 'Baba',
+        'user_id': 1234,
+        'username': 'thatguy',
+        'password': 'qwerty',
+        'acc_status': 'suspended',
+        'borrowed_books': {}
     }
 }
 
@@ -58,16 +66,17 @@ class User(object):
         """
         Sets values of a book object."""
 
-        user_params = ["user_id", "name", "email", "username", "password", "acc_status",
-                       "borrowed_books"]
+        user_params = ["user_id", "name", "email", "username", "password"]
         user_details = {}
 
         for detail in user_params:
             if detail in user_info:
                 user_details[detail] = user_info[detail]
 
+        user_details["acc_status"] = "member"
+        user_details["borrowed_books"] = {}
         self.add_to_reg(user_details)
-        print(user_details)
+        # print(user_details)
         return user_details
 
     def set_password(self, user_info):

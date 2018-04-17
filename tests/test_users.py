@@ -38,6 +38,14 @@ class UserEndpointsTestCase(unittest.TestCase):
             "acc_status": "suspended",
             "borrowed_books": {}}
 
+        self.user_details_three = {
+            "name": "one",
+            "user_id": "",
+            "username": "m",
+            "password": "",
+            "email": ""
+        }
+
         self.tokens = {}
 
         self.client.post(
@@ -68,6 +76,55 @@ class UserEndpointsTestCase(unittest.TestCase):
             headers={"content-type": "application/json"})
         self.assertEqual(result.status_code, 409)
         self.assertIn(b'Username not available. Already in use', result.data)
+
+
+    def test_create_user_account_with_invalid_pass(self):
+        """
+        Tests if password incorrect"""
+
+        result = self.client.post(
+            "/api/v1/auth/register",
+            data=json.dumps({
+                "name": "mary",
+                "user_id": "44",
+                "username": "m",
+                "password": "",
+                "email": "gmail@mary.com"}),
+            headers={"content-type": "application/json"})
+        self.assertEqual(result.status_code, 400)
+        self.assertIn(b'Invalid Password', result.data)
+
+    def test_create_user_account_with_invalid_username(self):
+        """
+        Tests if username incorrect"""
+
+        result = self.client.post(
+            "/api/v1/auth/register",
+            data=json.dumps({
+                "name": "mary",
+                "user_id": "44",
+                "username": "",
+                "password": "123",
+                "email": "gmail@mary.com"}),
+            headers={"content-type": "application/json"})
+        self.assertEqual(result.status_code, 400)
+        self.assertIn(b'Invalid Username', result.data)
+
+    def test_create_user_account_with_invalid_email(self):
+        """
+        Tests if email incorrect"""
+
+        result = self.client.post(
+            "/api/v1/auth/register",
+            data=json.dumps({
+                "name": "mary",
+                "user_id": "44",
+                "username": "m",
+                "password": "123",
+                "email": "gmaimary.com"}),
+            headers={"content-type": "application/json"})
+        self.assertEqual(result.status_code, 400)
+        self.assertIn(b'Invalid Email', result.data)
 
     def test_login(self):
         """
