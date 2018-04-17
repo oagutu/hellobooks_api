@@ -19,7 +19,7 @@ from datetime import datetime
 books_blueprint = Blueprint('books', __name__)
 
 book = Book()
-user = User()
+# user = User()
 
 
 @books_blueprint.route('/books', methods=['POST'])
@@ -163,60 +163,60 @@ def get_book(book_id):
             return jsonify({"msg": "Book not avialable"}), 404
 
 
-@books_blueprint.route('/users/books/<int:book_id>', methods=['POST'])
-@jwt_required
-def borrow_return_book(book_id):
-    """
-    Allows borrowing/returning of books."""
-
-    if request.method == 'POST':
-        data = request.get_json()
-
-        book_info = {}
-        try:
-            acc = user.get_user(get_jwt_identity())
-            book_details = book.get_book(book_id)
-            book_status = book_details["status"]
-            if acc["acc_status"] != "suspended" and book_status == "available":
-
-                book_info = user.set_borrowed()
-                book_info["book_id"] = book_id
-                book_info["borrower_id"] = acc["user_id"]
-                user.add_to_borrowed(book_id, book_info)
-
-                book.get_book(book_id)["status"] = "borrowed"
-                book_info['status'] = "borrowed"
-
-                return jsonify(book_info), 201
-
-            elif acc["acc_status"] != "suspended" and book_status == "borrowed":
-                if book_id in user.borrowed_books:
-                    borrowed_book = user.borrowed_books[book_id]
-                    current_day = datetime.now()
-                    return_day = datetime.strptime(
-                        borrowed_book["return_date"],  '%d/%m/%Y %H:%M')
-                    borrow_period = int(
-                        str(current_day - return_day).split(' ')[0])
-                    if borrow_period > 0:
-                        borrowed_book["fee_owed"] = borrow_period * 30
-                        borrowed_book["borrow_status"] = "unreturned"
-
-                    book.get_book(book_id)["status"] = "returned"
-                    borrowed_book["status"] = "returned"
-
-                    return jsonify(borrowed_book)
-
-                return jsonify(
-                    {
-                        "msg": "cannot return book. Not borrowed by user",
-                        "status": "borrowed"})
-
-            elif acc["acc_status"] == "suspended":
-
-                return jsonify(
-                    {
-                        "msg": "Member currently not authorised to borrow book"})
-
-        except KeyError:
-
-            return jsonify({"msg": "Book not available"}), 404
+# @books_blueprint.route('/users/books/<int:book_id>', methods=['POST'])
+# @jwt_required
+# def borrow_return_book(book_id):
+#     """
+#     Allows borrowing/returning of books."""
+#
+#     if request.method == 'POST':
+#         data = request.get_json()
+#
+#         book_info = {}
+#         try:
+#             acc = user.get_user(get_jwt_identity())
+#             book_details = book.get_book(book_id)
+#             book_status = book_details["status"]
+#             if acc["acc_status"] != "suspended" and book_status == "available":
+#
+#                 book_info = user.set_borrowed()
+#                 book_info["book_id"] = book_id
+#                 book_info["borrower_id"] = acc["user_id"]
+#                 user.add_to_borrowed(book_id, book_info)
+#
+#                 book.get_book(book_id)["status"] = "borrowed"
+#                 book_info['status'] = "borrowed"
+#
+#                 return jsonify(book_info), 201
+#
+#             elif acc["acc_status"] != "suspended" and book_status == "borrowed":
+#                 if book_id in user.borrowed_books:
+#                     borrowed_book = user.borrowed_books[book_id]
+#                     current_day = datetime.now()
+#                     return_day = datetime.strptime(
+#                         borrowed_book["return_date"],  '%d/%m/%Y %H:%M')
+#                     borrow_period = int(
+#                         str(current_day - return_day).split(' ')[0])
+#                     if borrow_period > 0:
+#                         borrowed_book["fee_owed"] = borrow_period * 30
+#                         borrowed_book["borrow_status"] = "unreturned"
+#
+#                     book.get_book(book_id)["status"] = "returned"
+#                     borrowed_book["status"] = "returned"
+#
+#                     return jsonify(borrowed_book)
+#
+#                 return jsonify(
+#                     {
+#                         "msg": "cannot return book. Not borrowed by user",
+#                         "status": "borrowed"})
+#
+#             elif acc["acc_status"] == "suspended":
+#
+#                 return jsonify(
+#                     {
+#                         "msg": "Member currently not authorised to borrow book"})
+#
+#         except KeyError:
+#
+#             return jsonify({"msg": "Book not available"}), 404

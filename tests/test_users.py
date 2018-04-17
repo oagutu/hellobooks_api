@@ -6,7 +6,7 @@
 import unittest
 import json
 
-from app import create_app
+from app import create_app, db
 
 
 class UserEndpointsTestCase(unittest.TestCase):
@@ -19,6 +19,12 @@ class UserEndpointsTestCase(unittest.TestCase):
 
         self.app = create_app('development')
         self.client = self.app.test_client()
+
+        # binds the app to the current context
+        with self.app.app_context():
+            # create all tables
+            db.create_all()
+
         self.user_details = {
             "name": "Jane Doe",
             "user_id": 123456,
@@ -61,10 +67,10 @@ class UserEndpointsTestCase(unittest.TestCase):
             "/api/v1/auth/register",
             data=json.dumps(self.user_details),
             headers={"content-type": "application/json"})
-        print(result.data)
+        # print(result.data)
         self.assertEqual(result.status_code, 201)
         self.assertIn(b'JD', result.data)
-        self.assertIn(b'123456', result.data)
+        self.assertIn(b'Jane Doe', result.data)
 
     def test_create_user_account_with_conflict(self):
         """
@@ -76,7 +82,6 @@ class UserEndpointsTestCase(unittest.TestCase):
             headers={"content-type": "application/json"})
         self.assertEqual(result.status_code, 409)
         self.assertIn(b'Username not available. Already in use', result.data)
-
 
     def test_create_user_account_with_invalid_pass(self):
         """
@@ -125,6 +130,21 @@ class UserEndpointsTestCase(unittest.TestCase):
             headers={"content-type": "application/json"})
         self.assertEqual(result.status_code, 400)
         self.assertIn(b'Invalid Email', result.data)
+
+    def test_crete_user_acc_no_email(self):
+        """
+        Tests if no email provided"""
+
+        result = self.client.post(
+            "/api/v1/auth/register",
+            data=json.dumps({
+                "name": "mary",
+                "user_id": "44",
+                "username": "m",
+                "password": "123"}),
+            headers={"content-type": "application/json"})
+        self.assertEqual(result.status_code, 400)
+        self.assertIn(b'No email provided', result.data)
 
     def test_login(self):
         """
