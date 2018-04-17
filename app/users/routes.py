@@ -84,7 +84,7 @@ def login():
             else:
                 return jsonify({"message": "Incorrect password"})
 
-        except KeyError:
+        except (KeyError, AttributeError):
             return jsonify({"message": "Account not available"})
  
 

@@ -20,6 +20,14 @@ register = {
         "email": "wasd@keyboard.com",
         "password": "1234",
         "acc_status": "admin"
+    },
+    "thatguy": {
+        'name': 'Baba',
+        'user_id': 1234,
+        'username': 'thatguy',
+        'password': 'qwerty',
+        'acc_status': 'suspended',
+        'borrowed_books': {}
     }
 }
 
