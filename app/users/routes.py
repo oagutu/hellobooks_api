@@ -13,7 +13,6 @@ from app.users.models import User
 
 users_blueprint = Blueprint('users', __name__)
 
-# user = User()
 blacklist = set()
 
 
@@ -47,6 +46,12 @@ def create_user_account():
             "username": data['username'],
             "password": data['password']
         }
+
+        if 'acc_status' in data:
+            user_info['acc_status'] = data['acc_status']
+        if 'borrowed_books' in data and len(data['borrowed_books']) > 0:
+            user_info["borrowed_books"] = data["borrowed_books"]
+        # print(user_info)
 
         if not User.get_user(data['username']):
             user = User(user_info)

@@ -6,7 +6,7 @@
 import unittest
 import json
 
-from app import create_app
+from app import create_app, db
 
 
 class BookEndpointsTestCase(unittest.TestCase):
@@ -20,45 +20,93 @@ class BookEndpointsTestCase(unittest.TestCase):
         self.app = create_app('development')
         self.client = self.app.test_client()
 
+        # binds the app to the current context
+        with self.app.app_context():
+            # create all tables
+            db.create_all()
+
         self.book_details = {
             "book_id": 1,
             "title": "book title",
-            "book_code": "123.45",
-            "author": "mary writer",
-            "synopsis": "Iwehn owueh owunef ohew ouweq...",
+            "book_code": 978966433901,
+            "ddc_code": "321.45",
+            "author": "mary",
+            "synopsis": "Pef ohew ouweq...",
+            "genre": 'fiction',
+            "sub_genre": "xyz",
+        }
+        self.book_details_two = {
+            "book_id": 2,
+            "title": "book title two",
+            "book_code": 978962222901,
+            "ddc_code": "322.45",
+            "author": "poppins",
             "genre": "fiction",
-            "subgenre": "xyz",
-            "status": "available"
+            "status": "borrowed"
+        }
+        self.book_details_three = {
+            "book_id": 3,
+            "title": "book title two",
+            "book_code": 978962221234,
+            "ddc_code": "322.00",
+            "author": "po",
+            "genre": "fiction",
+            "status": "borrowed"
         }
 
         self.user_details = {
             'name': 'John Doe',
             'user_id': '123456',
+            'email': 'name@email.co.ke',
             'username': 'Nickname',
             'password': 'qwerty',
-            'acc_status': 'member',
-            'borrowed_books': {}}
+            'acc_status': 'admin',
+            'borrowed_books': {
+                2: {
+                    "title": "book title two",
+                    "book_code": 978962222901,
+                    "borrow_date": "25/04/2018 02:30",
+                    "return_date": "1/05/2018 02:30",
+                    "fee_owed": 0,
+                    "borrow_status": "valid"}
+            }
+        }
 
         self.user_details_two = {
             'name': 'Baba',
             'user_id': '1234',
             'username': 'thatguy',
             'password': 'qwerty',
+            'email': 'jina@email.co.ke',
             'acc_status': 'suspended',
             'borrowed_books': {}}
 
         self.tokens = {}
 
+        self.client.post(
+            "/api/v1/auth/register",
+            data=json.dumps(self.user_details),
+            headers={"content-type": "application/json"})
+
         result = self.client.post(
             "/api/v1/auth/login",
-            data=json.dumps({'username': 'Jane', 'password': '1234'}),
+            data=json.dumps({'username': 'Nickname', 'password': 'qwerty'}),
             headers={"content-type": "application/json"})
-        self.tokens['Jane'] = result.headers['Authorization']
+        # print(result.data)
+        self.tokens['Nickname'] = result.headers['Authorization']
 
         self.client.post(
-            '/api/v1/books',
-            data=json.dumps(self.book_details),
-            headers={"content-type": "application/json"})
+            "/api/v1/books",
+            data=json.dumps(self.book_details_two),
+            headers={'content-type': 'application/json',
+                     'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
+
+    def tearDown(self):
+        """teardown all initialized variables."""
+        with self.app.app_context():
+            # drop all tables
+            db.session.remove()
+            db.drop_all()
 
     def test_add_book(self):
         """
@@ -68,10 +116,11 @@ class BookEndpointsTestCase(unittest.TestCase):
             "/api/v1/books",
             data=json.dumps(self.book_details),
             headers={'content-type': 'application/json',
-                     'Authorization': 'Bearer {}'.format(self.tokens["Jane"])})
+                     'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
+        # print(result.data)
         self.assertEqual(result.status_code, 201)
         self.assertIn(b'book title', result.data)
-        self.assertIn(b'123.45', result.data)
+        self.assertIn(b'321.45', result.data)
 
     def test_add_book_invalid_title(self):
         """
@@ -87,7 +136,7 @@ class BookEndpointsTestCase(unittest.TestCase):
                 "genre": "fiction",
             }),
             headers={'content-type': 'application/json',
-                     'Authorization': 'Bearer {}'.format(self.tokens["Jane"])})
+                     'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
         self.assertEqual(result.status_code, 400)
         self.assertIn(b'Invalid title', result.data)
 
@@ -105,27 +154,29 @@ class BookEndpointsTestCase(unittest.TestCase):
                 "genre": "fiction",
             }),
             headers={'content-type': 'application/json',
-                     'Authorization': 'Bearer {}'.format(self.tokens["Jane"])})
+                     'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
         self.assertEqual(result.status_code, 400)
         self.assertIn(b'Invalid author', result.data)
 
-    def test_add_book_invalid_book_code(self):
+    def test_add_book_invalid_ddc_code(self):
         """
-        Tests add book functionality for an invalid book_code."""
+        Tests add book functionality for an invalid ddc_code."""
 
         result = self.client.post(
             "/api/v1/books",
             data=json.dumps({
                 "book_id": 1,
                 "title": "yyy",
-                "book_code": "pp",
+                "book_code": 970066433901,
+                "ddc_code": "pp",
                 "author": "mary writer",
                 "genre": "fiction",
             }),
             headers={'content-type': 'application/json',
-                     'Authorization': 'Bearer {}'.format(self.tokens["Jane"])})
+                     'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
+        print(result.data)
         self.assertEqual(result.status_code, 400)
-        self.assertIn(b'Invalid book code', result.data)
+        self.assertIn(b'Invalid ddc_code', result.data)
 
     def test_update_book_not_in_library(self):
         """
@@ -134,31 +185,39 @@ class BookEndpointsTestCase(unittest.TestCase):
         result = self.client.put('/api/v1/books/3',
                                  data=json.dumps(self.book_details),
                                  headers={"content-type": "application/json",
-                                          'Authorization': 'Bearer {}'.format(self.tokens["Jane"])})
+                                          'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
         self.assertEqual(result.status_code, 404)
 
     def test_update_book_in_library(self):
         """
         Tests updating book in library"""
 
-        result = self.client.put('/api/v1/books/1',
-                                 data=json.dumps(self.book_details),
+        result = self.client.put('/api/v1/books/2',
+                                 data=json.dumps(self.book_details_two),
                                  headers={"content-type": "application/json",
-                                          'Authorization': 'Bearer {}'.format(self.tokens["Jane"])})
+                                          'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
+        print(result.data)
         self.assertEqual(result.status_code, 202)
         self.assertIn(b'book title', result.data)
-        self.assertIn(b'123.45', result.data)
+        self.assertIn(b'322.45', result.data)
 
     def test_remove_book(self):
         """
         Tests remove_book() functionality"""
 
+        # self.client.post(
+        #     "/api/v1/books",
+        #     data=json.dumps(self.book_details),
+        #     headers={'content-type': 'application/json',
+        #              'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
+
         result = self.client.delete('/api/v1/books/3',
-                                    headers={'Authorization': 'Bearer {}'.format(self.tokens["Jane"])})
+                                    headers={'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
         self.assertEqual(result.status_code, 404)
-        
-        result = self.client.delete('/api/v1/books/1',
-                                    headers={'Authorization': 'Bearer {}'.format(self.tokens["Jane"])})
+
+        result = self.client.delete('/api/v1/books/2',
+                                    headers={'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
+        # print(result.data)
         self.assertEqual(result.status_code, 204)
         self.assertNotIn(b'book title', result.data)
 
@@ -170,9 +229,9 @@ class BookEndpointsTestCase(unittest.TestCase):
             '/api/v1/books',
             data=json.dumps(self.book_details),
             headers={"content-type": "application/json",
-                     'Authorization': 'Bearer {}'.format(self.tokens["Jane"])}).status_code, 201)
+                     'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])}).status_code, 201)
         result = self.client.get('/api/v1/books',
-                                 headers={'Authorization': 'Bearer {}'.format(self.tokens["Jane"])})
+                                 headers={'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
         self.assertEqual(result.status_code, 200)
         self.assertIn(b'book title', result.data)
 
@@ -184,12 +243,12 @@ class BookEndpointsTestCase(unittest.TestCase):
             '/api/v1/books',
             data=json.dumps(self.book_details),
             headers={"content-type": "application/json",
-                     'Authorization': 'Bearer {}'.format(self.tokens["Jane"])}).status_code, 201)
+                     'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])}).status_code, 201)
         result = self.client.get(
             '/api/v1/books/1',
             data=json.dumps(self.book_details),
             headers={"content-type": "application/json",
-                     'Authorization': 'Bearer {}'.format(self.tokens["Jane"])})
+                     'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
         self.assertEqual(result.status_code, 200)
         self.assertIn('book title', str(result.data))
 
@@ -201,17 +260,23 @@ class BookEndpointsTestCase(unittest.TestCase):
             '/api/v1/books/10',
             data=json.dumps(self.book_details),
             headers={"content-type": "application/json",
-                     'Authorization': 'Bearer {}'.format(self.tokens["Jane"])}).status_code, 404)
+                     'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])}).status_code, 404)
 
     def test_borrow_book(self):
         """
-        Tests borrow_return_book() functionality
+        Tests borrowing book
         checks if book status changed to borrowed.
         """
+        self.client.post(
+            "/api/v1/books",
+            data=json.dumps(self.book_details),
+            headers={'content-type': 'application/json',
+                     'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
+
         result = self.client.post(
             '/api/v1/users/books/1',
             headers={
-                'Authorization': 'Bearer {}'.format(self.tokens["Jane"])})
+                'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
         self.assertIn(b'borrowed', result.data)
 
     def test_return(self):
@@ -219,42 +284,48 @@ class BookEndpointsTestCase(unittest.TestCase):
         Tests returning a book."""
 
         result = self.client.post(
-            '/api/v1/users/books/1',
+            '/api/v1/users/books/2',
             headers={
-                'Authorization': 'Bearer {}'.format(self.tokens["Jane"])})
-        self.assertIn(b'borrowed', result.data)
-
-        result = self.client.post(
-            '/api/v1/users/books/1',
-            headers={
-                'Authorization': 'Bearer {}'.format(self.tokens["Jane"])})
+                'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
+        print(result.data)
         self.assertIn(b'returned', result.data)
 
     def test_return_book_not_borrowed(self):
         """
-        Tests returning book not borrowed by user"""
+        Tests returning book not borrowed by user."""
+
+        self.client.post(
+            "/api/v1/books",
+            data=json.dumps(self.book_details_three),
+            headers={'content-type': 'application/json',
+                     'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
 
         result = self.client.post(
-             '/api/v1/users/books/2',
+             '/api/v1/users/books/3',
              headers={
-                 'Authorization': 'Bearer {}'.format(self.tokens["Jane"])})
+                 'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
         self.assertIn(b'cannot return book. Not borrowed by user', result.data)
 
     def test_user_not_authorized_to_borrow(self):
         """
         Tests book borrowing by unauthorized user"""
 
+        self.client.post(
+            "/api/v1/auth/register",
+            data=json.dumps(self.user_details_two),
+            headers={"content-type": "application/json"})
+
         result = self.client.post(
             "/api/v1/auth/login",
             data=json.dumps({'username': 'thatguy', 'password': 'qwerty'}),
             headers={"content-type": "application/json"})
-        print(result.data)
         token = result.headers['Authorization']
     
         result = self.client.post(
-            '/api/v1/users/books/1',
+            '/api/v1/users/books/2',
             headers={
                 'Authorization': 'Bearer {}'.format(token)})
+        print(result.data)
         self.assertIn(
                 b'Member currently not authorised to borrow book', result.data)
 
@@ -265,7 +336,7 @@ class BookEndpointsTestCase(unittest.TestCase):
         result = self.client.post(
             '/api/v1/users/books/11',
             headers={
-                'Authorization': 'Bearer {}'.format(self.tokens["Jane"])})
+                'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
         self.assertIn(b'Book not available', result.data)
         self.assertEqual(result.status_code, 404)
 

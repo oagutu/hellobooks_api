@@ -186,7 +186,7 @@ class UserEndpointsTestCase(unittest.TestCase):
 
         result = self.client.post(
             'api/v1/auth/reset-password',
-            data=json.dumps({'username': 'JD', 'current_password': 'qwerty', 'new_password': '09876'}),
+            data=json.dumps({'current_password': 'qwerty', 'new_password': '09876'}),
             headers={"content-type": "application/json",
                      'Authorization': 'Bearer {}'.format(self.tokens["John"])})
         self.assertEqual(result.status_code, 202)
