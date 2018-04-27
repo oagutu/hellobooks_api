@@ -44,6 +44,16 @@ class UserEndpointsTestCase(unittest.TestCase):
             "acc_status": "suspended",
             "borrowed_books": {}}
 
+        self.user_details_four = {
+            "name": "John Doe",
+            "user_id": 654321,
+            "username": "Doe",
+            "password": "qwerty",
+            "email": "abc@test.com",
+            "acc_status": "member",
+            "borrowed_books": {}
+        }
+
         self.user_details_three = {
             "name": "one",
             "user_id": "",
@@ -55,9 +65,22 @@ class UserEndpointsTestCase(unittest.TestCase):
         self.tokens = {}
 
         self.client.post(
-            "/api/v1/auth/login",
-            data=json.dumps({'username': 'JD', 'password': 'qwerty'}),
+            "/api/v1/auth/register",
+            data=json.dumps(self.user_details_four),
             headers={"content-type": "application/json"})
+
+        res = self.client.post(
+            "/api/v1/auth/login",
+            data=json.dumps({'username': 'Doe', 'password': 'qwerty'}),
+            headers={"content-type": "application/json"})
+        self.tokens['test_token'] = res.headers['Authorization']
+
+    def tearDown(self):
+        """teardown all initialized variables."""
+        with self.app.app_context():
+            # drop all tables
+            db.session.remove()
+            db.drop_all()
 
     def test_create_user_account(self):
         """
@@ -78,7 +101,7 @@ class UserEndpointsTestCase(unittest.TestCase):
 
         result = self.client.post(
             "/api/v1/auth/register",
-            data=json.dumps(self.user_details_two),
+            data=json.dumps(self.user_details_four),
             headers={"content-type": "application/json"})
         self.assertEqual(result.status_code, 409)
         self.assertIn(b'Username not available. Already in use', result.data)
@@ -148,7 +171,12 @@ class UserEndpointsTestCase(unittest.TestCase):
 
     def test_login(self):
         """
-        Tests login(), reset_password() and logout() functionality."""
+        Tests login() functionality."""
+
+        self.client.post(
+            "/api/v1/auth/register",
+            data=json.dumps(self.user_details),
+            headers={"content-type": "application/json"})
 
         result = self.client.post(
             "/api/v1/auth/login",
@@ -159,15 +187,24 @@ class UserEndpointsTestCase(unittest.TestCase):
         self.tokens['John'] = token
         self.assertIn(b'Successfully logged in', result.data)
 
-    def test_login_incorrect_credentials(self):
+    def test_login_incorrect_pasword(self):
         """
-        Tests login with wrong username/password"""
+        Tests login with wrong password"""
+
+        self.client.post(
+            "/api/v1/auth/register",
+            data=json.dumps(self.user_details),
+            headers={"content-type": "application/json"})
 
         result = self.client.post(
             "/api/v1/auth/login",
             data=json.dumps({'username': 'JD', 'password': 'rose'}),
             headers={"content-type": "application/json"})
         self.assertIn(b'Incorrect password', result.data)
+
+    def test_login_incorrect_username(self):
+        """
+        Tests login with wrong username."""
         result = self.client.post(
             "/api/v1/auth/login",
             data=json.dumps({'username': 'Amber', 'password': 'rose'}),
@@ -176,42 +213,34 @@ class UserEndpointsTestCase(unittest.TestCase):
 
     def test_reset_password(self):
         """
-        Tests password reset"""
-
-        res = self.client.post(
-            "/api/v1/auth/login",
-            data=json.dumps({'username': 'JD', 'password': 'qwerty'}),
-            headers={"content-type": "application/json"})
-        self.tokens['John'] = res.headers['Authorization']
+        Tests password reset."""
 
         result = self.client.post(
             'api/v1/auth/reset-password',
             data=json.dumps({'current_password': 'qwerty', 'new_password': '09876'}),
             headers={"content-type": "application/json",
-                     'Authorization': 'Bearer {}'.format(self.tokens["John"])})
+                     'Authorization': 'Bearer {}'.format(self.tokens["test_token"])})
         self.assertEqual(result.status_code, 202)
         self.assertIn(b'Successfully changed password', result.data)
+
+    def test_reset_password_incorrect_current_password(self):
+        """
+        Tests password reset with incorrect current password."""
         
         result = self.client.post(
             'api/v1/auth/reset-password',
             data=json.dumps({'username': 'JD', 'current_password': 'pass123', 'new_password': '09876'}),
             headers={"content-type": "application/json",
-                     'Authorization': 'Bearer {}'.format(self.tokens['John'])})
+                     'Authorization': 'Bearer {}'.format(self.tokens['test_token'])})
         self.assertIn(b'Current password incorrect', result.data)
 
     def test_logout(self):
         """
         Tests logout"""
 
-        res = self.client.post(
-            "/api/v1/auth/login",
-            data=json.dumps({'username': 'JD', 'password': 'qwerty'}),
-            headers={"content-type": "application/json"})
-        self.tokens['John'] = res.headers['Authorization']
-
         result = self.client.post(
             'api/v1/auth/logout',
-            headers={'Authorization': 'Bearer {}' .format(self.tokens['John'])}
+            headers={'Authorization': 'Bearer {}' .format(self.tokens['test_token'])}
         )
         self.assertIn(b'Successfully logged out', result.data)
 
