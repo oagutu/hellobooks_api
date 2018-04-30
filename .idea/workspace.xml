@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c9ee3c51-a679-42b6-9b3f-a65fb4079dbd" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/books/routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/books/routes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/users/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/users/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/test_books.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_books.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -43,8 +41,8 @@
       <file leaf-file-name="routes.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/books/routes.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-502">
-              <caret line="20" column="46" lean-forward="true" selection-start-line="20" selection-start-column="46" selection-end-line="20" selection-end-column="46" />
+            <state relative-caret-position="-26">
+              <caret line="147" column="83" selection-start-line="147" selection-start-column="32" selection-end-line="147" selection-end-column="83" />
               <folding>
                 <element signature="e#63#90#0" expanded="true" />
               </folding>
@@ -52,22 +50,18 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="config.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/config.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="357">
-              <caret line="21" column="68" selection-start-line="21" selection-start-column="68" selection-end-line="21" selection-end-column="68" />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="test_books.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/tests/test_books.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="464">
-              <caret line="46" column="35" lean-forward="true" selection-start-line="46" selection-start-column="35" selection-end-line="46" selection-end-column="35" />
+            <state relative-caret-position="365">
+              <caret line="332" column="86" selection-start-line="332" selection-start-column="86" selection-end-line="332" selection-end-column="86" />
               <folding>
                 <element signature="e#74#89#0" expanded="true" />
+                <element signature="e#567#851#0" />
+                <element signature="e#884#1131#0" />
+                <element signature="e#1166#1408#0" />
+                <element signature="e#1438#2011#0" />
+                <element signature="e#2045#2288#0" />
               </folding>
             </state>
           </provider>
@@ -77,7 +71,7 @@
         <entry file="file://$PROJECT_DIR$/app/users/models.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="552">
-              <caret line="116" lean-forward="true" selection-start-line="116" selection-end-line="116" />
+              <caret line="116" selection-start-line="116" selection-end-line="116" />
             </state>
           </provider>
         </entry>
@@ -147,12 +141,6 @@
               <item name="HBA" type="462c0819:PsiDirectoryNode" />
               <item name="app" type="462c0819:PsiDirectoryNode" />
               <item name="books" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="HBA" type="b2602c69:ProjectViewProjectNode" />
-              <item name="HBA" type="462c0819:PsiDirectoryNode" />
-              <item name="app" type="462c0819:PsiDirectoryNode" />
-              <item name="users" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="HBA" type="b2602c69:ProjectViewProjectNode" />
@@ -278,6 +266,11 @@
           <caret line="75" column="13" selection-start-line="75" selection-start-column="13" selection-end-line="75" selection-end-column="13" />
           <folding>
             <element signature="e#74#89#0" expanded="true" />
+            <element signature="e#567#851#0" />
+            <element signature="e#884#1131#0" />
+            <element signature="e#1166#1408#0" />
+            <element signature="e#1438#2011#0" />
+            <element signature="e#2045#2288#0" />
           </folding>
         </state>
       </provider>
@@ -329,6 +322,11 @@
           <caret line="71" column="34" lean-forward="true" selection-start-line="71" selection-start-column="34" selection-end-line="71" selection-end-column="34" />
           <folding>
             <element signature="e#74#89#0" expanded="true" />
+            <element signature="e#567#851#0" />
+            <element signature="e#884#1131#0" />
+            <element signature="e#1166#1408#0" />
+            <element signature="e#1438#2011#0" />
+            <element signature="e#2045#2288#0" />
           </folding>
         </state>
       </provider>
@@ -421,6 +419,11 @@
           <caret line="248" column="71" selection-start-line="248" selection-start-column="71" selection-end-line="248" selection-end-column="71" />
           <folding>
             <element signature="e#74#89#0" expanded="true" />
+            <element signature="e#567#851#0" />
+            <element signature="e#884#1131#0" />
+            <element signature="e#1166#1408#0" />
+            <element signature="e#1438#2011#0" />
+            <element signature="e#2045#2288#0" />
           </folding>
         </state>
       </provider>
@@ -581,13 +584,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/config.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="357">
-          <caret line="21" column="68" selection-start-line="21" selection-start-column="68" selection-end-line="21" selection-end-column="68" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/.travis.yml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="306">
@@ -608,14 +604,21 @@
     <entry file="file://$PROJECT_DIR$/app/users/models.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="552">
-          <caret line="116" lean-forward="true" selection-start-line="116" selection-end-line="116" />
+          <caret line="116" selection-start-line="116" selection-end-line="116" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="357">
+          <caret line="21" column="68" selection-start-line="21" selection-start-column="68" selection-end-line="21" selection-end-column="68" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/books/routes.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-502">
-          <caret line="20" column="46" lean-forward="true" selection-start-line="20" selection-start-column="46" selection-end-line="20" selection-end-column="46" />
+        <state relative-caret-position="-26">
+          <caret line="147" column="83" selection-start-line="147" selection-start-column="32" selection-end-line="147" selection-end-column="83" />
           <folding>
             <element signature="e#63#90#0" expanded="true" />
           </folding>
@@ -624,10 +627,15 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/tests/test_books.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="464">
-          <caret line="46" column="35" lean-forward="true" selection-start-line="46" selection-start-column="35" selection-end-line="46" selection-end-column="35" />
+        <state relative-caret-position="365">
+          <caret line="332" column="86" selection-start-line="332" selection-start-column="86" selection-end-line="332" selection-end-column="86" />
           <folding>
             <element signature="e#74#89#0" expanded="true" />
+            <element signature="e#567#851#0" />
+            <element signature="e#884#1131#0" />
+            <element signature="e#1166#1408#0" />
+            <element signature="e#1438#2011#0" />
+            <element signature="e#2045#2288#0" />
           </folding>
         </state>
       </provider>

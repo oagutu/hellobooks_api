@@ -281,6 +281,27 @@ class BookEndpointsTestCase(unittest.TestCase):
         self.assertIn(b'book title', result.data)
         self.assertIn(b'322.45', result.data)
 
+    def test_update_book_unauthorised_account(self):
+        """Tests updating book by unauthorized account"""
+
+        self.client.post(
+            "/api/v1/auth/register",
+            data=json.dumps(self.user_details_two),
+            headers={"content-type": "application/json"})
+
+        result = self.client.post(
+            "/api/v1/auth/login",
+            data=json.dumps({'username': 'thatguy', 'password': 'qwerty'}),
+            headers={"content-type": "application/json"})
+        token = result.headers['Authorization']
+
+        result = self.client.put('/api/v1/books/2',
+                                 data=json.dumps(self.book_details_two),
+                                 headers={"content-type": "application/json",
+                                          'Authorization': 'Bearer {}'.format(token)})
+        self.assertEqual(result.status_code, 401)
+        self.assertIn(b'Account not authorised to perform selected function', result.data)
+
     def test_remove_book(self):
         """
         Tests remove_book() functionality"""
@@ -293,6 +314,25 @@ class BookEndpointsTestCase(unittest.TestCase):
                                     headers={'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
         self.assertEqual(result.status_code, 204)
         self.assertNotIn(b'book title', result.data)
+
+    def test_remove_book_unauthorised_account(self):
+        """Tests updating book by unauthorized account"""
+
+        self.client.post(
+            "/api/v1/auth/register",
+            data=json.dumps(self.user_details_two),
+            headers={"content-type": "application/json"})
+
+        result = self.client.post(
+            "/api/v1/auth/login",
+            data=json.dumps({'username': 'thatguy', 'password': 'qwerty'}),
+            headers={"content-type": "application/json"})
+        token = result.headers['Authorization']
+
+        result = self.client.delete('/api/v1/books/2',
+                                    headers={'Authorization': 'Bearer {}'.format(token)})
+        self.assertEqual(result.status_code, 401)
+        self.assertIn(b'Account not authorised to perform selected function', result.data)
 
     def test_retrieve_all_books(self):
         """

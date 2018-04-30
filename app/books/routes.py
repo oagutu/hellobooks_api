@@ -97,7 +97,7 @@ def add_book():
             "synopsis": book.synopsis
             }), 201
     else:
-        return jsonify({"msg": "Account not authorised to perform selected function"})
+        return jsonify({"msg": "Account not authorised to perform selected function"}), 401
 
 
 @books_blueprint.route('/books/<int:book_id>', methods=['PUT'])
@@ -144,6 +144,8 @@ def update_book(book_id):
             book_details = {"msg": "Book entry not available"}
 
             return jsonify(book_details), 404
+    else:
+        return jsonify({"msg": "Account not authorised to perform selected function"}), 401
 
 
 @books_blueprint.route('/books/<int:book_id>', methods=['DELETE'])
@@ -168,6 +170,8 @@ def remove_book(book_id):
             book_details = {"msg": "Book entry not available"}
 
             return jsonify(book_details), 404
+    else:
+        return jsonify({"msg": "Account not authorised to perform selected function"}), 401
 
 
 @books_blueprint.route('/books', methods=['GET'])
