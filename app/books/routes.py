@@ -294,3 +294,28 @@ def borrow_return_book(book_id):
     except AttributeError:
 
         return jsonify({"msg": "Book not available"}), 404
+
+
+@books_blueprint.route('/users/books', methods=['GET'])
+@jwt_required
+def get_borrow_history():
+    """
+    Enables viewing of borrow history."""
+
+    if request.method == 'GET':
+        user = User.get_user(get_jwt_identity())
+        borrowed_books = user.borrowed_books
+        # print("TP1 - borrow details: ", borrowed_books)
+
+        returned = request.args.get("returned")
+        # print(returned)
+        if not returned:
+            return jsonify(borrowed_books), 200
+
+        elif returned == 'false':
+            pending_books = {}
+            for key in borrowed_books:
+                if borrowed_books[key]['borrow_status'] == 'invalid':
+                    pending_books[key] = borrowed_books[key]
+
+            return jsonify(pending_books), 200

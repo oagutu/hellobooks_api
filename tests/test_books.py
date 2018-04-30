@@ -68,7 +68,15 @@ class BookEndpointsTestCase(unittest.TestCase):
                     "borrow_date": "25/04/2018 02:30",
                     "return_date": "1/05/2018 02:30",
                     "fee_owed": 0,
-                    "borrow_status": "valid"}
+                    "borrow_status": "valid"},
+                4: {
+                    "title": "book title three",
+                    "book_code": 978933322901,
+                    "borrow_date": "21/04/2018 02:30",
+                    "return_date": "29/04/2018 02:30",
+                    "fee_owed": 0,
+                    "borrow_status": "invalid"
+                }
             }
         }
 
@@ -452,6 +460,30 @@ class BookEndpointsTestCase(unittest.TestCase):
         print(result.data)
         self.assertIn(
                 b'Member currently not authorised to borrow book', result.data)
+
+    def test_get_user_borrow_history(self):
+        """
+        Tests getting user borrowing history"""
+
+        result = self.client.get(
+            '/api/v1/users/books',
+            headers={
+                'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
+        self.assertEqual(result.status_code, 200)
+        self.assertIn(b'book title two', result.data)
+
+    def test_get_user_not_returned_books(self):
+        """
+        Tests getting books not returned by user"""
+
+        result = self.client.get(
+            '/api/v1/users/books?returned=false',
+            headers={
+                'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
+        self.assertEqual(result.status_code, 200)
+        self.assertNotIn(b'book title two', result.data)
+        self.assertIn(b'book title three', result.data)
+
 
 if __name__ == '__main__':
     unittest.main()
