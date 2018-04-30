@@ -2,82 +2,100 @@
 app/books/models.py
 endpoint books models
 """
+import enum
+from app import db
 
 
-library = {
-    1: {
-        "book_id": 1,
-        "title": "book title",
-        "book_code": 12345,
-        "author": "mary writer",
-        "synopsis": "iwehn owueh owunef ohew ouweq...",
-        "genre": "fiction",
-        "sub_genre": "xyz",
-        "status": "borrowed"},
-    2: {
-        "book_id": 2,
-        "title": "Catch-22",
-        "book_code": 6753,
-        "author": "Heller",
-        "synopsis": "iwehn owueh owunef ohew ouweq...",
-        "genre": "fiction",
-        "sub_genre": "xyz",
-        "status": "borrowed"},
-}
+class Genre(enum.Enum):
+    """Represents genre enum data type"""
+    Fiction = "fiction"
+    Non_fiction = "non-fiction"
 
 
-class Book(object):
-    """
-    Used to create book objects."""
+class Book(db.Model):
+    """Represents book table"""
 
-    def __init__(self):
+    __tablename__ = "books"
+
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    book_code = db.Column(db.BIGINT, unique=True, nullable=False)
+    title = db.Column(db.String(60))
+    ddc_code = db.Column(db.String(30))
+    author = db.Column(db.String(50))
+    synopsis = db.Column(db.Text, nullable=True)
+    genre = db.Column(db.Enum(Genre))
+    sub_genre = db.Column(db.String(70), nullable=True, default="NA")
+    status = db.Column(db.String(50), default="available", nullable=False)
+
+    def __init__(self, book_info):
         """
         Initializes book object"""
 
-        self.bk_id = None
-        self.title = None
-        self.code = None
-        self.author = None
-        self. synopsis = None
-        self.genre = None
-        self.sub_genre = None
-        self.status = None
+        self.title = book_info['title']
+        self.book_code = book_info['book_code']
+        self.ddc_code = book_info['ddc_code']
+        self.author = book_info['author']
+        self.genre = book_info['genre']
 
-    def set_book(self, book_info):
-        """
-        Sets value of a book object."""
+        if 'book_id' in book_info:
+            self.id = book_info['book_id']
+        if 'synopsis' in book_info:
+            self. synopsis = book_info['synopsis']
+        if 'sub_genre' in book_info:
+            self.sub_genre = book_info['sub_genre']
+        if 'status' in book_info:
+            self.status = book_info['status']
 
-        bk_params = ["book_id", "title", "author", "book_code", "synopsis",
-                     "genre", "subgenre"]
-        book_details = {}
-
-        for detail in bk_params:
-            if detail in book_info:
-                book_details[detail] = book_info[detail]
-
-        book_details["status"] = "available"
-        self.add_to_lib(book_details)
-
-        return book_details
-
-    def add_to_lib(self, book_details):
+    def add_to_lib(self):
         """
         Adds books to library dict."""
 
-        global library
-        library[book_details['book_id']] = book_details
+        db.session.add(self)
+        db.session.commit()
 
-    def get_book(self, book_id):
+    @staticmethod
+    def get_book(param):
         """
         Gets book by book_id."""
+        if type(param) == int and len(str(param)) == 12:
+            return Book.query.filter_by(book_code=param).first()
+        elif type(param) == int:
+            return Book.query.filter_by(id=param).first()
+        else:
+            return Book.query.filter_by(title=param).first()
 
-        global library
-        if library[book_id]:
-            return library[book_id]
-
-    def get_all_books(self):
+    @staticmethod
+    def get_all_books():
         """
         Gets all books in library."""
 
-        global library
-        return library
+        return Book.query.all()
+
+    def delete_book(self):
+        """
+        Deletes book entries for db."""
+        db.session.delete(self)
+        db.session.commit()
+
+    def set_book_status(self, status):
+        """
+        Sets the status of the book after borrowing/returning."""
+
+        self.status = status
+        db.session.commit()
+
+    def __repr__(self):
+        """
+        Represents the object instance of the model when queried."""
+        return str({
+            self.id: {
+                "title": self.title,
+                "author": self.author,
+                "genre": self.genre,
+                "sub_genre": self.sub_genre,
+                "synopsis": self.synopsis,
+                "book_code": self.book_code,
+                "ddc_code": self.ddc_code,
+                "status": self.status
+            }
+        })
