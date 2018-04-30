@@ -392,11 +392,22 @@ class BookEndpointsTestCase(unittest.TestCase):
                 'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
         self.assertIn(b'borrowed', result.data)
 
+    def test_borrow_book_not_in_library(self):
+        """
+        Tests borrowing book not in library"""
+
+        result = self.client.post(
+            '/api/v1/users/books/11',
+            headers={
+                'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
+        self.assertIn(b'Book not available', result.data)
+        self.assertEqual(result.status_code, 404)
+
     def test_return(self):
         """
         Tests returning a book."""
 
-        result = self.client.post(
+        result = self.client.put(
             '/api/v1/users/books/2',
             headers={
                 'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
@@ -413,7 +424,7 @@ class BookEndpointsTestCase(unittest.TestCase):
             headers={'content-type': 'application/json',
                      'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
 
-        result = self.client.post(
+        result = self.client.put(
              '/api/v1/users/books/3',
              headers={
                  'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
@@ -441,18 +452,6 @@ class BookEndpointsTestCase(unittest.TestCase):
         print(result.data)
         self.assertIn(
                 b'Member currently not authorised to borrow book', result.data)
-
-    def test_borrow_book_not_in_library(self):
-        """
-        Tests borrowing book not in library"""
-
-        result = self.client.post(
-            '/api/v1/users/books/11',
-            headers={
-                'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
-        self.assertIn(b'Book not available', result.data)
-        self.assertEqual(result.status_code, 404)
-
 
 if __name__ == '__main__':
     unittest.main()

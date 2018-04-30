@@ -226,22 +226,28 @@ def get_book(book_id):
             return jsonify({"msg": "Book not available"}), 404
 
 
-@books_blueprint.route('/users/books/<int:book_id>', methods=['POST'])
+@books_blueprint.route('/users/books/<int:book_id>', methods=['POST', 'PUT'])
 @jwt_required
 def borrow_return_book(book_id):
     """
     Allows borrowing/returning of books."""
 
-    if request.method == 'POST':
+    try:
+        user = User.get_user(get_jwt_identity())
+        # print(user.acc_status)
+        # print(user.get_all_borrowed())
+        book_details = Book.get_book(book_id)
+        # print("TP - Borrow:\n", book_details)
+        book_status = book_details.status
+        # Borrow available book by authorised user.
 
-        try:
-            user = User.get_user(get_jwt_identity())
-            # print(user.acc_status)
-            # print(user.get_all_borrowed())
-            book_details = Book.get_book(book_id)
-            # print("TP - Borrow:\n", book_details)
-            book_status = book_details.status
-            # Borrow available book by authorised user.
+        if user.acc_status == "suspended":
+
+            return jsonify(
+                {
+                    "msg": "Member currently not authorised to borrow book"})
+
+        if request.method == 'POST':
             if user.acc_status != "suspended" and book_status == "available":
 
                 borrow_info = user.set_borrowed()
@@ -262,8 +268,10 @@ def borrow_return_book(book_id):
 
                 return jsonify(borrow_info), 201
 
-            # Return borrowed book by authorised user.
-            elif user.acc_status != "suspended" and book_status == "borrowed":
+        # Return borrowed book by authorised user.
+        elif request.method == 'PUT':
+
+            if user.acc_status != "suspended" and book_status == "borrowed":
                 # print(user.borrowed_books)
                 if str(book_id) in user.borrowed_books:
                     borrowed_book = user.borrowed_books[str(book_id)]
@@ -283,12 +291,6 @@ def borrow_return_book(book_id):
                             "msg": "cannot return book. Not borrowed by user",
                             "book_status": "borrowed"})
 
-            elif user.acc_status == "suspended":
+    except AttributeError:
 
-                return jsonify(
-                    {
-                        "msg": "Member currently not authorised to borrow book"})
-
-        except AttributeError:
-
-            return jsonify({"msg": "Book not available"}), 404
+        return jsonify({"msg": "Book not available"}), 404
