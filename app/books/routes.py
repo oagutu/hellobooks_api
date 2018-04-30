@@ -27,81 +27,77 @@ def add_book():
     """
     Adds specified book to library."""
 
-    try:
-        acc = User.get_user(get_jwt_identity())
+    acc = User.get_user(get_jwt_identity())
 
-        if request.method == "POST" and acc.acc_status == "admin":
+    if request.method == "POST" and acc.acc_status == "admin":
 
-            data = request.get_json()
+        data = request.get_json()
 
-            if len(data['title'].strip()) < 1:
-                return jsonify({"msg": "Invalid title"}), 400
+        if len(data['title'].strip()) < 1:
+            return jsonify({"msg": "Invalid title"}), 400
 
-            if len(data['author'].strip()) < 1:
-                return jsonify({"msg": "Invalid author"}), 400
+        if len(data['author'].strip()) < 1:
+            return jsonify({"msg": "Invalid author"}), 400
 
-            if 'book_code' not in data:
-                return jsonify({"msg": "Missing book Code"}), 400
-            elif Book.get_book(data['book_code']):
-                # print(Book.get_book(data['book_code']))
-                return jsonify({"msg": "Book(book_code) already in lib"}), 409
+        if 'book_code' not in data:
+            return jsonify({"msg": "Missing book Code"}), 400
+        elif Book.get_book(data['book_code']):
+            # print(Book.get_book(data['book_code']))
+            return jsonify({"msg": "Book(book_code) already in lib"}), 409
 
-            # Checks if given ddc_code follows Dewey Decimal Classification syst.
+        # Checks if given ddc_code follows Dewey Decimal Classification syst.
+        # print(data)
+        if 'ddc_code' not in data:
             # print(data)
-            if 'ddc_code' not in data:
-                # print(data)
-                return jsonify({"msg": "Missing ddc Code"}), 400
-            else:
-                pattern = r"^[\d][\d][\d](\.*[\d])*$"
-                match = re.search(pattern, data['ddc_code'])
-                # print(match)
-                if not match:
-                    return jsonify({"msg": "Invalid ddc_code. Use DDC structure."}), 400
-
-            if type(data['book_code']) != int or len(str(data['book_code'])) != 12:
-                return jsonify({"msg": "Invalid book_code"}), 400
-
-            book_info = {
-                "title": data['title'],
-                "author": data['author'],
-                "book_code": data['book_code'],
-                "ddc_code": data['ddc_code'],
-            }
-            if data['genre'] == 'fiction':
-                book_info['genre'] = Genre.Fiction
-            else:
-                book_info['genre'] = Genre.Non_fiction
-
-            if 'book_id' in data:
-                book_info['book_id'] = data['book_id']
-
-            if "synopsis" in data:
-                book_info["synopsis"] = data["synopsis"]
-
-            if "subgenre" in data:
-                book_info["subgenre"] = data["subgenre"]
-
-            if 'status' in data:
-                book_info["status"] = data["status"]
-
-            book = Book(book_info)
-            book.add_to_lib()
-            # print(book)
-            return jsonify({
-                "book_id": book.id,
-                "title": book.title,
-                "author": book.author,
-                "book_code": book.book_code,
-                "ddc_code": book.ddc_code,
-                "genre": book.genre.value,
-                "sub_genre": book.sub_genre,
-                "synopsis": book.synopsis
-                }), 201
+            return jsonify({"msg": "Missing ddc Code"}), 400
         else:
-            return jsonify({"msg": "Account not authorised to perform selected function"})
+            pattern = r"^[\d][\d][\d](\.*[\d])*$"
+            match = re.search(pattern, data['ddc_code'])
+            # print(match)
+            if not match:
+                return jsonify({"msg": "Invalid ddc_code. Use DDC structure."}), 400
 
-    except AttributeError:
-        return jsonify({"msg": "Unauthorized user account"})
+        if type(data['book_code']) != int or len(str(data['book_code'])) != 12:
+            return jsonify({"msg": "Invalid book_code"}), 400
+
+        book_info = {
+            "title": data['title'],
+            "author": data['author'],
+            "book_code": data['book_code'],
+            "ddc_code": data['ddc_code'],
+        }
+        if data['genre'] == 'fiction':
+            book_info['genre'] = Genre.Fiction
+        else:
+            book_info['genre'] = Genre.Non_fiction
+
+        if 'book_id' in data:
+            book_info['book_id'] = data['book_id']
+
+        if "synopsis" in data:
+            book_info["synopsis"] = data["synopsis"]
+
+        if "subgenre" in data:
+            book_info["subgenre"] = data["subgenre"]
+
+        if 'status' in data:
+            book_info["status"] = data["status"]
+
+        book = Book(book_info)
+        book.add_to_lib()
+        # print(book)
+        return jsonify({
+            "book_id": book.id,
+            "title": book.title,
+            "author": book.author,
+            "book_code": book.book_code,
+            "ddc_code": book.ddc_code,
+            "genre": book.genre.value,
+            "sub_genre": book.sub_genre,
+            "synopsis": book.synopsis
+            }), 201
+    else:
+        return jsonify({"msg": "Account not authorised to perform selected function"})
 
 
 @books_blueprint.route('/books/<int:book_id>', methods=['PUT'])

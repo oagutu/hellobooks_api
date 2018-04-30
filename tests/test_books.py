@@ -41,7 +41,7 @@ class BookEndpointsTestCase(unittest.TestCase):
             "book_code": 978962222901,
             "ddc_code": "322.45",
             "author": "poppins",
-            "genre": "fiction",
+            "genre": "non-fiction",
             "status": "borrowed"
         }
         self.book_details_three = {
@@ -158,6 +158,22 @@ class BookEndpointsTestCase(unittest.TestCase):
         self.assertEqual(result.status_code, 400)
         self.assertIn(b'Invalid author', result.data)
 
+    def test_add_book_missing_ddc_code(self):
+        """
+        Tests add book functionality for an missing book_code."""
+        result = self.client.post(
+            "/api/v1/books",
+            data=json.dumps({
+                "book_id": 1,
+                "title": "yyy",
+                "book_code": 970066433901,
+                "author": "mary writer",
+                "genre": "non-fiction",
+            }),
+            headers={'content-type': 'application/json',
+                     'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
+        self.assertIn(b'Missing ddc Code', result.data)
+
     def test_add_book_invalid_ddc_code(self):
         """
         Tests add book functionality for an invalid ddc_code."""
@@ -178,6 +194,71 @@ class BookEndpointsTestCase(unittest.TestCase):
         self.assertEqual(result.status_code, 400)
         self.assertIn(b'Invalid ddc_code', result.data)
 
+    def test_add_book_missing_book_code(self):
+        """
+        Tests add book functionality for an missing book_code."""
+
+        result = self.client.post(
+            "/api/v1/books",
+            data=json.dumps({
+                "book_id": 1,
+                "title": "yyy",
+                "ddc_code": "123.45",
+                "author": "mary writer",
+                "genre": "fiction",
+            }),
+            headers={'content-type': 'application/json',
+                     'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
+        self.assertIn(b'Missing book Code', result.data)
+
+    def test_add_book_invalid_book_code(self):
+        """
+        Tests add book functionality for an invalid book_code.
+        Book code can either be already existing or have an invalid format"""
+
+        result = self.client.post(
+            "/api/v1/books",
+            data=json.dumps(self.book_details_two),
+            headers={'content-type': 'application/json',
+                     'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
+        self.assertIn(b'Book(book_code) already in lib', result.data)
+
+        result = self.client.post(
+            "/api/v1/books",
+            data=json.dumps({
+                "book_id": 1,
+                "title": "yyy",
+                "book_code": 9700664339,
+                "ddc_code": "123.45",
+                "author": "mary writer",
+                "genre": "fiction",
+            }),
+            headers={'content-type': 'application/json',
+                     'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
+        self.assertIn(b'Invalid book_code', result.data)
+
+    def test_add_book_unauthorized_account(self):
+        """
+        Tests adding a book by an unauthorised account ie. not an admin"""
+
+        self.client.post(
+            "/api/v1/auth/register",
+            data=json.dumps(self.user_details_two),
+            headers={"content-type": "application/json"})
+
+        result = self.client.post(
+            "/api/v1/auth/login",
+            data=json.dumps({'username': 'thatguy', 'password': 'qwerty'}),
+            headers={"content-type": "application/json"})
+        token = result.headers['Authorization']
+
+        result = self.client.post(
+            "/api/v1/books",
+            data=json.dumps(self.book_details),
+            headers={'content-type': 'application/json',
+                     'Authorization': 'Bearer {}'.format(token)})
+        self.assertIn(b'Account not authorised to perform selected function', result.data)
+
     def test_update_book_not_in_library(self):
         """
         Tests upadting book not in the library"""
@@ -196,7 +277,6 @@ class BookEndpointsTestCase(unittest.TestCase):
                                  data=json.dumps(self.book_details_two),
                                  headers={"content-type": "application/json",
                                           'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
-        print(result.data)
         self.assertEqual(result.status_code, 202)
         self.assertIn(b'book title', result.data)
         self.assertIn(b'322.45', result.data)
@@ -205,19 +285,12 @@ class BookEndpointsTestCase(unittest.TestCase):
         """
         Tests remove_book() functionality"""
 
-        # self.client.post(
-        #     "/api/v1/books",
-        #     data=json.dumps(self.book_details),
-        #     headers={'content-type': 'application/json',
-        #              'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
-
         result = self.client.delete('/api/v1/books/3',
                                     headers={'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
         self.assertEqual(result.status_code, 404)
 
         result = self.client.delete('/api/v1/books/2',
                                     headers={'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
-        # print(result.data)
         self.assertEqual(result.status_code, 204)
         self.assertNotIn(b'book title', result.data)
 
