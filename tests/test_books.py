@@ -66,6 +66,7 @@ class BookEndpointsTestCase(unittest.TestCase):
                     "title": "book title two",
                     "book_code": 978962222901,
                     "borrow_date": "25/04/2018 02:30",
+                    "ERD": "30/04/2018 02:30",
                     "return_date": "1/05/2018 02:30",
                     "fee_owed": 0,
                     "borrow_status": "valid"},
@@ -73,6 +74,7 @@ class BookEndpointsTestCase(unittest.TestCase):
                     "title": "book title three",
                     "book_code": 978933322901,
                     "borrow_date": "21/04/2018 02:30",
+                    "ERD": "29/04/2018 02:30",
                     "return_date": "29/04/2018 02:30",
                     "fee_owed": 0,
                     "borrow_status": "invalid"
@@ -351,10 +353,23 @@ class BookEndpointsTestCase(unittest.TestCase):
             data=json.dumps(self.book_details),
             headers={"content-type": "application/json",
                      'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])}).status_code, 201)
-        result = self.client.get('/api/v1/books',
+        result = self.client.get('/api/v1/books?results=1',
                                  headers={'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
         self.assertEqual(result.status_code, 200)
         self.assertIn(b'book title', result.data)
+
+    def test_retrieve_all_books_invalid_page(self):
+        """
+        Tests retrieve_all_books() functionality for missing page."""
+
+        self.assertEqual(self.client.post(
+            '/api/v1/books',
+            data=json.dumps(self.book_details),
+            headers={"content-type": "application/json",
+                     'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])}).status_code, 201)
+        result = self.client.get('/api/v1/books?results=1&page=3',
+                                 headers={'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
+        self.assertEqual(result.status_code, 404)
 
     def test_get_book(self):
         """
@@ -466,9 +481,10 @@ class BookEndpointsTestCase(unittest.TestCase):
         Tests getting user borrowing history"""
 
         result = self.client.get(
-            '/api/v1/users/books',
+            '/api/v1/users/books?results=5&order_param=borrow_date',
             headers={
                 'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
+        # print("test_books: ", result.data)
         self.assertEqual(result.status_code, 200)
         self.assertIn(b'book title two', result.data)
 

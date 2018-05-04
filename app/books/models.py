@@ -65,11 +65,11 @@ class Book(db.Model):
             return Book.query.filter_by(title=param).first()
 
     @staticmethod
-    def get_all_books():
+    def get_all_books(entries=50, page=1):
         """
         Gets all books in library."""
 
-        return Book.query.all()
+        return Book.query.paginate(page, int(entries), True).items
 
     def delete_book(self):
         """

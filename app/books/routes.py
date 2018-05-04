@@ -9,6 +9,7 @@ from flask_jwt_extended import (
     jwt_required, get_jwt_identity
 )
 
+from math import ceil
 import re
 from app.books.models import Genre
 
@@ -182,9 +183,21 @@ def retrieve_all_books():
 
     if request.method == 'GET':
 
-        all_books = Book.get_all_books()
+        entry_no = request.args.get('results')
+        page = request.args.get('page')
+        if entry_no and page:
+            all_books = Book.get_all_books(entry_no, int(page))
+
+        elif entry_no and not page:
+            all_books = Book.get_all_books(entry_no)
+
+        elif not entry_no and page:
+            all_books = Book.get_all_books(int(page))
+
+        else:
+            all_books = Book.get_all_books()
         library = {}
-        print(all_books)
+
         for book in all_books:
             entry = {
                 "book_id": book.id,
@@ -279,11 +292,15 @@ def borrow_return_book(book_id):
                     current_day = datetime.now()
                     return_day = datetime.strptime(
                         borrowed_book["return_date"],  '%d/%m/%Y %H:%M')
-                    borrow_period = int(
-                        str(current_day - return_day).split(' ')[0])
+                    # print(str(current_day - return_day).split(' ')[0])
+                    borrow_period = str(current_day - return_day).split(' ')[0]
+                    if type(borrow_period) != int:
+                        borrow_period = 0
+                    else:
+                        borrow_period = int(borrow_period)
                     user.update_borrowed(str(book_id), borrow_period)
 
-                    return jsonify(borrowed_book)
+                    return jsonify(borrowed_book), 202
 
                 else:
                     return jsonify(
@@ -303,14 +320,44 @@ def get_borrow_history():
     Enables viewing of borrow history."""
 
     if request.method == 'GET':
-        user = User.get_user(get_jwt_identity())
-        borrowed_books = user.borrowed_books
-        # print("TP1 - borrow details: ", borrowed_books)
-
         returned = request.args.get("returned")
-        # print(returned)
+        entries = request.args.get("results")
+        order_param = request.args.get("order_param")
+
+        user = User.get_user(get_jwt_identity())
+        if order_param:
+            borrowed_books, record_details = user.get_all_borrowed(False, order_param)
+        else:
+            borrowed_books, record_details = user.get_all_borrowed()
+
+        # print("TP1 - borrow details: \n", borrowed_books)
+
         if not returned:
-            return jsonify(borrowed_books), 200
+            for key in borrowed_books:
+                current_day = datetime.now()
+                return_day = datetime.strptime(
+                    borrowed_books[key]['ERD'],  '%d/%m/%Y %H:%M')
+                borrow_period = str(current_day - return_day).split(' ')[0]
+                if current_day <= return_day:
+                    borrow_period = 0
+                else:
+                    borrow_period = int(borrow_period)
+
+                user.update_borrowed(str(key), borrow_period, True)
+                # print("{0} \n {1} ".format(key, user.get_all_borrowed()[0]))
+
+                if entries:
+                    entries = int(entries)
+                    record_details['tot_pages'] = ceil(record_details['records']/entries)
+                    keys = record_details['keys'][:(entries + 1)]
+                    borrowed_temp = {}
+                    for val in keys:
+                        borrowed_temp[val] = borrowed_books[val]
+                    borrowed_books = borrowed_temp
+
+            # print(borrowed_books, record_details)
+            print(user.get_all_borrowed())
+            return jsonify(borrowed_books), 201
 
         elif returned == 'false':
             pending_books = {}

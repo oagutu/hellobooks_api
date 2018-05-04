@@ -64,11 +64,33 @@ class User(db.Model):
         if self.password != user_info[2]:
             self.password = user_info[2]
 
-    def get_all_borrowed(self):
+    def get_all_borrowed(self, order=False, order_param='return_date'):
         """
         Returns list of borrowed books by user"""
 
-        return self.borrowed_books
+        # Holds temp list of borrowed_books.
+        borrowed_two = []
+
+        # Adds key and value pairs to list borrowed_two.
+        for y, x in enumerate(self.borrowed_books):
+            borrowed_two.append({'id': x})
+            borrowed_two[y].update(self.borrowed_books[x])
+
+        # Sorts list borrowed_two in order of descending date.
+        borrowed_sorted = sorted(borrowed_two, key=lambda date: date[order_param], reverse=order)
+
+        borrowed_dict = {}
+        keys = []
+
+        # Recreates dict a sorted according to date.
+        for val in borrowed_sorted:
+            borrowed_dict[val['id']] = val
+            keys.append(val['id'])
+            del borrowed_dict[val['id']]['id']
+
+        # print(borrowed_dict)
+
+        return borrowed_dict, {'keys': keys, 'records': len(borrowed_dict)}
 
     @staticmethod
     def set_borrowed():
@@ -78,8 +100,9 @@ class User(db.Model):
         borrow_info = dict()
 
         borrow_info["borrow_date"] = datetime.now().strftime("%d/%m/%Y %H:%M")
-        borrow_info["return_date"] = (datetime.now() + timedelta(days=10)).strftime(
+        borrow_info["ERD"] = (datetime.now() + timedelta(days=10)).strftime(
             "%d/%m/%Y %H:%M")
+        borrow_info["ARD"] = ''
         borrow_info["fee_owed"] = 0
         borrow_info["status"] = "valid"
 
@@ -92,13 +115,28 @@ class User(db.Model):
         self.borrowed_books[book_id] = borrow_info
         db.session.commit()
 
-    def update_borrowed(self, book_id, borrow_period):
+    def update_borrowed(self, book_id, borrow_period, get=False):
         """
         Updates borrowed book info."""
 
-        if borrow_period < 0:
-            self.borrowed_books[book_id]["fee_owed"] = borrow_period * 30
-        self.borrowed_books[book_id]["status"] = "returned"
+        borrowed_books = self.borrowed_books
+        borrowed = borrowed_books[book_id]
+        if borrow_period > 0:
+            borrowed["fee_owed"] = borrow_period * 30
+            # print("---> ", borrowed_books[book_id])
+            # self.add_to_borrowed(book_id, borrowed_books[book_id])
+            del self.borrowed_books[book_id]
+
+            self.add_to_borrowed(book_id, borrowed)
+
+        if not get:
+            self.borrowed_books[book_id]["status"] = "returned"
+        db.session.commit()
+
+    def update_borrowed_all(self, borrowed):
+        """Updates borrowed books as a whole."""
+
+        self.borrowed_books = borrowed
         db.session.commit()
 
     def __repr__(self):
