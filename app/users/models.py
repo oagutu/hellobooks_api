@@ -4,8 +4,53 @@ Endpoint user models."""
 from app import db
 from datetime import datetime, timedelta
 
+from sqlalchemy.ext.mutable import Mutable
+from sqlalchemy.ext.declarative import declarative_base
 
-class User(db.Model):
+
+class MutableDict(Mutable, dict):
+    """
+    Represents MutableDict object."""
+
+    @classmethod
+    def coerce(cls, key, value):
+        """
+        Converts dictionary to MutableDict type"""
+
+        if not isinstance(value, MutableDict):
+            if isinstance(value, dict):
+                return MutableDict(value)
+
+            # this call will raise ValueError
+            return Mutable.coerce(key, value)
+        else:
+            return value
+
+    def __setitem__(self, key, value):
+        """
+        Handles set events for MutableDict."""
+
+        dict.__setitem__(self, key, value)
+        self.changed()
+
+    def __delitem__(self, key):
+        """
+        Handles delete events for MutableDict."""
+
+        dict.__delitem__(self, key)
+        self.changed()
+
+    def __getstate__(self):
+        return dict(self)
+
+    def __setstate__(self, state):
+        self.update(state)
+
+
+Base = declarative_base()
+
+
+class User(db.Model, Base):
     """
     Represents user table"""
 
@@ -17,7 +62,7 @@ class User(db.Model):
     email = db.Column(db.String(60), unique=True, nullable=False)
     password = db.Column(db.String(30), nullable=False)
     acc_status = db.Column(db.String(40), default="member")
-    borrowed_books = db.Column(db.PickleType, default={})
+    borrowed_books = db.Column(MutableDict.as_mutable(db.PickleType), default={})
 
     def __init__(self, user_info):
         """
@@ -66,7 +111,12 @@ class User(db.Model):
 
     def get_all_borrowed(self, order=False, order_param='return_date'):
         """
-        Returns list of borrowed books by user"""
+        Returns list of borrowed books by user.
+
+        :param order: determines ordering of results. True - ascending.
+        :param order_param: parameter used to order query results
+        :return: borrowed_dict, record_details
+        """
 
         # Holds temp list of borrowed_books.
         borrowed_two = []
@@ -87,8 +137,6 @@ class User(db.Model):
             borrowed_dict[val['id']] = val
             keys.append(val['id'])
             del borrowed_dict[val['id']]['id']
-
-        # print(borrowed_dict)
 
         return borrowed_dict, {'keys': keys, 'records': len(borrowed_dict)}
 
@@ -119,24 +167,13 @@ class User(db.Model):
         """
         Updates borrowed book info."""
 
-        borrowed_books = self.borrowed_books
-        borrowed = borrowed_books[book_id]
+        borrowed = self.borrowed_books[book_id]
         if borrow_period > 0:
             borrowed["fee_owed"] = borrow_period * 30
-            # print("---> ", borrowed_books[book_id])
-            # self.add_to_borrowed(book_id, borrowed_books[book_id])
-            del self.borrowed_books[book_id]
-
             self.add_to_borrowed(book_id, borrowed)
 
         if not get:
             self.borrowed_books[book_id]["status"] = "returned"
-        db.session.commit()
-
-    def update_borrowed_all(self, borrowed):
-        """Updates borrowed books as a whole."""
-
-        self.borrowed_books = borrowed
         db.session.commit()
 
     def __repr__(self):

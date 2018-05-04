@@ -434,7 +434,6 @@ class BookEndpointsTestCase(unittest.TestCase):
             '/api/v1/users/books/2',
             headers={
                 'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
-        print(result.data)
         self.assertIn(b'returned', result.data)
 
     def test_return_book_not_borrowed(self):
@@ -472,7 +471,6 @@ class BookEndpointsTestCase(unittest.TestCase):
             '/api/v1/users/books/2',
             headers={
                 'Authorization': 'Bearer {}'.format(token)})
-        print(result.data)
         self.assertIn(
                 b'Member currently not authorised to borrow book', result.data)
 

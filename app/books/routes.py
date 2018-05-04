@@ -258,7 +258,7 @@ def borrow_return_book(book_id):
 
             return jsonify(
                 {
-                    "msg": "Member currently not authorised to borrow book"})
+                    "msg": "Member currently not authorised to borrow book"}), 401
 
         if request.method == 'POST':
             if user.acc_status != "suspended" and book_status == "available":
@@ -291,8 +291,7 @@ def borrow_return_book(book_id):
                     # print(user.borrowed_books)
                     current_day = datetime.now()
                     return_day = datetime.strptime(
-                        borrowed_book["return_date"],  '%d/%m/%Y %H:%M')
-                    # print(str(current_day - return_day).split(' ')[0])
+                        borrowed_book["ERD"],  '%d/%m/%Y %H:%M')
                     borrow_period = str(current_day - return_day).split(' ')[0]
                     if type(borrow_period) != int:
                         borrow_period = 0
@@ -357,7 +356,7 @@ def get_borrow_history():
 
             # print(borrowed_books, record_details)
             print(user.get_all_borrowed())
-            return jsonify(borrowed_books), 201
+            return jsonify(borrowed_books), 200
 
         elif returned == 'false':
             pending_books = {}
