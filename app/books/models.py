@@ -137,7 +137,7 @@ class BookLog(db.Model):
         Gets all entries in log."""
 
         if book_id:
-            return BookLog.query.filter_by(book_id=book_id).first()
+            return BookLog.query.filter_by(book_id=book_id).all()
         else:
             return BookLog.query.all()
 

@@ -392,7 +392,7 @@ def get_log():
 
     if request.method == 'GET' and acc_type.acc_status == "admin":
         if book_id:
-            logs = BookLog.get_logs(book_id)
+            logs = BookLog.get_logs(int(book_id))
         else:
             logs = BookLog.get_logs()
 

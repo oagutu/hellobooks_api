@@ -240,7 +240,7 @@ class UserLog(db.Model):
         Gets all entries in log."""
 
         if user_id:
-            return UserLog.query.filter_by(user_id=user_id).first()
+            return UserLog.query.filter_by(user_id=user_id).all()
         else:
             return UserLog.query.all()
 

@@ -51,6 +51,7 @@ class BookEndpointsTestCase(unittest.TestCase):
             "ddc_code": "322.00",
             "author": "po",
             "genre": "fiction",
+            "subgenre": "legal-drama",
             "status": "borrowed"
         }
 
@@ -503,7 +504,7 @@ class BookEndpointsTestCase(unittest.TestCase):
         Test if data logged."""
 
         result = self.client.get(
-            '/api/v1/users/books/logs',
+            '/api/v1/users/books/logs?book_id=2',
             headers={
                 'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
         self.assertEqual(result.status_code, 200)

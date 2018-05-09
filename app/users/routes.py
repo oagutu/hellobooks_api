@@ -60,7 +60,7 @@ def create_user_account():
             # print(user)
             user.add_to_reg()
 
-            if not user.id:
+            if user.id:
                 UserLog(user.id, action='INSERT').add_to_log()
             else:
                 UserLog(user.id, action='INSERT', success=False).add_to_log()
@@ -104,7 +104,7 @@ def login():
                 return response
 
             else:
-                return jsonify({"message": "Incorrect password"})
+                return jsonify({"message": "Incorrect password"}), 401
 
         except (KeyError, AttributeError):
             return jsonify({"message": "Account not available"})
@@ -183,9 +183,9 @@ def update_user_status():
         return jsonify({'msg': '{0} changed to {1}'.format(data['user'], data['new_status'])}), 200
 
     elif request.method != "POST":
-        return jsonify({'msg': 'Invalid method'})
+        return jsonify({'msg': 'Invalid method'}), 405
     else:
-        return jsonify({'msg': 'Unauthorised User'})
+        return jsonify({'msg': 'Unauthorised User'}), 401
 
 
 @users_blueprint.route('/users/logs', methods=['GET'])
@@ -195,11 +195,11 @@ def get_log():
     Enables viewing of book logs."""
 
     acc_type = User.get_user(get_jwt_identity())
-    book_id = request.args.get("user_id")
+    user_id = request.args.get("user_id")
 
     if request.method == 'GET' and acc_type.acc_status == "admin":
-        if book_id:
-            logs = UserLog.get_logs(book_id)
+        if user_id:
+            logs = UserLog.get_logs(int(user_id))
         else:
             logs = UserLog.get_logs()
 
