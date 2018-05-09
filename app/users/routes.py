@@ -47,6 +47,8 @@ def create_user_account():
             "password": data['password']
         }
 
+        if 'user_id' in data:
+            user_info['user_id'] = data['user_id']
         if 'acc_status' in data:
             user_info['acc_status'] = data['acc_status']
         if 'borrowed_books' in data and len(data['borrowed_books']) > 0:
@@ -150,6 +152,40 @@ def reset_password():
 
         else:
             return jsonify({"message": "Current password incorrect"})
+
+
+@users_blueprint.route('/users/status_change', methods=['POST'])
+@jwt_required
+def update_user_status():
+    """
+    Enables viewing of book logs."""
+
+    acc_type = User.get_user(get_jwt_identity())
+
+    if request.method == 'POST' and acc_type.acc_status == "admin":
+        data = request.get_json()
+        status_options = ['banned', 'suspended', 'admin', 'member']
+
+        if data['new_status'] not in status_options:
+            return jsonify({"msg": "Invalid status option"}), 400
+
+        if 'user' not in data:
+            return jsonify({"msg": "Missing user_id/username"}), 400
+        else:
+            user_param = data['user']
+
+        if not User.get_user(user_param):
+            return jsonify({"msg": "User does NOT exist. Invalid Username/UserID."}), 400
+
+        user = User.get_user(user_param)
+        user.change_status(data['new_status'])
+
+        return jsonify({'msg': '{0} changed to {1}'.format(data['user'], data['new_status'])}), 200
+
+    elif request.method != "POST":
+        return jsonify({'msg': 'Invalid method'})
+    else:
+        return jsonify({'msg': 'Unauthorised User'})
 
 
 @users_blueprint.route('/users/logs', methods=['GET'])

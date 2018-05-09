@@ -77,6 +77,8 @@ class User(db.Model, Base):
         self.username = user_info['username']
         self.password = user_info['password']
 
+        if 'user_id' in user_info:
+            self.id = user_info['user_id']
         if 'acc_status' in user_info:
             self.acc_status = user_info['acc_status']
         if 'borrowed_books' in user_info:
@@ -90,12 +92,21 @@ class User(db.Model, Base):
         db.session.commit()
 
     @staticmethod
-    def get_user(username):
+    def get_user(param):
         """
         Fetches user details from register."""
         # print(User.query.filter(User.username == username))
 
-        return User.query.filter_by(username=username).first()
+        if type(param) == int:
+            return User.query.filter_by(id=param).first()
+        elif type(param) == str:
+            return User.query.filter_by(username=param).first()
+
+    def change_status(self, new_status):
+
+        self.acc_status = new_status
+        db.session.add(self)
+        db.session.commit()
 
     @staticmethod
     def get_register():
