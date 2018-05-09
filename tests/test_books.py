@@ -498,6 +498,39 @@ class BookEndpointsTestCase(unittest.TestCase):
         self.assertNotIn(b'book title two', result.data)
         self.assertIn(b'book title three', result.data)
 
+    def test_get_book_log(self):
+        """
+        Test if data logged."""
+
+        result = self.client.get(
+            '/api/v1/users/books/logs',
+            headers={
+                'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
+        print(result.data)
+        self.assertIn(b'2', result.data)
+
+    def test_get_book_log_unauthorised_user(self):
+        """
+        Test if data logged."""
+
+        self.client.post(
+            "/api/v1/auth/register",
+            data=json.dumps(self.user_details_two),
+            headers={"content-type": "application/json"})
+
+        result = self.client.post(
+            "/api/v1/auth/login",
+            data=json.dumps({'username': 'thatguy', 'password': 'qwerty'}),
+            headers={"content-type": "application/json"})
+        token = result.headers['Authorization']
+
+        result = self.client.get(
+            '/api/v1/users/books/logs',
+            headers={
+                'Authorization': 'Bearer {}'.format(token)})
+        print(result.data)
+        self.assertIn(b'User not authorised', result.data)
+
 
 if __name__ == '__main__':
     unittest.main()

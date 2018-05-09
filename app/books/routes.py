@@ -15,7 +15,7 @@ from app.books.models import Genre
 
 
 from app.users.models import User
-from app.books.models import Book
+from app.books.models import Book, BookLog
 
 from datetime import datetime
 
@@ -86,7 +86,13 @@ def add_book():
 
         book = Book(book_info)
         book.add_to_lib()
-        # print(book)
+        if book.id:
+            BookLog(book.id).add_to_log()
+        else:
+            BookLog(book.id, success=False).add_to_log()
+            return jsonify({'msg': 'Book not successfully added'})
+
+        print("add_part: ", BookLog(book.id))
         return jsonify({
             "book_id": book.id,
             "title": book.title,
@@ -224,7 +230,7 @@ def get_book(book_id):
 
         if Book.get_book(book_id):
             book_details = Book.get_book(book_id)
-            # print('test point: book details\n: 'book_details)
+            print('test point: book details\n: ', book_details)
 
             return jsonify({
                 "book_id": book_details.id,
@@ -365,3 +371,33 @@ def get_borrow_history():
                     pending_books[key] = borrowed_books[key]
 
             return jsonify(pending_books), 200
+
+
+@books_blueprint.route('/users/books/logs', methods=['GET'])
+@jwt_required
+def get_log():
+    """
+    Enables viewing of book logs."""
+
+    acc_type = User.get_user(get_jwt_identity())
+    book_id = request.args.get("book_id")
+
+    if request.method == 'GET' and acc_type.acc_status == "admin":
+        if book_id:
+            logs = BookLog.get_logs(book_id)
+        else:
+            logs = BookLog.get_logs()
+            print("get_log: ", logs)
+
+        audit_log = {}
+        for log in logs:
+            entry = {
+                "book_id": log.book_id,
+                "timestamp": log.timestamp,
+                "action": log.action
+                }
+            audit_log[log.log_id] = entry
+
+        return jsonify(audit_log)
+    else:
+        return jsonify({'msg': 'User not authorised'})

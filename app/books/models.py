@@ -4,6 +4,8 @@ endpoint books models
 """
 import enum
 from app import db
+# from sqlalchemy import DDL, event
+from datetime import datetime
 
 
 class Genre(enum.Enum):
@@ -62,7 +64,7 @@ class Book(db.Model):
         elif type(param) == int:
             return Book.query.filter_by(id=param).first()
         else:
-            return Book.query.filter_by(title=param).first()
+            return Book.query.filter_by(title=param).all()
 
     @staticmethod
     def get_all_books(entries=50, page=1):
@@ -99,3 +101,71 @@ class Book(db.Model):
                 "status": self.status
             }
         })
+
+
+class BookLog(db.Model):
+    """
+    Represent book log object."""
+
+    __tablename__ = "book_logs"
+
+    log_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    book_id = db.Column(db.Integer)
+    timestamp = db.Column(db.DateTime)
+    action = db.Column(db.String(30), nullable=False)
+    success = db.Column(db.Boolean)
+
+    def __init__(self, book_id, action='INSERT', success=True):
+        """
+        Initialize BookLog object."""
+
+        self.book_id = book_id
+        self.timestamp = datetime.now().strftime("%d/%m/%Y %H:%M")
+        self.action = action
+        self.success = success
+
+    def add_to_log(self):
+        """
+        Save created log entry to BookLog."""
+
+        db.session.add(self)
+        db.session.commit()
+
+    @staticmethod
+    def get_logs(*book_id):
+        """
+        Gets all entries in log."""
+
+        if book_id:
+            return BookLog.query.filter_by(book_id=book_id).first()
+        else:
+            print(BookLog.query.all())
+            return BookLog.query.all()
+
+    def __repr__(self):
+        """
+        Represents the object instance of the model when queried."""
+        return str({
+            self.log_id: {
+                "book_id": self.book_id,
+                "timestamp": self.timestamp,
+                "action": self.action,
+                "success": self.success
+            }
+        })
+
+
+# trigger = DDL(
+#     "CREATE TRIGGER book_trig AFTER INSERT OR DELETE OR UPDATE ON books "
+#     "FOR EACH ROW "
+#     "BEGIN "
+#     "INSERT INTO book_logs(book_id, timestamp, action) "
+#     "VALUES(new.id, now(), TD['event']);"
+#     "END;"
+#     )
+#
+# event.listen(
+#     Book.__table__,
+#     'after_create',
+#     trigger.execute_if(dialect='postgresql')
+# )

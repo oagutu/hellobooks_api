@@ -41,9 +41,13 @@ class MutableDict(Mutable, dict):
         self.changed()
 
     def __getstate__(self):
+        """
+        Return dictionary contents."""
         return dict(self)
 
     def __setstate__(self, state):
+        """
+        Reset dictionary contents."""
         self.update(state)
 
 
