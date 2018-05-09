@@ -90,9 +90,7 @@ def add_book():
             BookLog(book.id).add_to_log()
         else:
             BookLog(book.id, success=False).add_to_log()
-            return jsonify({'msg': 'Book not successfully added'})
 
-        print("add_part: ", BookLog(book.id))
         return jsonify({
             "book_id": book.id,
             "title": book.title,
@@ -135,7 +133,12 @@ def update_book(book_id):
             book_info['book_id'] = book_id
             book = Book(book_info)
             book.add_to_lib()
-            # print(book)
+
+            if book.id:
+                BookLog(book.id, action='UPDATE').add_to_log()
+            else:
+                BookLog(book.id, action='UPDATE', success=False).add_to_log()
+
             return jsonify({
                 "book_id": book.id,
                 "title": book.title,
@@ -168,6 +171,11 @@ def remove_book(book_id):
         try:
             book = Book.get_book(book_id)
             book.delete_book()
+
+            if not book.id:
+                BookLog(book.id, action='DELETE').add_to_log()
+            else:
+                BookLog(book.id, action='DELETE', success=False).add_to_log()
 
             book_details = {"msg": "Book entry deleted"}
 
@@ -387,17 +395,17 @@ def get_log():
             logs = BookLog.get_logs(book_id)
         else:
             logs = BookLog.get_logs()
-            print("get_log: ", logs)
 
         audit_log = {}
         for log in logs:
             entry = {
                 "book_id": log.book_id,
                 "timestamp": log.timestamp,
-                "action": log.action
+                "action": log.action,
+                "success": log.success
                 }
             audit_log[log.log_id] = entry
 
-        return jsonify(audit_log)
+        return jsonify(audit_log), 200
     else:
-        return jsonify({'msg': 'User not authorised'})
+        return jsonify({'msg': 'User not authorised'}), 401

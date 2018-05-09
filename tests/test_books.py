@@ -498,7 +498,7 @@ class BookEndpointsTestCase(unittest.TestCase):
         self.assertNotIn(b'book title two', result.data)
         self.assertIn(b'book title three', result.data)
 
-    def test_get_book_log(self):
+    def test_get_add_log(self):
         """
         Test if data logged."""
 
@@ -506,10 +506,10 @@ class BookEndpointsTestCase(unittest.TestCase):
             '/api/v1/users/books/logs',
             headers={
                 'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
-        print(result.data)
+        self.assertEqual(result.status_code, 200)
         self.assertIn(b'2', result.data)
 
-    def test_get_book_log_unauthorised_user(self):
+    def test_get_add_log_unauthorised_user(self):
         """
         Test if data logged."""
 
@@ -528,8 +528,40 @@ class BookEndpointsTestCase(unittest.TestCase):
             '/api/v1/users/books/logs',
             headers={
                 'Authorization': 'Bearer {}'.format(token)})
-        print(result.data)
+        self.assertEqual(result.status_code, 401)
         self.assertIn(b'User not authorised', result.data)
+
+    def test_get_update_log(self):
+        """
+        Test getting log of updated book"""
+
+        self.assertEqual(self.client.put('/api/v1/books/2',
+                         data=json.dumps(self.book_details_two),
+                         headers={"content-type": "application/json",
+                                  'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])}).status_code, 202)
+
+        result = self.client.get(
+            '/api/v1/users/books/logs',
+            headers={
+                'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
+        print(result.data)
+        self.assertIn(b'UPDATE', result.data)
+
+    def test_get_delete_log(self):
+        """
+        Test getting log of updated book"""
+
+        self.assertEqual(
+            self.client.delete(
+                '/api/v1/books/2',
+                headers={'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])}).status_code, 204)
+
+        result = self.client.get(
+            '/api/v1/users/books/logs',
+            headers={
+                'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
+        print(result.data)
+        self.assertIn(b'DELETE', result.data)
 
 
 if __name__ == '__main__':

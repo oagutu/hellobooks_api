@@ -139,7 +139,6 @@ class BookLog(db.Model):
         if book_id:
             return BookLog.query.filter_by(book_id=book_id).first()
         else:
-            print(BookLog.query.all())
             return BookLog.query.all()
 
     def __repr__(self):

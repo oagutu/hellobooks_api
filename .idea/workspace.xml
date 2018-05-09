@@ -2,23 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c9ee3c51-a679-42b6-9b3f-a65fb4079dbd" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/books/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/books/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/books/routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/books/routes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/users/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/users/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/README" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/alembic.ini" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/env.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/script.py.mako" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/versions/048464e496b0_.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/versions/09f89d4dad7f_.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/versions/10490bf432ee_.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/versions/6646c3d5b05e_.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/versions/79d602395914_.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/versions/a8a6658c7973_.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/versions/ce3f8fb885cb_.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/migrations/versions/f1f8925fd59d_.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/test_books.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_books.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -42,11 +28,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="models.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/books/models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="369">
-              <caret line="164" column="7" lean-forward="true" selection-start-line="164" selection-start-column="7" selection-end-line="164" selection-end-column="7" />
+            <state relative-caret-position="216">
+              <caret line="140" column="13" selection-start-line="140" selection-start-column="13" selection-end-line="140" selection-end-column="13" />
               <folding>
                 <element signature="e#50#61#0" expanded="true" />
               </folding>
@@ -54,11 +40,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="routes.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="routes.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/books/routes.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="342">
-              <caret line="399" lean-forward="true" selection-start-line="399" selection-end-line="399" />
+            <state relative-caret-position="257">
+              <caret line="399" column="24" lean-forward="true" selection-start-line="399" selection-start-column="24" selection-end-line="399" selection-end-column="24" />
               <folding>
                 <element signature="e#63#90#0" expanded="true" />
               </folding>
@@ -69,7 +55,7 @@
       <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/users/models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1413">
+            <state relative-caret-position="1872">
               <caret line="153" column="78" lean-forward="true" selection-start-line="153" selection-start-column="51" selection-end-line="153" selection-end-column="78" />
               <folding>
                 <element signature="e#30#48#0" expanded="true" />
@@ -81,8 +67,8 @@
       <file leaf-file-name="test_books.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tests/test_books.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="6256">
-              <caret line="524" column="47" lean-forward="true" selection-start-line="524" selection-start-column="47" selection-end-line="524" selection-end-column="47" />
+            <state relative-caret-position="206">
+              <caret line="554" column="31" lean-forward="true" selection-start-line="554" selection-start-column="31" selection-end-line="554" selection-end-column="31" />
               <folding>
                 <element signature="e#74#89#0" expanded="true" />
               </folding>
@@ -123,9 +109,9 @@
         <option value="$PROJECT_DIR$/app/users/models.py" />
         <option value="$PROJECT_DIR$/.env" />
         <option value="$PROJECT_DIR$/temp.py" />
+        <option value="$PROJECT_DIR$/app/books/models.py" />
         <option value="$PROJECT_DIR$/tests/test_books.py" />
         <option value="$PROJECT_DIR$/app/books/routes.py" />
-        <option value="$PROJECT_DIR$/app/books/models.py" />
       </list>
     </option>
   </component>
@@ -629,10 +615,20 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/app/books/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="216">
+          <caret line="140" column="13" selection-start-line="140" selection-start-column="13" selection-end-line="140" selection-end-column="13" />
+          <folding>
+            <element signature="e#50#61#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/tests/test_books.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="6256">
-          <caret line="524" column="47" lean-forward="true" selection-start-line="524" selection-start-column="47" selection-end-line="524" selection-end-column="47" />
+        <state relative-caret-position="206">
+          <caret line="554" column="31" lean-forward="true" selection-start-line="554" selection-start-column="31" selection-end-line="554" selection-end-column="31" />
           <folding>
             <element signature="e#74#89#0" expanded="true" />
           </folding>
@@ -641,7 +637,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/users/models.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1413">
+        <state relative-caret-position="1872">
           <caret line="153" column="78" lean-forward="true" selection-start-line="153" selection-start-column="51" selection-end-line="153" selection-end-column="78" />
           <folding>
             <element signature="e#30#48#0" expanded="true" />
@@ -651,20 +647,10 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/books/routes.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="342">
-          <caret line="399" lean-forward="true" selection-start-line="399" selection-end-line="399" />
+        <state relative-caret-position="257">
+          <caret line="399" column="24" lean-forward="true" selection-start-line="399" selection-start-column="24" selection-end-line="399" selection-end-column="24" />
           <folding>
             <element signature="e#63#90#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/books/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="369">
-          <caret line="164" column="7" lean-forward="true" selection-start-line="164" selection-start-column="7" selection-end-line="164" selection-end-column="7" />
-          <folding>
-            <element signature="e#50#61#0" expanded="true" />
           </folding>
         </state>
       </provider>
