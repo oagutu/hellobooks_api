@@ -50,7 +50,7 @@ class UserEndpointsTestCase(unittest.TestCase):
             "username": "Doe",
             "password": "qwerty",
             "email": "abc@test.com",
-            "acc_status": "member",
+            "acc_status": "admin",
             "borrowed_books": {}
         }
 
@@ -243,6 +243,67 @@ class UserEndpointsTestCase(unittest.TestCase):
             headers={'Authorization': 'Bearer {}' .format(self.tokens['test_token'])}
         )
         self.assertIn(b'Successfully logged out', result.data)
+
+    # def test_user_status_change(self):
+    #     """
+    #     Test if admin able to change user status"""
+    #
+    #     result = self.client.post(
+    #         '/api/v1/auth/users/',
+    #         headers={
+    #             'Authorization': 'Bearer {}'.format(self.tokens["test_token"])})
+    #     self.assertEqual(result.status_code, 200)
+
+    def test_get_add_user_log(self):
+        """
+        Test if user data creation logged."""
+
+        result = self.client.get(
+            '/api/v1/auth/users/logs',
+            headers={
+                'Authorization': 'Bearer {}'.format(self.tokens["test_token"])})
+        print(result.data)
+        self.assertEqual(result.status_code, 200)
+        self.assertIn(b'INSERT', result.data)
+
+    def test_get_add_user_log_unauthorised_user(self):
+        """
+        Test if user data creation logged by unauthorised user."""
+
+        self.client.post(
+            "/api/v1/auth/register",
+            data=json.dumps(self.user_details),
+            headers={"content-type": "application/json"})
+
+        result = self.client.post(
+            "/api/v1/auth/login",
+            data=json.dumps({'username': 'JD', 'password': 'qwerty'}),
+            headers={"content-type": "application/json"})
+        token = result.headers['Authorization']
+
+        result = self.client.get(
+            '/api/v1/auth/users/logs',
+            headers={
+                'Authorization': 'Bearer {}'.format(token)})
+        self.assertEqual(result.status_code, 401)
+        self.assertIn(b'User not authorised', result.data)
+
+    def test_get_reset_password_log(self):
+        """
+        Test getting log of reset user password"""
+
+        self.assertEqual(self.client.post(
+            'api/v1/auth/reset-password',
+            data=json.dumps({'current_password': 'qwerty', 'new_password': '09876'}),
+            headers={"content-type": "application/json",
+                     'Authorization': 'Bearer {}'.format(self.tokens["test_token"])}).status_code, 202)
+
+        result = self.client.get(
+            '/api/v1/auth/users/logs',
+            headers={
+                'Authorization': 'Bearer {}'.format(self.tokens["test_token"])})
+        print(result.data)
+        self.assertIn(b'UPDATE', result.data)
 
 
 if __name__ == '__main__':

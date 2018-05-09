@@ -9,7 +9,7 @@ from flask_jwt_extended import (
 )
 import re
 
-from app.users.models import User
+from app.users.models import User, UserLog
 
 users_blueprint = Blueprint('users', __name__)
 
@@ -57,6 +57,11 @@ def create_user_account():
             user = User(user_info)
             # print(user)
             user.add_to_reg()
+
+            if not user.id:
+                UserLog(user.id, action='INSERT').add_to_log()
+            else:
+                UserLog(user.id, action='INSERT', success=False).add_to_log()
 
             return jsonify({
                 "user_id": user.id,
@@ -133,9 +138,45 @@ def reset_password():
         user_details = User.get_user(get_jwt_identity())
         if user_details.password == data['current_password']:
             user_details.set_password(user_info)
+
+            if user_details.id:
+                UserLog(user_details.id, action='UPDATE').add_to_log()
+            else:
+                UserLog(user_details.id, action='UPDATE', success=False).add_to_log()
+
             flash('Successfully changed password', category='info')
 
             return jsonify({"message": "Successfully changed password"}), 202
 
         else:
             return jsonify({"message": "Current password incorrect"})
+
+
+@users_blueprint.route('/users/logs', methods=['GET'])
+@jwt_required
+def get_log():
+    """
+    Enables viewing of book logs."""
+
+    acc_type = User.get_user(get_jwt_identity())
+    book_id = request.args.get("user_id")
+
+    if request.method == 'GET' and acc_type.acc_status == "admin":
+        if book_id:
+            logs = UserLog.get_logs(book_id)
+        else:
+            logs = UserLog.get_logs()
+
+        audit_log = {}
+        for log in logs:
+            entry = {
+                "user_id": log.user_id,
+                "timestamp": log.timestamp,
+                "action": log.action,
+                "success": log.success
+                }
+            audit_log[log.log_id] = entry
+
+        return jsonify(audit_log), 200
+    else:
+        return jsonify({'msg': 'User not authorised'}), 401

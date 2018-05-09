@@ -544,7 +544,6 @@ class BookEndpointsTestCase(unittest.TestCase):
             '/api/v1/users/books/logs',
             headers={
                 'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
-        print(result.data)
         self.assertIn(b'UPDATE', result.data)
 
     def test_get_delete_log(self):

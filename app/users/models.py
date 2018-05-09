@@ -193,3 +193,54 @@ class User(db.Model, Base):
                 "borrowed_books": self.borrowed_books
             }
         })
+
+
+class UserLog(db.Model):
+    """
+    Represent book log object."""
+
+    __tablename__ = "user_logs"
+
+    log_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    user_id = db.Column(db.Integer)
+    timestamp = db.Column(db.DateTime)
+    action = db.Column(db.String(30), nullable=False)
+    success = db.Column(db.Boolean)
+
+    def __init__(self, user_id, action='INSERT', success=True):
+        """
+        Initialize BookLog object."""
+
+        self.user_id = user_id
+        self.timestamp = datetime.now().strftime("%d/%m/%Y %H:%M")
+        self.action = action
+        self.success = success
+
+    def add_to_log(self):
+        """
+        Save created log entry to BookLog."""
+
+        db.session.add(self)
+        db.session.commit()
+
+    @staticmethod
+    def get_logs(*user_id):
+        """
+        Gets all entries in log."""
+
+        if user_id:
+            return UserLog.query.filter_by(user_id=user_id).first()
+        else:
+            return UserLog.query.all()
+
+    def __repr__(self):
+        """
+        Represents the object instance of the model when queried."""
+        return str({
+            self.log_id: {
+                "book_id": self.user_id,
+                "timestamp": self.timestamp,
+                "action": self.action,
+                "success": self.success
+            }
+        })
