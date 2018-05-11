@@ -89,7 +89,7 @@ def add_book():
 
         return jsonify({
             "book_id": book.id,
-            "title": book.title,q
+            "title": book.title,
             "author": book.author,
             "book_code": book.book_code,
             "ddc_code": book.ddc_code,

@@ -18,7 +18,6 @@ Hellobooks is a simple api for managing library books and users. It is built on 
             "password": "qwerty",
             "email": "abc@gfg.com",
             "acc_status": "member",
-            "borrowed_books": {}
         }
 
 + Response 201 (application/json)
@@ -32,8 +31,8 @@ Hellobooks is a simple api for managing library books and users. It is built on 
             "acc_status": "member",
             "borrowed_books": {}
         }
- 
-        
+
+
 ### Login [/api/v1/auth/login]
 
 #### Login [POST /api/v1/auth/login]
@@ -44,7 +43,7 @@ Hellobooks is a simple api for managing library books and users. It is built on 
             "username": "Jane Doe",
             "password": "qwerty",
         }
-        
+
 + Response 200 (applcation/json)
 
         {
@@ -53,7 +52,7 @@ Hellobooks is a simple api for managing library books and users. It is built on 
 
 
 ### Reset Password [/api/v1/auth/reset-password]
-        
+
 #### Reset Password [POST /api/v1/auth/reset-password]
 
 + Request (application/json)
@@ -68,6 +67,39 @@ Hellobooks is a simple api for managing library books and users. It is built on 
 
         {
             "message": "Successfully changed password"
+        }
+
+
+### Add/Get Books [/api/v1/books]
+
+#### Add Book [POST /api/v1/books]
+
++ Request (application/json)
+
+        {
+            1 :{
+                    "book_id": 1,
+                    "title": "book title",
+                    "book_code": 12345,
+                    "author": "mary writer",
+                    "synopsis": "iwehn owueh owunef ohew ouweq...",
+                    "genre": "fiction",
+                    "sub_genre": "xyz",
+                    "status": "borrowed"},
+        }
+
++ Response 200 (application/json)
+
+        {
+            1 :{
+                    "book_id": 1,
+                    "title": "book title",
+                    "book_code": 12345,
+                    "author": "mary writer",
+                    "synopsis": "iwehn owueh owunef ohew ouweq...",
+                    "genre": "fiction",
+                    "sub_genre": "xyz",
+                    "status": "borrowed"},
         }
 
 
@@ -107,10 +139,11 @@ Hellobooks is a simple api for managing library books and users. It is built on 
             "sub_genre": "xyz",
             "status": "borrowed"
         }
-        
-### Modify Book [/api/v1/books/2]
-        
-#### Modify Book [PUT /api/v1/books/2]
+
+### Update Book [/api/v1/books/2]
+
+admin only
+#### Update Book [PUT /api/v1/books/2]
 
 + Request (application/json)
 
@@ -125,7 +158,7 @@ Hellobooks is a simple api for managing library books and users. It is built on 
             "status": "borrowed"},
         }
 
-        
+
 + Response 202 (application/json)
 
         {
@@ -138,15 +171,16 @@ Hellobooks is a simple api for managing library books and users. It is built on 
             "sub_genre": "romance",
             "status": "borrowed"
         }
-        
+
 ### Remove Book [/api/v1/books/3]
 
+admin only
 #### Remove a Book [DELETE /api/v1/books/3]
 
 + Response 204 (application/json)
 
 
-### Borrow a Book [/api/v1/users/books/1]
+### Borrow/Return [/api/v1/users/books/1]
 
 ### Borrow a Book [POST /api/v1/users/books/1]
 
@@ -162,7 +196,7 @@ Hellobooks is a simple api for managing library books and users. It is built on 
             "acc_status": "member",
             "borrowed_books": {}
         }
-        
+
 + Response 201 (application/json)
 
         {
@@ -172,4 +206,106 @@ Hellobooks is a simple api for managing library books and users. It is built on 
             "return_date" : "1/05/2018 02:30",
             "fee_owed" : 0,
             "borrow_status": "valid"
+        }
+
+### Return a Book [/api/v1/users/books/1]
+
+### Return a Book [PUT /api/v1/users/books/1]
+
++ Response 202 (application/json)
+
+        {
+              "ERD": "30/04/2018 02:30",
+              "book_code": 978962222901,
+              "borrow_date": "25/04/2018 02:30",
+              "borrow_status": "valid",
+              "fee_owed": 0,
+              "return_date": "1/05/2018 02:30",
+              "status": "returned",
+              "title": "book title two"
+        }
+
+### Get borrowed books history [/api/v1/users/books]
+
+### Return borrowed books history [GET /api/v1/users/books]
+
++ Response 200 (applcation/json)
+
+        {
+            '4': {
+                    'title': 'book title three',
+                    'book_code': 978933322901,
+                    'borrow_date': '21/04/2018 02:30',
+                    'ERD': '29/04/2018 02:30',
+                    'return_date': '29/04/2018 02:30',
+                    'fee_owed': 0,
+                    'borrow_status': 'invalid'},
+            '2': {
+                    'title': 'book title two',
+                    'book_code': 978962222901,
+                    'borrow_date': '25/04/2018 02:30',
+                    'ERD': '30/04/2018 02:30',
+                    'return_date': '1/05/2018 02:30',
+                    'fee_owed': 0,
+                    'borrow_status': 'valid'}
+        }
+
+
+### Get book logs [/api/v1/users/books/logs]
+
+admin only
+### Return borrowed books history [GET /api/v1/users/books/logs]
+
++ Response 200 (applcation/json)
+
+        {
+            1: {
+                    'book_id': 2,
+                    'timestamp': datetime.datetime(2018, 5, 11, 17, 8),
+                    'action': 'INSERT',
+                    success': True}
+        }
+
+### Update User Status [/api/v1/auth/users/status_change]
+
+admin only
+#### Update User Status [POST /api/v1/auth/users/status_change]
+
++ Request (application/json)
+
+        {
+            'user': 1234,
+            'new_status': 'banned'
+        }
+
++ Response 200 (applcation/json)
+
+        {
+            'msg': '1234 changed to banned'
+        }
+
+### Get User logs [/api/v1/auth/users/logs]
+
+admin only
+####  Get User logs [GET /api/v1/auth/users/logs]
+
++ Response 200 (application/json)
+
+        {
+            1: {
+                'user_id': 654321,
+                'timestamp': Fri, 11 May 2018 17:20:00 GMT,
+                'action': 'INSERT',
+                'success': True}
+        }
+
+
+### Logout [/api/v1/auth/logout]
+
+####  Logout [POST /api/v1/auth/logout]
+
++ Response 200 (application/json)
+
+        {
+            "message": "Successfully logged out"
         }
