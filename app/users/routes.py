@@ -19,7 +19,11 @@ blacklist = set()
 @users_blueprint.route('/register', methods=['POST'])
 def create_user_account():
     """
-    Adds new user."""
+    Adds new user.
+
+    :return: created user details or failure message
+    :rtype: json obj
+    """
 
     if request.method == "POST":
 
@@ -53,11 +57,9 @@ def create_user_account():
             user_info['acc_status'] = data['acc_status']
         if 'borrowed_books' in data and len(data['borrowed_books']) > 0:
             user_info["borrowed_books"] = data["borrowed_books"]
-        # print(user_info)
 
         if not User.get_user(data['username']):
             user = User(user_info)
-            # print(user)
             user.add_to_reg()
 
             if user.id:
@@ -83,7 +85,11 @@ def create_user_account():
 @users_blueprint.route('/login', methods=['POST'])
 def login():
     """
-    Facilitates user login."""
+    Facilitate user login.
+
+    :return: login message
+    :rtype: json obj
+    """
 
     if request.method == 'POST':
 
@@ -114,7 +120,11 @@ def login():
 @jwt_required
 def logout():
     """
-    Facilitates user logout."""
+    Facilitate user logout.
+
+    :return: logout message
+    :rtype: json obj
+    """
 
     if request.method == 'POST':
         blacklist.add(get_raw_jwt()['jti'])
@@ -126,7 +136,11 @@ def logout():
 @jwt_required
 def reset_password():
     """
-    Resets user password."""
+    Reset user password.
+
+    :return: password reset message
+    :rtype: json obj
+    """
 
     if request.method == 'POST':
 
@@ -158,7 +172,11 @@ def reset_password():
 @jwt_required
 def update_user_status():
     """
-    Enables viewing of book logs."""
+    Update user status.
+
+    :return: update user status message
+    :rtype: json obj
+    """
 
     acc_type = User.get_user(get_jwt_identity())
 
@@ -192,7 +210,11 @@ def update_user_status():
 @jwt_required
 def get_log():
     """
-    Enables viewing of book logs."""
+    Retrieve user logs
+
+    :return: user logs
+    :rtype: json obj
+    """
 
     acc_type = User.get_user(get_jwt_identity())
     user_id = request.args.get("user_id")

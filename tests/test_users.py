@@ -10,12 +10,10 @@ from app import create_app, db
 
 
 class UserEndpointsTestCase(unittest.TestCase):
-    """
-    Tests user API endpoints."""
+    """Test user API endpoints."""
 
     def setUp(self):
-        """
-        Sets up testing environment variables"""
+        """et up testing environment variables."""
 
         self.app = create_app('development')
         self.client = self.app.test_client()
@@ -54,14 +52,6 @@ class UserEndpointsTestCase(unittest.TestCase):
             "borrowed_books": {}
         }
 
-        self.user_details_three = {
-            "name": "one",
-            "user_id": "",
-            "username": "m",
-            "password": "",
-            "email": ""
-        }
-
         self.tokens = {}
 
         self.client.post(
@@ -96,8 +86,7 @@ class UserEndpointsTestCase(unittest.TestCase):
         self.assertIn(b'Jane Doe', result.data)
 
     def test_create_user_account_with_conflict(self):
-        """
-        Tests if username already in use when creating an account"""
+        """Test if username already in use when creating an account."""
 
         result = self.client.post(
             "/api/v1/auth/register",
@@ -107,8 +96,7 @@ class UserEndpointsTestCase(unittest.TestCase):
         self.assertIn(b'Username not available. Already in use', result.data)
 
     def test_create_user_account_with_invalid_pass(self):
-        """
-        Tests if password incorrect"""
+        """Test if password incorrect."""
 
         result = self.client.post(
             "/api/v1/auth/register",
@@ -123,8 +111,7 @@ class UserEndpointsTestCase(unittest.TestCase):
         self.assertIn(b'Invalid Password', result.data)
 
     def test_create_user_account_with_invalid_username(self):
-        """
-        Tests if username incorrect"""
+        """Test if username incorrect."""
 
         result = self.client.post(
             "/api/v1/auth/register",
@@ -139,8 +126,7 @@ class UserEndpointsTestCase(unittest.TestCase):
         self.assertIn(b'Invalid Username', result.data)
 
     def test_create_user_account_with_invalid_email(self):
-        """
-        Tests if email incorrect"""
+        """Test if email incorrect."""
 
         result = self.client.post(
             "/api/v1/auth/register",
@@ -155,8 +141,7 @@ class UserEndpointsTestCase(unittest.TestCase):
         self.assertIn(b'Invalid Email', result.data)
 
     def test_crete_user_acc_no_email(self):
-        """
-        Tests if no email provided"""
+        """Test if no email provided."""
 
         result = self.client.post(
             "/api/v1/auth/register",
@@ -170,8 +155,7 @@ class UserEndpointsTestCase(unittest.TestCase):
         self.assertIn(b'No email provided', result.data)
 
     def test_login(self):
-        """
-        Tests login() functionality."""
+        """Test login() functionality."""
 
         self.client.post(
             "/api/v1/auth/register",
@@ -183,13 +167,11 @@ class UserEndpointsTestCase(unittest.TestCase):
             data=json.dumps({'username': 'JD', 'password': 'qwerty'}),
             headers={"content-type": "application/json"})
         token = result.headers['Authorization']
-        print(token)
         self.tokens['John'] = token
         self.assertIn(b'Successfully logged in', result.data)
 
-    def test_login_incorrect_pasword(self):
-        """
-        Tests login with wrong password"""
+    def test_login_incorrect_password(self):
+        """Test login with wrong password."""
 
         self.client.post(
             "/api/v1/auth/register",
@@ -203,8 +185,7 @@ class UserEndpointsTestCase(unittest.TestCase):
         self.assertIn(b'Incorrect password', result.data)
 
     def test_login_incorrect_username(self):
-        """
-        Tests login with wrong username."""
+        """Test login with wrong username."""
         result = self.client.post(
             "/api/v1/auth/login",
             data=json.dumps({'username': 'Amber', 'password': 'rose'}),
@@ -212,8 +193,7 @@ class UserEndpointsTestCase(unittest.TestCase):
         self.assertIn(b'Account not available', result.data)
 
     def test_reset_password(self):
-        """
-        Tests password reset."""
+        """Test password reset."""
 
         result = self.client.post(
             'api/v1/auth/reset-password',
@@ -224,8 +204,7 @@ class UserEndpointsTestCase(unittest.TestCase):
         self.assertIn(b'Successfully changed password', result.data)
 
     def test_reset_password_incorrect_current_password(self):
-        """
-        Tests password reset with incorrect current password."""
+        """Test password reset with incorrect current password."""
         
         result = self.client.post(
             'api/v1/auth/reset-password',
@@ -235,8 +214,7 @@ class UserEndpointsTestCase(unittest.TestCase):
         self.assertIn(b'Current password incorrect', result.data)
 
     def test_logout(self):
-        """
-        Tests logout"""
+        """Test logout"""
 
         result = self.client.post(
             'api/v1/auth/logout',
@@ -245,8 +223,7 @@ class UserEndpointsTestCase(unittest.TestCase):
         self.assertIn(b'Successfully logged out', result.data)
 
     def test_user_status_change(self):
-        """
-        Test if admin able to change user status"""
+        """Test if admin able to change user status."""
 
         self.assertEqual(self.client.post(
             "/api/v1/auth/register",
@@ -259,13 +236,11 @@ class UserEndpointsTestCase(unittest.TestCase):
             headers={
                 'content-type': 'application/json',
                 'Authorization': 'Bearer {}'.format(self.tokens["test_token"])})
-        print(result.data)
         self.assertEqual(result.status_code, 200)
         self.assertIn(b'banned', result.data)
 
     def test_user_status_change_missing_user_info(self):
-        """
-        Test if admin able to change user status without giving user"""
+        """Test if admin able to change user status without giving user."""
 
         self.assertEqual(self.client.post(
             "/api/v1/auth/register",
@@ -282,8 +257,7 @@ class UserEndpointsTestCase(unittest.TestCase):
         self.assertIn(b'Missing user_id/username', result.data)
 
     def test_user_status_change_invalid_status(self):
-        """
-        Test if admin able to change user status with invalid status option"""
+        """Test if admin able to change user status with invalid status option."""
 
         self.assertEqual(self.client.post(
             "/api/v1/auth/register",
@@ -300,8 +274,7 @@ class UserEndpointsTestCase(unittest.TestCase):
         self.assertIn(b'Invalid status option', result.data)
 
     def test_user_status_change_missing_user(self):
-        """
-        Test if admin able to change user status for nonexistent user"""
+        """Test if admin able to change user status for nonexistent user."""
 
         result = self.client.post(
             '/api/v1/auth/users/status_change',
@@ -313,8 +286,7 @@ class UserEndpointsTestCase(unittest.TestCase):
         self.assertIn(b'User does NOT exist. Invalid Username/UserID.', result.data)
 
     def test_user_status_change_invalid_method(self):
-        """
-        Test if admin able to change user status for invalid method"""
+        """Test if admin able to change user status for invalid method."""
 
         result = self.client.put(
             '/api/v1/auth/users/status_change',
@@ -325,8 +297,7 @@ class UserEndpointsTestCase(unittest.TestCase):
         self.assertEqual(result.status_code, 405)
 
     def test_user_status_change_by_unauthorised_user(self):
-        """
-        Test if non-admin able to change user status."""
+        """Test if non-admin able to change user status."""
 
         self.assertEqual(self.client.post(
             "/api/v1/auth/register",
@@ -337,7 +308,6 @@ class UserEndpointsTestCase(unittest.TestCase):
             "/api/v1/auth/login",
             data=json.dumps({'username': 'John', 'password': 'qwerty'}),
             headers={"content-type": "application/json"})
-        print(result.data)
         self.assertIn(b'Successfully logged in', result.data)
         token = result.headers['Authorization']
 
@@ -350,8 +320,7 @@ class UserEndpointsTestCase(unittest.TestCase):
         self.assertEqual(result.status_code, 405)
 
     def test_get_add_user_log(self):
-        """
-        Test if user data creation logged."""
+        """Test if user data creation logged."""
 
         result = self.client.get(
             '/api/v1/auth/users/logs?user_id=654321',
@@ -362,8 +331,7 @@ class UserEndpointsTestCase(unittest.TestCase):
         self.assertIn(b'INSERT', result.data)
 
     def test_get_add_user_log_unauthorised_user(self):
-        """
-        Test if user data creation logged by unauthorised user."""
+        """Test that unauthorised user cannot access user logs."""
 
         self.client.post(
             "/api/v1/auth/register",
@@ -384,8 +352,7 @@ class UserEndpointsTestCase(unittest.TestCase):
         self.assertIn(b'User not authorised', result.data)
 
     def test_get_reset_password_log(self):
-        """
-        Test getting log of reset user password"""
+        """Test getting log of reset user password."""
 
         self.assertEqual(self.client.post(
             'api/v1/auth/reset-password',
@@ -397,7 +364,6 @@ class UserEndpointsTestCase(unittest.TestCase):
             '/api/v1/auth/users/logs',
             headers={
                 'Authorization': 'Bearer {}'.format(self.tokens["test_token"])})
-        print(result.data)
         self.assertIn(b'UPDATE', result.data)
 
 

@@ -10,44 +10,55 @@ from sqlalchemy.ext.declarative import declarative_base
 
 class MutableDict(Mutable, dict):
     """
-    Represents MutableDict object."""
+    Represent MutableDict object.
+
+    Allows for borrowed books pickle to be mutable.
+    """
 
     @classmethod
     def coerce(cls, key, value):
-        """
-        Converts dictionary to MutableDict type"""
+        """Convert dictionary to MutableDict type."""
 
         if not isinstance(value, MutableDict):
             if isinstance(value, dict):
                 return MutableDict(value)
 
-            # this call will raise ValueError
             return Mutable.coerce(key, value)
         else:
             return value
 
     def __setitem__(self, key, value):
-        """
-        Handles set events for MutableDict."""
+        """Handle set events for MutableDict."""
 
         dict.__setitem__(self, key, value)
         self.changed()
 
     def __delitem__(self, key):
         """
-        Handles delete events for MutableDict."""
+        Handle delete events for MutableDict.
+
+        :param key: dict key used to determine dict entry to be deleted
+        :tyoe key: str
+        """
 
         dict.__delitem__(self, key)
         self.changed()
 
     def __getstate__(self):
         """
-        Return dictionary contents."""
+        Return dictionary contents.
+
+        :return: borrowed_book contents for queried book object
+        :rtype: dict
+        """
         return dict(self)
 
     def __setstate__(self, state):
         """
-        Reset dictionary contents."""
+        Reset dictionary contents.
+
+        :param state: state of of queried result(ie. the borrowed book entry)
+        """
         self.update(state)
 
 
@@ -55,8 +66,7 @@ Base = declarative_base()
 
 
 class User(db.Model, Base):
-    """
-    Represents user table"""
+    """Represent user table"""
 
     __tablename__ = "users"
 
@@ -70,7 +80,11 @@ class User(db.Model, Base):
 
     def __init__(self, user_info):
         """
-        Sets values of a book object."""
+        Sets values of a book object.
+
+        :param user_info: dict containing details of user to be added to to users table
+        :type user_info: dict
+        """
 
         self.name = user_info['name']
         self.email = user_info['email']
@@ -85,16 +99,21 @@ class User(db.Model, Base):
             self.borrowed_books = user_info['borrowed_books']
 
     def add_to_reg(self):
-        """
-        Adds books to library dict."""
-        # print(self)
+        """Add books to library dict."""
+
         db.session.add(self)
         db.session.commit()
 
     @staticmethod
     def get_user(param):
         """
-        Fetches user details from register."""
+        Fetch user details from register.
+
+        :param param: parameter used to search for specific user object
+        :type param: int or str
+        :return:  query obj for specified user
+        :rtype: query obj
+        """
         # print(User.query.filter(User.username == username))
 
         if type(param) == int:
@@ -111,14 +130,20 @@ class User(db.Model, Base):
     @staticmethod
     def get_register():
         """
-        Returns all users."""
+        Return all users.
+
+        :return: query object with a;l users
+        :rtype: query obj
+        """
 
         return User.query.all()
 
     def set_password(self, user_info):
         """
         Sets user password.
-        User_info: list -> [username, current_password, new_password]
+
+        :param user_info: dict holding username, current_password & new password
+        :type user_info: dict
         """
 
         if self.password != user_info[2]:
@@ -129,8 +154,11 @@ class User(db.Model, Base):
         Returns list of borrowed books by user.
 
         :param order: determines ordering of results. True - ascending.
+        :type order: bool
         :param order_param: parameter used to order query results
+        :type order_param: str
         :return: borrowed_dict, record_details
+        :rtype: tuple
         """
 
         # Holds temp list of borrowed_books.
@@ -158,7 +186,11 @@ class User(db.Model, Base):
     @staticmethod
     def set_borrowed():
         """
-        Provides borrow/return book functionality."""
+        Provides borrow/return book functionality.
+
+        :return: info on borrowed book
+        :rtype: dict
+        """
 
         borrow_info = dict()
 
@@ -173,14 +205,28 @@ class User(db.Model, Base):
 
     def add_to_borrowed(self, book_id, borrow_info):
         """
-        Adds borrowed book to borrowed_books dictionary."""
+        Add borrowed book to borrowed_books dictionary.
+
+        :param book_id: id of book to be borrowed
+        :type book_id: str
+        :param borrow_info: borrow transaction details
+        :type borrow_info: dict
+        """
 
         self.borrowed_books[book_id] = borrow_info
         db.session.commit()
 
     def update_borrowed(self, book_id, borrow_period, get=False):
         """
-        Updates borrowed book info."""
+        Update borrowed book info.
+
+        :param book_id: id of borroowed book
+        :type book_id: str
+        :param borrow_period: no. of days book borrowed for
+        :type borrow_period: int
+        :param get: determines action, ie. if borrowing book or fetching borrow history
+        :type get: bool
+        """
 
         borrowed = self.borrowed_books[book_id]
         if borrow_period > 0:
@@ -193,7 +239,11 @@ class User(db.Model, Base):
 
     def __repr__(self):
         """
-        Represents the object instance of the model when queried."""
+        Represent the object instance of the model when queried.
+
+        :return: list of user object details
+        :rtype: list
+        """
         return str({
             self.username: {
                 "user_id": self.id,
@@ -207,8 +257,7 @@ class User(db.Model, Base):
 
 
 class UserLog(db.Model):
-    """
-    Represent book log object."""
+    """Represent book log object."""
 
     __tablename__ = "user_logs"
 
@@ -220,7 +269,15 @@ class UserLog(db.Model):
 
     def __init__(self, user_id, action='INSERT', success=True):
         """
-        Initialize BookLog object."""
+        Initialize BookLog object.
+
+        :param user_id: id of user object acted on
+        :type user_id: int
+        :param action: action performed on the user object
+        :type action: str
+        :param success: status of action performed on user object
+        :type success: bool
+        """
 
         self.user_id = user_id
         self.timestamp = datetime.now().strftime("%d/%m/%Y %H:%M")
@@ -228,8 +285,7 @@ class UserLog(db.Model):
         self.success = success
 
     def add_to_log(self):
-        """
-        Save created log entry to BookLog."""
+        """Save created log entry to BookLog."""
 
         db.session.add(self)
         db.session.commit()
@@ -237,7 +293,13 @@ class UserLog(db.Model):
     @staticmethod
     def get_logs(*user_id):
         """
-        Gets all entries in log."""
+        Get all entries in log.
+
+        :param user_id: used to fetch logs for specific user
+        :type: int
+        :return: user logs
+        :rtype: query obj
+        """
 
         if user_id:
             return UserLog.query.filter_by(user_id=user_id).all()
@@ -246,7 +308,11 @@ class UserLog(db.Model):
 
     def __repr__(self):
         """
-        Represents the object instance of the model when queried."""
+         Represent the object instance of the model when queried.
+
+        :return: list of user log objects
+        :rtype: list
+        """
         return str({
             self.log_id: {
                 "book_id": self.user_id,

@@ -1,6 +1,6 @@
 """
     app/users/routes.py
-    Holds book API endpoints.
+    Hold books API endpoints.
 """
 
 from flask import Blueprint
@@ -25,8 +25,7 @@ books_blueprint = Blueprint('books', __name__)
 @books_blueprint.route('/books', methods=['POST'])
 @jwt_required
 def add_book():
-    """
-    Adds specified book to library."""
+    """Add specified book to library."""
 
     acc = User.get_user(get_jwt_identity())
 
@@ -43,18 +42,15 @@ def add_book():
         if 'book_code' not in data:
             return jsonify({"msg": "Missing book Code"}), 400
         elif Book.get_book(data['book_code']):
-            # print(Book.get_book(data['book_code']))
             return jsonify({"msg": "Book(book_code) already in lib"}), 409
 
         # Checks if given ddc_code follows Dewey Decimal Classification syst.
-        # print(data)
         if 'ddc_code' not in data:
             # print(data)
             return jsonify({"msg": "Missing ddc Code"}), 400
         else:
             pattern = r"^[\d][\d][\d](\.*[\d])*$"
             match = re.search(pattern, data['ddc_code'])
-            # print(match)
             if not match:
                 return jsonify({"msg": "Invalid ddc_code. Use DDC structure."}), 400
 
@@ -109,14 +105,19 @@ def add_book():
 @jwt_required
 def update_book(book_id):
     """
-    Updates book entry in library."""
+    Update book entry in library
+
+    :param book_id: id of book to be updated.
+    :type book_id: int
+    :return: updated book entry.
+    :rtype: JSON obj
+    """
 
     acc = User.get_user(get_jwt_identity())
 
     if request.method == "PUT" and acc.acc_status == "admin":
 
         data = request.get_json()
-        # print(data)
 
         try:
             book = Book.get_book(book_id)
@@ -162,7 +163,13 @@ def update_book(book_id):
 @jwt_required
 def remove_book(book_id):
     """
-    Delete book entry from library."""
+    Delete book entry from library.
+
+    :param book_id: id of book to be deleted form db
+    :type book_id: int
+    :return: message on result of deletion
+    :rtype: JSON obj
+    """
 
     acc_type = User.get_user(get_jwt_identity())
 
@@ -193,7 +200,11 @@ def remove_book(book_id):
 @jwt_required
 def retrieve_all_books():
     """
-    Retieves all books in library."""
+    Retrieve all books in library.
+
+    :return: all books in the library db
+    :rtype: JSON obj
+    """
 
     if request.method == 'GET':
 
@@ -232,7 +243,13 @@ def retrieve_all_books():
 @jwt_required
 def get_book(book_id):
     """
-    Gets specific book using book_id."""
+    Get specific book using book_id.
+
+    :param book_id: id of book to be fetched
+    :type book_id: int
+    :return: specified book details
+    :rtype: JSON obj
+    """
 
     if request.method == 'GET':
 
@@ -249,7 +266,6 @@ def get_book(book_id):
                 "sub)genre": book_details.sub_genre,
                 "synopsis": book_details.synopsis}), 200
         else:
-            # print('test point: bk not available')
             return jsonify({"msg": "Book not available"}), 404
 
 
@@ -257,14 +273,17 @@ def get_book(book_id):
 @jwt_required
 def borrow_return_book(book_id):
     """
-    Allows borrowing/returning of books."""
+    Facilitate borrowing/returning of books.
+
+    :param book_id: id of book to be borrowed/returned
+    :type book_id: int
+    :return: json obj containing status message or borrowed/returned book details
+    :rtype: JSON obj
+    """
 
     try:
         user = User.get_user(get_jwt_identity())
-        # print(user.acc_status)
-        # print(user.get_all_borrowed())
         book_details = Book.get_book(book_id)
-        # print("TP - Borrow:\n", book_details)
         book_status = book_details.status
         # Borrow available book by authorised user.
 
@@ -278,7 +297,6 @@ def borrow_return_book(book_id):
             if user.acc_status != "suspended" and book_status == "available":
 
                 borrow_info = user.set_borrowed()
-                # print("TP - Borrow Info:\n ", borrow_info)
                 borrow_info["book_id"] = book_id
                 user.add_to_borrowed(book_id, borrow_info)
 
@@ -299,10 +317,8 @@ def borrow_return_book(book_id):
         elif request.method == 'PUT':
 
             if user.acc_status != "suspended" and book_status == "borrowed":
-                # print(user.borrowed_books)
                 if str(book_id) in user.borrowed_books:
                     borrowed_book = user.borrowed_books[str(book_id)]
-                    # print(user.borrowed_books)
                     current_day = datetime.now()
                     return_day = datetime.strptime(
                         borrowed_book["ERD"],  '%d/%m/%Y %H:%M')
@@ -330,7 +346,11 @@ def borrow_return_book(book_id):
 @jwt_required
 def get_borrow_history():
     """
-    Enables viewing of borrow history."""
+    Enable viewing of borrow history.
+
+    :return: users borrowed books details
+    :rtype: JSON obj
+    """
 
     if request.method == 'GET':
         returned = request.args.get("returned")
@@ -342,8 +362,6 @@ def get_borrow_history():
             borrowed_books, record_details = user.get_all_borrowed(False, order_param)
         else:
             borrowed_books, record_details = user.get_all_borrowed()
-
-        # print("TP1 - borrow details: \n", borrowed_books)
 
         if not returned:
             for key in borrowed_books:
@@ -357,7 +375,6 @@ def get_borrow_history():
                     borrow_period = int(borrow_period)
 
                 user.update_borrowed(str(key), borrow_period, True)
-                # print("{0} \n {1} ".format(key, user.get_all_borrowed()[0]))
 
                 if entries:
                     entries = int(entries)
@@ -368,8 +385,6 @@ def get_borrow_history():
                         borrowed_temp[val] = borrowed_books[val]
                     borrowed_books = borrowed_temp
 
-            # print(borrowed_books, record_details)
-            print(user.get_all_borrowed())
             return jsonify(borrowed_books), 200
 
         elif returned == 'false':
@@ -385,7 +400,11 @@ def get_borrow_history():
 @jwt_required
 def get_log():
     """
-    Enables viewing of book logs."""
+    Enable viewing of book logs.
+
+    :return: log of all changes made to the books table
+    :rtype: JSON obj
+    """
 
     acc_type = User.get_user(get_jwt_identity())
     book_id = request.args.get("book_id")
