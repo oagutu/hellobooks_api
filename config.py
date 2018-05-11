@@ -6,7 +6,7 @@ Specifies default environment settings.
 
 class Config(object):
     """
-    Main config class"""
+    Main config class."""
 
     DEBUG = False
     CSRF_ENABLED = True
@@ -15,15 +15,16 @@ class Config(object):
 
 class DevelopmentConfig(Config):
     """
-    Development config settings"""
+    Development config settings."""
 
     DEBUG = True
     TESTING = True
+    SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:@postgresadmin@localhost/hb_test_db'
 
 
 class ProductionConfig(Config):
     """
-    Production config settings"""
+    Production config settings."""
 
     DEBUG = False
     TESTING = False
