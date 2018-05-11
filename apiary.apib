@@ -68,6 +68,39 @@ Hellobooks is a simple api for managing library books and users. It is built on 
         {
             "message": "Successfully changed password"
         }
+        
+        
+### Add/Get Books [/api/v1/books]
+
+#### Add Book [POST /api/v1/books]
+
++ Request (application/json)
+
+        {
+            1 :{
+                    "book_id": 1,
+                    "title": "book title",
+                    "book_code": 12345,
+                    "author": "mary writer",
+                    "synopsis": "iwehn owueh owunef ohew ouweq...",
+                    "genre": "fiction",
+                    "sub_genre": "xyz",
+                    "status": "borrowed"},
+        }
+        
++ Response 200 (application/json)
+
+        {
+            1 :{
+                    "book_id": 1,
+                    "title": "book title",
+                    "book_code": 12345,
+                    "author": "mary writer",
+                    "synopsis": "iwehn owueh owunef ohew ouweq...",
+                    "genre": "fiction",
+                    "sub_genre": "xyz",
+                    "status": "borrowed"},
+        }
 
 
 ### Add/Get Books [/api/v1/books]
@@ -139,7 +172,11 @@ Hellobooks is a simple api for managing library books and users. It is built on 
             "sub_genre": "xyz",
             "status": "borrowed"
         }
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> e45ec8bfc1c5098827903f740ac7d77a95bccf79
 ### Update Book [/api/v1/books/2]
 
 admin only
@@ -207,11 +244,16 @@ admin only
             "fee_owed" : 0,
             "borrow_status": "valid"
         }
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> e45ec8bfc1c5098827903f740ac7d77a95bccf79
 ### Return a Book [/api/v1/users/books/1]
 
 ### Return a Book [PUT /api/v1/users/books/1]
 
+<<<<<<< HEAD
 + Response 202 (application/json)
 
         {
@@ -223,17 +265,29 @@ admin only
                   "return_date": "1/05/2018 02:30",
                   "status": "returned",
                   "title": "book title two"
+=======
++ Response 202 (applcation/json)
+
+        {
+                "msg": "cannot return book. Not borrowed by user",
+                "book_status": "borrowed"
+>>>>>>> e45ec8bfc1c5098827903f740ac7d77a95bccf79
         }
 
 ### Get borrowed books history [/api/v1/users/books]
 
+<<<<<<< HEAD
 ### Get borrowed books history [GET /api/v1/users/books]
+=======
+### Return borrowed books history [GET /api/v1/users/books]
+>>>>>>> e45ec8bfc1c5098827903f740ac7d77a95bccf79
 
 + Response 200 (applcation/json)
 
         {
             '4': {
                     'title': 'book title three',
+<<<<<<< HEAD
                     'book_code': 978933322901,
                     'borrow_date': '21/04/2018 02:30',
                     'ERD': '29/04/2018 02:30',
@@ -257,15 +311,47 @@ admin only
 ### Get book logs [GET /api/v1/users/books/logs]
 
 + Response 200 (application/json)
+=======
+                    'book_code': 978933322901, 
+                    'borrow_date': '21/04/2018 02:30', 
+                    'ERD': '29/04/2018 02:30', 
+                    'return_date': '29/04/2018 02:30',
+                    'fee_owed': 0, 
+                    'borrow_status': 'invalid'}, 
+            '2': {
+                    'title': 'book title two',
+                    'book_code': 978962222901, 
+                    'borrow_date': '25/04/2018 02:30', 
+                    'ERD': '30/04/2018 02:30', 
+                    'return_date': '1/05/2018 02:30', 
+                    'fee_owed': 0, 
+                    'borrow_status': 'valid'}
+        }
+
+     
+### Get book logs [/api/v1/users/books/logs]
+
+admin only
+### Return borrowed books history [GET /api/v1/users/books/logs]
+
++ Response 200 (applcation/json)
+>>>>>>> e45ec8bfc1c5098827903f740ac7d77a95bccf79
 
         {
             1: {
                     'book_id': 2,
                     'timestamp': datetime.datetime(2018, 5, 11, 17, 8),
+<<<<<<< HEAD
                     'action': 'INSERT',
                     success': True}
         }
 
+=======
+                    'action': 'INSERT', 
+                    success': True}
+        }
+        
+>>>>>>> e45ec8bfc1c5098827903f740ac7d77a95bccf79
 ### Update User Status [/api/v1/auth/users/status_change]
 
 admin only
@@ -277,7 +363,11 @@ admin only
             'user': 1234,
             'new_status': 'banned'
         }
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> e45ec8bfc1c5098827903f740ac7d77a95bccf79
 + Response 200 (applcation/json)
 
         {
@@ -290,12 +380,20 @@ admin only
 ####  Get User logs [GET /api/v1/auth/users/logs]
 
 + Response 200 (application/json)
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> e45ec8bfc1c5098827903f740ac7d77a95bccf79
         {
             1: {
                 'user_id': 654321,
                 'timestamp': Fri, 11 May 2018 17:20:00 GMT,
+<<<<<<< HEAD
                 'action': 'INSERT',
+=======
+                'action': 'INSERT', 
+>>>>>>> e45ec8bfc1c5098827903f740ac7d77a95bccf79
                 'success': True}
         }
 
