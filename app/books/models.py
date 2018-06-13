@@ -147,7 +147,7 @@ class BookLog(db.Model):
         """
 
         self.book_id = book_id
-        self.timestamp = datetime.now().strftime("%d/%m/%Y %H:%M")
+        self.timestamp = datetime.now().strftime("%m/%d/%Y %H:%M")
         self.action = action
         self.success = success
 

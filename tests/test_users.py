@@ -200,7 +200,7 @@ class UserEndpointsTestCase(unittest.TestCase):
             data=json.dumps({'current_password': 'qwerty', 'new_password': '09876'}),
             headers={"content-type": "application/json",
                      'Authorization': 'Bearer {}'.format(self.tokens["test_token"])})
-        self.assertEqual(result.status_code, 202)
+        self.assertEqual(result.status_code, 200)
         self.assertIn(b'Successfully changed password', result.data)
 
     def test_reset_password_incorrect_current_password(self):
@@ -358,7 +358,7 @@ class UserEndpointsTestCase(unittest.TestCase):
             'api/v1/auth/reset-password',
             data=json.dumps({'current_password': 'qwerty', 'new_password': '09876'}),
             headers={"content-type": "application/json",
-                     'Authorization': 'Bearer {}'.format(self.tokens["test_token"])}).status_code, 202)
+                     'Authorization': 'Bearer {}'.format(self.tokens["test_token"])}).status_code, 200)
 
         result = self.client.get(
             '/api/v1/auth/users/logs',

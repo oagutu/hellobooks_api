@@ -7,6 +7,9 @@ from datetime import datetime, timedelta
 from sqlalchemy.ext.mutable import Mutable
 from sqlalchemy.ext.declarative import declarative_base
 
+from passlib.hash import sha256_crypt
+# from werkzeug.security import generate_password_hash, check_password_hash
+
 
 class MutableDict(Mutable, dict):
     """
@@ -74,7 +77,7 @@ class User(db.Model, Base):
     username = db.Column(db.String, nullable=False, unique=True)
     name = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(60), unique=True, nullable=False)
-    password = db.Column(db.String(30), nullable=False)
+    password = db.Column(db.String(100), nullable=False)
     acc_status = db.Column(db.String(40), default="member")
     borrowed_books = db.Column(MutableDict.as_mutable(db.PickleType), default={})
 
@@ -89,7 +92,10 @@ class User(db.Model, Base):
         self.name = user_info['name']
         self.email = user_info['email']
         self.username = user_info['username']
-        self.password = user_info['password']
+        # hash_password = sha256_crypt.encrypt(user_info['password'])
+        # self.password = generate_password_hash(user_info['password'])
+        # self.password = user_info['pas']
+        self.password = sha256_crypt.encrypt(user_info['password'])
 
         if 'user_id' in user_info:
             self.id = user_info['user_id']
@@ -146,8 +152,28 @@ class User(db.Model, Base):
         :type user_info: dict
         """
 
-        if self.password != user_info[2]:
-            self.password = user_info[2]
+        if sha256_crypt.verify(user_info[1], self.password):
+            self.password = sha256_crypt.encrypt(user_info[2])
+
+    @staticmethod
+    def verify_pass(username, password):
+        """
+        Verifies that password entered and in DB are equal
+
+        :param username: username used to login
+        :type username: str
+        :param password: password used to login
+        :type password: str
+        :return: status of verification
+        :rtype: boolean
+        """
+
+        user = User.get_user(username)
+
+        if sha256_crypt.verify(password, user.password):
+            return True
+        else:
+            return False
 
     def get_all_borrowed(self, order=False, order_param='return_date'):
         """
@@ -280,7 +306,7 @@ class UserLog(db.Model):
         """
 
         self.user_id = user_id
-        self.timestamp = datetime.now().strftime("%d/%m/%Y %H:%M")
+        self.timestamp = datetime.now().strftime("%m/%d/%Y %H:%M")
         self.action = action
         self.success = success
 

@@ -6,6 +6,8 @@ hb/
 .vscode/
 .idea/
 .__pycache__/
+migrations/
+.DS_Store
 
 #untracked files
 temp.py

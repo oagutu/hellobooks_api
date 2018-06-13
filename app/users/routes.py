@@ -7,6 +7,8 @@ from flask import Blueprint, request, jsonify, flash
 from flask_jwt_extended import (
     jwt_required, create_access_token, get_raw_jwt, get_jwt_identity
 )
+from passlib.hash import sha256_crypt
+
 import re
 
 from app.users.models import User, UserLog
@@ -96,8 +98,11 @@ def login():
         data = request.get_json()
 
         try:
-            user_details = User.get_user(data['username'])
-            if user_details.password == data['password']:
+            # user_details = User.get_user(data['username'])
+            # print(user_details.username)
+            isverified = User.verify_pass(data['username'], data['password'])
+            # if user_details.password == data['password']:
+            if isverified:
                 access_token = create_access_token(identity=data['username'])
 
                 response = jsonify({
@@ -152,7 +157,8 @@ def reset_password():
         ]
 
         user_details = User.get_user(get_jwt_identity())
-        if user_details.password == data['current_password']:
+
+        if sha256_crypt.verify(user_info[1], user_details.password):
             user_details.set_password(user_info)
 
             if user_details.id:
@@ -162,7 +168,7 @@ def reset_password():
 
             flash('Successfully changed password', category='info')
 
-            return jsonify({"message": "Successfully changed password"}), 202
+            return jsonify({"message": "Successfully changed password"}), 200
 
         else:
             return jsonify({"message": "Current password incorrect"})
