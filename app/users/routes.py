@@ -43,6 +43,8 @@ def create_user_account():
             match = re.search(pattern, email)
             if not match:
                 return jsonify({"msg": "Invalid Email"}), 400
+            if User.get_email(email):
+                return jsonify({"msg": "Email address already in use"}), 409
         except KeyError:
             return jsonify({"msg": "No email provided"}), 400
 

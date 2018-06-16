@@ -127,6 +127,21 @@ class User(db.Model, Base):
         elif type(param) == str:
             return User.query.filter_by(username=param).first()
 
+    @staticmethod
+    def get_email(param):
+        """
+        Check if email already in use.
+
+        :param param: provided email
+        :type param: string
+        :return: status of email present
+        :rtpye: bool
+        """
+
+        if User.query.filter_by(email=param).first():
+            return True
+
+
     def change_status(self, new_status):
 
         self.acc_status = new_status

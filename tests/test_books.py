@@ -15,7 +15,7 @@ class BookEndpointsTestCase(unittest.TestCase):
     def setUp(self):
         """Set up testing environment."""
 
-        self.app = create_app('development')
+        self.app = create_app('testing')
         self.client = self.app.test_client()
 
         # binds the app to the current context

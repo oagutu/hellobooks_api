@@ -15,7 +15,7 @@ class UserEndpointsTestCase(unittest.TestCase):
     def setUp(self):
         """et up testing environment variables."""
 
-        self.app = create_app('development')
+        self.app = create_app('testing')
         self.client = self.app.test_client()
 
         # binds the app to the current context
@@ -90,7 +90,13 @@ class UserEndpointsTestCase(unittest.TestCase):
 
         result = self.client.post(
             "/api/v1/auth/register",
-            data=json.dumps(self.user_details_four),
+            data=json.dumps({
+                "name": "John Doe",
+                "username": "Doe",
+                "password": "qwerty",
+                "email": "another@test.com",
+                }
+            ),
             headers={"content-type": "application/json"})
         self.assertEqual(result.status_code, 409)
         self.assertIn(b'Username not available. Already in use', result.data)
@@ -139,6 +145,31 @@ class UserEndpointsTestCase(unittest.TestCase):
             headers={"content-type": "application/json"})
         self.assertEqual(result.status_code, 400)
         self.assertIn(b'Invalid Email', result.data)
+
+    def test_create_user_account_with_email_conflict(self):
+        """Test if email already in use."""
+
+        self.assertEqual(self.client.post(
+            "/api/v1/auth/register",
+            data=json.dumps({
+                "name": "mary",
+                "user_id": "44",
+                "username": "m",
+                "password": "123",
+                "email": "gmail@mary.com"}),
+            headers={"content-type": "application/json"}).status_code, 201)
+
+        result = self.client.post(
+            "/api/v1/auth/register",
+            data=json.dumps({
+                "name": "mary",
+                "username": "mmm",
+                "password": "123",
+                "email": "gmail@mary.com"}),
+            headers={"content-type": "application/json"})
+
+        self.assertEqual(result.status_code, 409)
+        self.assertIn(b'Email address already in use', result.data)
 
     def test_crete_user_acc_no_email(self):
         """Test if no email provided."""
