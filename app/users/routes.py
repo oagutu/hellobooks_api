@@ -107,8 +107,10 @@ def login():
             if isverified:
                 access_token = create_access_token(identity=data['username'])
 
+                message = "Successfully logged in as: " + data['username']
+
                 response = jsonify({
-                    "message": "Successfully logged in",
+                    "message": message,
                     "access_token": access_token}
                 )
 

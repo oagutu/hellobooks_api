@@ -33,10 +33,10 @@ def add_book():
 
         data = request.get_json()
 
-        if len(data['title'].strip()) < 1:
+        if 'title' not in data or len(data['title'].strip()) < 1:
             return jsonify({"msg": "Invalid title"}), 400
 
-        if len(data['author'].strip()) < 1:
+        if 'author' not in data or len(data['author'].strip()) < 1:
             return jsonify({"msg": "Invalid author"}), 400
 
         if 'book_code' not in data:
@@ -255,7 +255,7 @@ def get_book(book_id):
 
         if Book.get_book(book_id):
             book_details = Book.get_book(book_id)
-            print('test point: book details\n: ', book_details)
+            # print('test point: book details\n: ', book_details)
 
             return jsonify({
                 "book_id": book_details.id,

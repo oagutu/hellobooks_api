@@ -141,7 +141,6 @@ class User(db.Model, Base):
         if User.query.filter_by(email=param).first():
             return True
 
-
     def change_status(self, new_status):
 
         self.acc_status = new_status
