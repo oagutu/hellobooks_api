@@ -12,7 +12,6 @@ class Config(object):
 
     DEBUG = False
     CSRF_ENABLED = True
-    # SECRET_KEY = "oj3099834$#!)_(efqkp-034r9jp4jorfpo//2_$@*epok"
     SECRET_KEY = urandom(24)
 
 

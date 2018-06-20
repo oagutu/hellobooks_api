@@ -31,10 +31,10 @@ def create_user_account():
 
         data = request.get_json()
 
-        if len(data['password'].strip()) < 1 or 'password' not in data:
+        if 'password' not in data or len(data['password'].strip()) < 1:
             return jsonify({"msg": "Invalid Password"}), 400
 
-        if len(data['username'].strip()) < 1 or 'username' not in data:
+        if 'username' not in data or len(data['username'].strip()) < 1:
             return jsonify({"msg": "Invalid Username"}), 400
 
         try:
@@ -99,11 +99,15 @@ def login():
 
         data = request.get_json()
 
+        if 'password' not in data or len(data['password'].strip()) < 1:
+            return jsonify({"msg": "Invalid/Missing Password"}), 400
+
+        if 'username' not in data or len(data['username'].strip()) < 1:
+            return jsonify({"msg": "Invalid/Missing Username"}), 400
+
         try:
-            # user_details = User.get_user(data['username'])
-            # print(user_details.username)
             isverified = User.verify_pass(data['username'], data['password'])
-            # if user_details.password == data['password']:
+
             if isverified:
                 access_token = create_access_token(identity=data['username'])
 
@@ -194,7 +198,7 @@ def update_user_status():
         data = request.get_json()
         status_options = ['banned', 'suspended', 'admin', 'member']
 
-        if data['new_status'] not in status_options:
+        if 'new_status' not in data or data['new_status'] not in status_options:
             return jsonify({"msg": "Invalid status option"}), 400
 
         if 'user' not in data:

@@ -201,6 +201,24 @@ class UserEndpointsTestCase(unittest.TestCase):
         self.tokens['John'] = token
         self.assertIn(b'Successfully logged in', result.data)
 
+    def login_invalid_username(self):
+        """Test login with invalid/missing password"""
+
+        result = self.client.post(
+            "/api/v1/auth/login",
+            data=json.dumps({'username': '', 'password': 'qwerty'}),
+            headers={"content-type": "application/json"})
+        self.assertIn(b'Invalid/Missing Username', result.data)
+
+    def test_login_invalid_password(self):
+        """Test login with invalid/missing password"""
+
+        result = self.client.post(
+            "/api/v1/auth/login",
+            data=json.dumps({'username': 'Doe', 'password': ''}),
+            headers={"content-type": "application/json"})
+        self.assertIn(b'Invalid/Missing Password', result.data)
+
     def test_login_incorrect_password(self):
         """Test login with wrong password."""
 

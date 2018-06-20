@@ -8,7 +8,6 @@ from sqlalchemy.ext.mutable import Mutable
 from sqlalchemy.ext.declarative import declarative_base
 
 from passlib.hash import sha256_crypt
-# from werkzeug.security import generate_password_hash, check_password_hash
 
 
 class MutableDict(Mutable, dict):
@@ -189,7 +188,7 @@ class User(db.Model, Base):
         else:
             return False
 
-    def get_all_borrowed(self, order=False, order_param='return_date'):
+    def get_all_borrowed(self, order=False, order_param='ERD'):
         """
         Returns list of borrowed books by user.
 
@@ -271,10 +270,13 @@ class User(db.Model, Base):
         borrowed = self.borrowed_books[book_id]
         if borrow_period > 0:
             borrowed["fee_owed"] = borrow_period * 30
-            self.add_to_borrowed(book_id, borrowed)
+            self.borrowed_books[book_id]["status"] = "pending"
 
         if not get:
+            self.borrowed_books[book_id]["ARD"] = datetime.now().strftime("%d/%m/%Y %H:%M")
             self.borrowed_books[book_id]["status"] = "returned"
+
+        self.add_to_borrowed(book_id, borrowed)
         db.session.commit()
 
     def __repr__(self):

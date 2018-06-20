@@ -38,6 +38,9 @@ def add_book():
 
         if 'author' not in data or len(data['author'].strip()) < 1:
             return jsonify({"msg": "Invalid author"}), 400
+        genres = ['fiction', 'non-fiction']
+        if 'genre' not in data or data['genre'].lower() not in genres:
+            return jsonify({"msg": "Invalid genre"})
 
         if 'book_code' not in data:
             return jsonify({"msg": "Missing book Code"}), 400
@@ -46,7 +49,6 @@ def add_book():
 
         # Checks if given ddc_code follows Dewey Decimal Classification syst.
         if 'ddc_code' not in data:
-            # print(data)
             return jsonify({"msg": "Missing ddc Code"}), 400
         else:
             pattern = r"^[\d][\d][\d](\.*[\d])*$"
@@ -179,7 +181,7 @@ def remove_book(book_id):
             book = Book.get_book(book_id)
             book.delete_book()
 
-            if not book.id:
+            if not Book.get_book(book.id):
                 BookLog(book.id, action='DELETE').add_to_log()
             else:
                 BookLog(book.id, action='DELETE', success=False).add_to_log()
@@ -313,29 +315,36 @@ def borrow_return_book(book_id):
 
                 return jsonify(borrow_info), 201
 
+        elif request.method == "POST" and book_status == "borrowed":
+            return jsonify({"msg": "Book not available for borrowing"})
+
         # Return borrowed book by authorised user.
         elif request.method == 'PUT':
 
             if user.acc_status != "suspended" and book_status == "borrowed":
-                if str(book_id) in user.borrowed_books:
-                    borrowed_book = user.borrowed_books[str(book_id)]
+
+                try:
+                    borrowed_book = user.borrowed_books[book_id]
                     current_day = datetime.now()
                     return_day = datetime.strptime(
-                        borrowed_book["ERD"],  '%d/%m/%Y %H:%M')
+                        borrowed_book["ERD"], '%d/%m/%Y %H:%M')
                     borrow_period = str(current_day - return_day).split(' ')[0]
                     if type(borrow_period) != int:
                         borrow_period = 0
                     else:
                         borrow_period = int(borrow_period)
-                    user.update_borrowed(str(book_id), borrow_period)
+                    user.update_borrowed(book_id, borrow_period)
+                    book_details.set_book_status("available")
 
                     return jsonify(borrowed_book), 202
 
-                else:
-                    return jsonify(
-                        {
+                except KeyError:
+                    return jsonify({
                             "msg": "cannot return book. Not borrowed by user",
                             "book_status": "borrowed"})
+
+            else:
+                return jsonify({"msg": "Book already available"})
 
     except AttributeError:
 
@@ -374,7 +383,7 @@ def get_borrow_history():
                 else:
                     borrow_period = int(borrow_period)
 
-                user.update_borrowed(str(key), borrow_period, True)
+                user.update_borrowed(key, borrow_period, True)
 
                 if entries:
                     entries = int(entries)
