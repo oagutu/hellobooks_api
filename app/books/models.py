@@ -76,7 +76,7 @@ class Book(db.Model):
             return Book.query.filter_by(title=param).all()
 
     @staticmethod
-    def get_all_books(entries=50, page=1):
+    def get_all_books(entries=3, page=1):
         """
          Return all books in library.
 
@@ -88,7 +88,7 @@ class Book(db.Model):
         :rtype: list
         """
 
-        return Book.query.paginate(page, int(entries), True).items
+        return Book.query.paginate(page, entries, True).items
 
     def delete_book(self):
         """Delete specific book entry from books_table."""

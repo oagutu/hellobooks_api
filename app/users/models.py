@@ -186,7 +186,7 @@ class User(db.Model, Base):
         if sha256_crypt.verify(password, user.password):
             return True
         else:
-            return False
+            return None
 
     def get_all_borrowed(self, order=False, order_param='ERD'):
         """
@@ -287,15 +287,27 @@ class User(db.Model, Base):
         :rtype: list
         """
         return str({
-            self.username: {
                 "user_id": self.id,
                 "name": self.name,
                 "password": self.password,
+                "username": self.username,
                 "email": self.email,
                 "acc_status": self.acc_status,
                 "borrowed_books": self.borrowed_books
-            }
         })
+
+    # def details(self):
+    #     return {
+    #
+    #         "user_id": self.id,
+    #         "name": self.name,
+    #         "password": self.password,
+    #         "username": self.username,
+    #         "email": self.email,
+    #         "acc_status": self.acc_status,
+    #         "borrowed_books": self.borrowed_books
+    #
+    #     }
 
 
 class UserLog(db.Model):

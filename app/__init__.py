@@ -2,7 +2,7 @@
 app/__init__.py
 Creates new app and loads config settings."""
 
-from flask import render_template
+from flask import render_template, make_response, jsonify
 from flask_api import FlaskAPI
 from flask_jwt_extended import JWTManager
 from flask_sqlalchemy import SQLAlchemy
@@ -29,12 +29,25 @@ def create_app(config_name):
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
 
-    blacklist = set()
+    # Defines custom claims to be added to access token
+    @jwt.user_claims_loader
+    def add_claims_to_access_token(user):
+        return {'role': user.acc_status}
+
+    # Defines access token identity
+    @jwt.user_identity_loader
+    def user_identity_lookup(user):
+        return user.username
+
+    from app.blacklist.helpers import check_blacklist
 
     @jwt.token_in_blacklist_loader
-    def check_if_token_in_blacklist(decrypted_token):
-        jti = decrypted_token['jti']
-        return jti in blacklist
+    def check_if_token_in_blacklist(token):
+        return check_blacklist(token)
+
+    @app.errorhandler(405)
+    def invalid_method(error):
+        return make_response(jsonify({'error':'405: Invalid method'}), 405)
 
     @app.route('/')
     def index():

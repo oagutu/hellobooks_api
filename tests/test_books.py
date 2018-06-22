@@ -261,7 +261,7 @@ class BookEndpointsTestCase(unittest.TestCase):
             data=json.dumps(self.book_details),
             headers={'content-type': 'application/json',
                      'Authorization': 'Bearer {}'.format(token)})
-        self.assertIn(b'Account not authorised to perform selected function', result.data)
+        self.assertIn(b'Unauthorised User', result.data)
 
     def test_update_book_not_in_library(self):
         """Test updating book not in the library"""
@@ -301,8 +301,8 @@ class BookEndpointsTestCase(unittest.TestCase):
                                  data=json.dumps(self.book_details_two),
                                  headers={"content-type": "application/json",
                                           'Authorization': 'Bearer {}'.format(token)})
-        self.assertEqual(result.status_code, 401)
-        self.assertIn(b'Account not authorised to perform selected function', result.data)
+        self.assertEqual(result.status_code, 403)
+        self.assertIn(b'Unauthorised User', result.data)
 
     def test_remove_book(self):
         """Test remove_book() functionality"""
@@ -332,8 +332,8 @@ class BookEndpointsTestCase(unittest.TestCase):
 
         result = self.client.delete('/api/v1/books/2',
                                     headers={'Authorization': 'Bearer {}'.format(token)})
-        self.assertEqual(result.status_code, 401)
-        self.assertIn(b'Account not authorised to perform selected function', result.data)
+        self.assertEqual(result.status_code, 403)
+        self.assertIn(b'Unauthorised User', result.data)
 
     def test_retrieve_all_books(self):
         """Test retrieve_all_books() functionality."""
@@ -507,8 +507,8 @@ class BookEndpointsTestCase(unittest.TestCase):
             '/api/v1/users/books/logs',
             headers={
                 'Authorization': 'Bearer {}'.format(token)})
-        self.assertEqual(result.status_code, 401)
-        self.assertIn(b'User not authorised', result.data)
+        self.assertEqual(result.status_code, 403)
+        self.assertIn(b'Unauthorised User', result.data)
 
     def test_get_update_log(self):
         """Test getting log of updated book"""

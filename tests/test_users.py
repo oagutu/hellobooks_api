@@ -397,8 +397,8 @@ class UserEndpointsTestCase(unittest.TestCase):
             '/api/v1/auth/users/logs',
             headers={
                 'Authorization': 'Bearer {}'.format(token)})
-        self.assertEqual(result.status_code, 401)
-        self.assertIn(b'User not authorised', result.data)
+        self.assertEqual(result.status_code, 403)
+        self.assertIn(b'Unauthorised User', result.data)
 
     def test_get_reset_password_log(self):
         """Test getting log of reset user password."""
