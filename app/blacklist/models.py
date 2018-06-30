@@ -16,7 +16,7 @@ class Blacklist(db.Model):
 
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     token = db.Column(db.String(255), unique=True, nullable=False)
-    time = db.Column(db.DateTime, nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False)
 
     def __init__(self, token):
         """
@@ -26,7 +26,7 @@ class Blacklist(db.Model):
         :type token: str
         """
         self.token = token
-        self.time = datetime.now()
+        self.timestamp = datetime.now()
 
     def add_to_blacklist(self):
         """Save blacklist instance to db."""

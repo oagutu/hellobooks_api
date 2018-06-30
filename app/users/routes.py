@@ -77,7 +77,6 @@ def create_user_account():
             "name": user.name,
             "email": user.email,
             "username": user.username,
-            "password": user.password,
             "account_status": user.acc_status
         }), 201
 
@@ -128,7 +127,6 @@ def login():
             return jsonify({"message": "Incorrect password"}), 401
 
     except (KeyError, AttributeError) as e:
-        print(e)
         return jsonify({"message": "Account not available"})
 
 
@@ -141,7 +139,6 @@ def logout():
     :return: logout message
     :rtype: json obj
     """
-    print("---", get_raw_jwt())
 
     token_index = get_raw_jwt()['jti']
     Blacklist.add_to_blacklist(Blacklist(token_index))

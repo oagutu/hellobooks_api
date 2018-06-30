@@ -28,6 +28,7 @@ class Book(db.Model):
     genre = db.Column(db.Enum(Genre))
     sub_genre = db.Column(db.String(70), nullable=True, default="NA")
     status = db.Column(db.String(50), default="available", nullable=False)
+    users = db.relationship('User', secondary='borrowed_books')
 
     def __init__(self, book_info):
         """
@@ -109,7 +110,7 @@ class Book(db.Model):
         :return: list of queried book objects
         """
 
-        return str({
+        return {
             self.id: {
                 "title": self.title,
                 "author": self.author,
@@ -120,7 +121,72 @@ class Book(db.Model):
                 "ddc_code": self.ddc_code,
                 "status": self.status
             }
-        })
+        }
+
+
+class BorrowedBook(db.Model):
+    """Associates Book and User  classes."""
+
+    __tablename__ = 'borrowed_books'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    book_id = db.Column(db.Integer, db.ForeignKey('books.id'))
+    borrow_date = db.Column(db.DateTime, nullable=False)
+    return_date = db.Column(db.DateTime, nullable=True)
+    status = db.Column(db.String(40), default='valid')
+    fee_owed = db.Column(db.Integer, default=0)
+    user = db.relationship('User', backref=db.backref('user_borrow'))
+    book = db.relationship('Book', backref=db.backref('book_borrow'))
+
+    def __init__(self, book_id, user_id):
+        """Initialize BorrowedBook obj."""
+
+        self.book_id = book_id
+        self.user_id = user_id
+        self.borrow_date = datetime.now().strftime("%m/%d/%Y %H:%M")
+
+    def save(self):
+        """Save created Borrowedbook instance."""
+
+        db.session.add(self)
+        db.session.commit()
+
+    @staticmethod
+    def get_borrowed_by_id(book_id):
+        """
+        Get book borrowed by user
+
+        :param book_id: id of borrowed book
+        :return: query obj
+        """
+
+        return BorrowedBook.query.filter_by(book_id=book_id, return_date=None).first()
+
+    @staticmethod
+    def get_borrowed(user_id, order_param='borrow_date', returned=True):
+        """
+        Get borrowed book history
+        # :param returned: indicates if borrowing is valid, pending or returned
+        # :type returned:str
+        :return: query obj
+        """
+        if returned and order_param == 'return_date':
+            return BorrowedBook.query.filter_by(user_id=user_id).order_by(BorrowedBook.return_date.desc()).all()
+        elif returned:
+            return BorrowedBook.query.filter_by(user_id=user_id).order_by(BorrowedBook.borrow_date.desc()).all()
+        else:
+            return BorrowedBook.query.filter_by(user_id=user_id, return_date=None).order_by(
+                BorrowedBook.borrow_date).all()
+
+    def update_borrowed(self, borrow_period):
+        """Modify BorrowedBook entry on returning book."""
+
+        if borrow_period > 0:
+            self.fee_owed = borrow_period * 30
+
+        self.status = 'returned'
+        self.return_date = datetime.now().strftime("%m/%d/%Y %H:%M")
 
 
 class BookLog(db.Model):
@@ -180,11 +246,11 @@ class BookLog(db.Model):
         :return: list of que=ried book objects
         """
         
-        return str({
+        return {
             self.log_id: {
                 "book_id": self.book_id,
                 "timestamp": self.timestamp,
                 "action": self.action,
                 "success": self.success
             }
-        })
+        }

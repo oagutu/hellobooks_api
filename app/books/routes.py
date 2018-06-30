@@ -9,17 +9,16 @@ from flask_jwt_extended import (
     jwt_required, get_jwt_identity
 )
 
-from math import ceil
 import re
 from app.books.models import Genre
 
 
 from app.users.models import User
-from app.books.models import Book, BookLog
+from app.books.models import Book, BookLog, BorrowedBook
 from app.blacklist.helpers import admin_required, verify_status
 
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 books_blueprint = Blueprint('books', __name__)
 
@@ -278,22 +277,18 @@ def borrow_return_book(book_id):
         # Borrow available book by authorised user.
         if request.method == 'POST' and book_status == "available":
 
-            borrow_info = user.set_borrowed()
-            borrow_info["book_id"] = book_id
-            user.add_to_borrowed(book_id, borrow_info)
-
+            borrow = BorrowedBook(book_id, user.id)
+            borrow.save()
             book_details.set_book_status("borrowed")
 
-            borrowed_book = {
-                "book_id": book_details.id,
-                "book_code": book_details.book_code,
-                "title": book_details.title,
-                "status": book_details.status
-            }
-
-            borrow_info.update(borrowed_book)
-
-            return jsonify(borrow_info), 201
+            return jsonify({
+                "book_id": borrow.book_id,
+                "borrow_date": borrow.borrow_date,
+                "due_date":  (datetime.now() + timedelta(days=10)).strftime("%d/%m/%Y %H:%M"),
+                "return_date": borrow.return_date,
+                "status": borrow.status,
+                "fee_owed": borrow.fee_owed
+            }), 201
 
         elif request.method == "POST" and book_status == "borrowed":
             return jsonify({"msg": "Book not available for borrowing"})
@@ -302,21 +297,30 @@ def borrow_return_book(book_id):
         elif request.method == 'PUT' and book_status == "borrowed":
 
             try:
-                borrowed_book = user.borrowed_books[book_id]
-                current_day = datetime.now()
-                return_day = datetime.strptime(
-                    borrowed_book["ERD"], '%d/%m/%Y %H:%M')
-                borrow_period = str(current_day - return_day).split(' ')[0]
+                borrowed_book = BorrowedBook.get_borrowed_by_id(book_id)
+                current_date = datetime.now()
+                borrow_date = borrowed_book.borrow_date
+                expected_return_date = (borrow_date + timedelta(days=10)).strftime("%d/%m/%Y %H:%M")
+                expected_return_date = datetime.strptime(expected_return_date, "%d/%m/%Y %H:%M")
+                borrow_period = str(current_date - expected_return_date).split(' ')[0]
                 if type(borrow_period) != int:
                     borrow_period = 0
                 else:
                     borrow_period = int(borrow_period)
-                user.update_borrowed(book_id, borrow_period)
+
+                borrowed_book.update_borrowed(borrow_period)
+                borrowed_book.save()
                 book_details.set_book_status("available")
 
-                return jsonify(borrowed_book), 202
+                return jsonify({
+                    "book_id": borrowed_book.book_id,
+                    "borrow_date": borrowed_book.borrow_date,
+                    "return_date": borrowed_book.return_date,
+                    "fee_owed": borrowed_book.fee_owed,
+                    "status": borrowed_book.status
+                }), 202
 
-            except KeyError:
+            except AttributeError:
                 return jsonify({
                         "msg": "cannot return book. Not borrowed by user",
                         "book_status": "borrowed"})
@@ -340,46 +344,28 @@ def get_borrow_history():
     """
 
     returned = request.args.get("returned")
-    entries = request.args.get("results")
     order_param = request.args.get("order_param")
 
     user = User.get_user(get_jwt_identity())
     if order_param:
-        borrowed_books, record_details = user.get_all_borrowed(False, order_param)
+        borrowed_books = BorrowedBook.get_borrowed(user.id, order_param)
+    elif returned and not order_param:
+        borrowed_books = BorrowedBook.get_borrowed(user.id, 'borrow_date', False)
     else:
-        borrowed_books, record_details = user.get_all_borrowed()
+        borrowed_books = BorrowedBook.get_borrowed(user.id)
 
-    if not returned:
-        for key in borrowed_books:
-            current_day = datetime.now()
-            return_day = datetime.strptime(
-                borrowed_books[key]['ERD'],  '%d/%m/%Y %H:%M')
-            borrow_period = str(current_day - return_day).split(' ')[0]
-            if current_day <= return_day:
-                borrow_period = 0
-            else:
-                borrow_period = int(borrow_period)
+    borrowed = []
+    for book in borrowed_books:
+        entry = {
+            "book_id": book.book_id,
+            "book_title": book.book.title,
+            "borrow_date": book.borrow_date,
+            "return_date": book.return_date,
+            "fee_owed": book.return_date
+        }
+        borrowed.append(entry)
 
-            user.update_borrowed(key, borrow_period, True)
-
-            if entries:
-                entries = int(entries)
-                record_details['tot_pages'] = ceil(record_details['records']/entries)
-                keys = record_details['keys'][:(entries + 1)]
-                borrowed_temp = {}
-                for val in keys:
-                    borrowed_temp[val] = borrowed_books[val]
-                borrowed_books = borrowed_temp
-
-        return jsonify(borrowed_books), 200
-
-    elif returned == 'false':
-        pending_books = {}
-        for key in borrowed_books:
-            if borrowed_books[key]['borrow_status'] == 'invalid':
-                pending_books[key] = borrowed_books[key]
-
-        return jsonify(pending_books), 200
+    return jsonify(borrowed), 200
 
 
 @books_blueprint.route('/users/books/logs', methods=['GET'])

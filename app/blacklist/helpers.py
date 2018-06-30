@@ -41,6 +41,7 @@ def admin_required(fn):
 def verify_status(fn):
     """
     Check if user account status not suspended or banned
+
     :param fn: endpoint func to be accessed
     :return: endpoint or error message
     :rtype: wrapper func
@@ -56,7 +57,6 @@ def verify_status(fn):
         """
 
         if get_jwt_claims()['role'] not in ['suspended', 'banned']:
-            print(get_jwt_claims())
             return fn(*args, **kwargs)
         else:
             return jsonify(

@@ -25,6 +25,9 @@ class TestingConfig(Config):
 
 class DevelopmentConfig(Config):
     """
+
+
+
     Development config settings."""
 
     DEBUG = True
