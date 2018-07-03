@@ -7,6 +7,8 @@ from functools import wraps
 from flask_jwt_extended import get_jwt_identity
 from flask import jsonify
 
+from app.books.models import Genre
+
 
 def already_logged_in(fn):
     """
@@ -34,3 +36,27 @@ def already_logged_in(fn):
             return jsonify({"msg": msg})
 
     return wrapper
+
+
+def get_genre(genre):
+    """
+    Gets genre type from user input
+    :param genre: str
+    :return:
+    """
+    if genre == 'fiction':
+        return Genre.Fiction
+    else:
+        return Genre.Non_fiction
+
+
+def validate_id(book_id):
+    """
+    check if given book_id is int
+
+    :param book_id: book_id as given in url
+    :return: JSON response obj
+    """
+
+    if not str(book_id).isdigit():
+        return jsonify({"msg": "book_id must be a number/integer"}), 400

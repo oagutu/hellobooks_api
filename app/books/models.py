@@ -89,7 +89,7 @@ class Book(db.Model):
         :rtype: list
         """
 
-        return Book.query.paginate(page, entries, True).items
+        return Book.query.paginate(page=page, per_page=entries, error_out=True)
 
     def delete_book(self):
         """Delete specific book entry from books_table."""

@@ -10,13 +10,11 @@ from flask_jwt_extended import (
 )
 
 import re
-from app.books.models import Genre
-
 
 from app.users.models import User
 from app.books.models import Book, BookLog, BorrowedBook
 from app.blacklist.helpers import admin_required, verify_status
-
+from app.helpers import get_genre
 
 from datetime import datetime, timedelta
 
@@ -45,7 +43,7 @@ def add_book():
     elif Book.get_book(data['book_code']):
         return jsonify({"msg": "Book(book_code) already in lib"}), 409
 
-    # Checks if given ddc_code follows Dewey Decimal Classification syst.
+    # Check if given ddc_code follows Dewey Decimal Classification syst.
     if 'ddc_code' not in data:
         return jsonify({"msg": "Missing ddc Code"}), 400
     else:
@@ -63,10 +61,8 @@ def add_book():
         "book_code": data['book_code'],
         "ddc_code": data['ddc_code'],
     }
-    if data['genre'] == 'fiction':
-        book_info['genre'] = Genre.Fiction
-    else:
-        book_info['genre'] = Genre.Non_fiction
+    if 'genre' in data:
+        book_info['genre'] = get_genre(data["genre"])
 
     if 'book_id' in data:
         book_info['book_id'] = data['book_id']
@@ -116,14 +112,24 @@ def update_book(book_id):
 
     try:
         book = Book.get_book(book_id)
+        book_temp = {
+            "book_id": book.id,
+            "title": book.title,
+            "author": book.author,
+            "book_code": book.book_code,
+            "ddc_code": book.ddc_code,
+            "genre": get_genre(book.genre.value),
+            "sub_genre": book.sub_genre,
+            "synopsis": book.synopsis
+        }
         book.delete_book()
         book_info = {}
         for val in data:
             if val == 'genre':
-                if data['genre'] == 'fiction':
-                    book_info['genre'] = Genre.Fiction
-                else:
-                    book_info['genre'] = Genre.Non_fiction
+                book_info['genre'] = get_genre(data[val])
+            elif val == 'book_code' and Book.get_book(data["book_code"]):
+                Book(book_temp).add_to_lib()
+                return jsonify({"msg": "Book code already in use"}), 400
             else:
                 book_info[val] = data[val]
         book_info['book_id'] = book_id
@@ -147,9 +153,7 @@ def update_book(book_id):
         }), 202
 
     except AttributeError:
-        book_details = {"msg": "Book entry not available"}
-
-        return jsonify(book_details), 404
+        return jsonify({"msg": "Book entry not available"}), 404
 
 
 @books_blueprint.route('/books/<int:book_id>', methods=['DELETE'])
@@ -194,25 +198,18 @@ def retrieve_all_books():
     :rtype: JSON obj
     """
 
-    entry_no = request.args.get('results')
+    results = request.args.get('results')
     page = request.args.get('page')
 
-    if entry_no and page:
-        all_books = Book.get_all_books(int(entry_no), int(page))
-
-    elif entry_no and not page:
+    if not results:
+        results = 3
+    if not page:
         page = 1
-        all_books = Book.get_all_books(int(entry_no), page)
 
-    elif not entry_no and page:
-        entry_no = 3
-        all_books = Book.get_all_books(entry_no, int(page))
+    all_books = Book.get_all_books(int(results), int(page))
+    library = {"books": {}}
 
-    else:
-        all_books = Book.get_all_books()
-    library = {}
-
-    for book in all_books:
+    for book in all_books.items:
         entry = {
             "book_id": book.id,
             "title": book.title,
@@ -223,8 +220,21 @@ def retrieve_all_books():
             "sub_genre": book.sub_genre,
             "synopsis": book.synopsis
         }
-        library[book.id] = entry
+        library["books"][book.id] = entry
 
+    if not all_books.has_prev:
+        prev_pg = int(page)
+    else:
+        prev_pg = all_books.prev_num
+    if not all_books.has_next:
+        next_pg = int(page)
+    else:
+        next_pg = all_books.next_num
+    library["no_of_results"]  = len(library["books"])
+    library["prev_page"] = prev_pg
+    library["prev_url"] = request.path + "?page=" + str(prev_pg) + "&results=" + str(results)
+    library["next_page"] = next_pg
+    library["next_url"] = request.path + "?page=" + str(next_pg) + "&results=" + str(results)
     return jsonify(library), 200
 
 

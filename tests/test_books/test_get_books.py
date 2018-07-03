@@ -32,7 +32,7 @@ class GetBookTestCase(BookEndpointsTestCase):
             data=json.dumps(self.book_details),
             headers={"content-type": "application/json",
                      'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])}).status_code, 201)
-        result = self.client.get('/api/v1/books?results=1&page=3',
+        result = self.client.get('/api/v1/books?page=3',
                                  headers={'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
         self.assertEqual(result.status_code, 404)
 
