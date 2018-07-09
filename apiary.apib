@@ -5,37 +5,40 @@ HOST: https://fast-stream-12738.herokuapp.com/
 
 Hellobooks is a simple api for managing library books and users. It is built on the Flask microframework.
 
-### Create New User Account [/api/v1/auth/register]
+## Create New User Account [/api/v1/auth/register]
 
-#### Create New User Account [POST /api/v1/auth/register]
+### Create New User Account [POST]
+This action allows for a user to register as member.
+- It takes a JSON payload, containing the user's details, as part of the request.
+- The response returns a JSON object with registered user details and a 201 response. 
 
 + Request (application/json)
 
         {
             "name": "John Doe",
-            "user_id": 123456,
             "username": "Jane Doe",
             "password": "qwerty",
             "email": "abc@gfg.com",
-            "acc_status": "member",
         }
 
 + Response 201 (application/json)
 
         {
+            "msg" : "",
             "name": "John Doe",
-            "user_id": 123456,
             "username": "Jane Doe",
-            "password": "qwerty",
             "email": "abc@gfg.com",
             "acc_status": "member",
             "borrowed_books": {}
         }
 
 
-### Login [/api/v1/auth/login]
+## Login [/api/v1/auth/login]
 
-#### Login [POST /api/v1/auth/login]
+### Login [POST /api/v1/auth/login]
+This action allows for user login.
+- The request payload is JSON object conatining username and password.
+- The response payload holds login success message and 201 status code.
 
 + Request (application/json)
 
@@ -47,118 +50,127 @@ Hellobooks is a simple api for managing library books and users. It is built on 
 + Response 200 (applcation/json)
 
         {
-            "message": "Successfully logged in",
+            "message": "Successfully logged in as: Jane Doe",
         }
 
 
-### Reset Password [/api/v1/auth/reset-password]
+## Reset Password [/api/v1/auth/reset-password]
 
-#### Reset Password [POST /api/v1/auth/reset-password]
+### Reset Password [POST]
+This action enables a logged in user to change their password.
+- The request payload holds current and new password in a JSON object.
+- The Response holds a action success message and a 200 status code. 
+ 
 
 + Request (application/json)
 
         {
-            "username": "Jane Doe",
             "current_password": "qwerty",
             "new_password" : "09876"
         }
 
-+ Response 202 (application/json)
++ Response 200 (application/json)
 
         {
             "message": "Successfully changed password"
         }
         
         
-### Add/Get Books [/api/v1/books]
+## Add/Get Books [/api/v1/books]
 
-#### Add Book [POST /api/v1/books]
+### Add Book [POST]
+#### ADMIN ROLE
+
+This action allows for a logged in ADMIN to add a new book to the library.
+ - The request holds the new book details in a JSON object.
+ - The response holds newly registered book details and a 200 status code
 
 + Request (application/json)
 
         {
-            1 :{
-                    "book_id": 1,
-                    "title": "book title",
-                    "book_code": 12345,
-                    "author": "mary writer",
-                    "synopsis": "iwehn owueh owunef ohew ouweq...",
-                    "genre": "fiction",
-                    "sub_genre": "xyz",
-                    "status": "borrowed"},
+            "title": "Pip the Hound",
+            "book_code": 941111130550,
+            "ddc_code": "321.15",
+            "author": "Writer Mcwriter",
+            "synopsis": "If hibuve ibed tere ind hwbej jb. Kesse jnew ohew ouweq...",
+            "genre": "fiction",
+            "sub_genre": "epic"
         }
         
 + Response 200 (application/json)
 
         {
-            1 :{
-                    "book_id": 1,
-                    "title": "book title",
-                    "book_code": 12345,
-                    "author": "mary writer",
-                    "synopsis": "iwehn owueh owunef ohew ouweq...",
-                    "genre": "fiction",
-                    "sub_genre": "xyz",
-                    "status": "borrowed"},
+            "author": "Writer Mcwriter",
+            "book_code": 941111130550,"
+            "book_id": 14,
+            "ddc_code": "321.15",
+            "genre": "fiction",
+            "sub_genre": "NA",
+            "synopsis": "If hibuve ibed tere ind hwbej jb. Kesse jnew ohew ouweq...",
+            "title": "Pip the Hound"
         }
 
+### Get All Books [GET /api/v1/books{?results,page}]
 
-### Add/Get Books [/api/v1/books]
+This action gets all books in the library.
+- The request may contain url parameters.
+- The response contains a JSON object with queried results and 200 status code
 
-#### Add Book [POST /api/v1/books]
 
-+ Request (application/json)
-
-        {
-            1 :{
-                    "book_id": 1,
-                    "title": "book title",
-                    "book_code": 12345,
-                    "author": "mary writer",
-                    "synopsis": "iwehn owueh owunef ohew ouweq...",
-                    "genre": "fiction",
-                    "sub_genre": "xyz",
-                    "status": "borrowed"},
-        }
++ Parameters
+    + results (optional) - A query variable referring to no. of results tyo be returned
+    + page (optional) - Query varible indicating page to be returned
 
 + Response 200 (application/json)
 
         {
-            1 :{
-                    "book_id": 1,
-                    "title": "book title",
-                    "book_code": 12345,
-                    "author": "mary writer",
-                    "synopsis": "iwehn owueh owunef ohew ouweq...",
-                    "genre": "fiction",
-                    "sub_genre": "xyz",
-                    "status": "borrowed"},
+            "books": {
+                    "3": {
+                        "author": "Booky Mcbookface",
+                        "book_code": 971111130000,
+                        "book_id": 3,
+                        "ddc_code": "321.15",
+                        "genre": "fiction",
+                        "sub_genre": "NA",
+                        "synopsis": "If hibuve ibed tere ind hwbej jb. Kesse jnew ohew ouweq...",
+                         "title": "Bookbook"
+                        },
+                    "6": {
+                        "author": "Booky Mcbookface",
+                        "book_code": 971111130550,
+                        "book_id": 6,
+                        "ddc_code": "321.15",
+                        "genre": "fiction",
+                        "sub_genre": "NA",
+                        "synopsis": "If hibuve ibed tere ind hwbej jb. Kesse jnew ohew ouweq...",
+                        "title": "Pip the Cat"
+                    },
+                    "12": {
+                        "author": "Booky Mcbookface",
+                        "book_code": 971111130022,
+                        "book_id": 12,
+                        "ddc_code": "321.15",
+                        "genre": "fiction",
+                        "sub_genre": "epic",
+                        "synopsis": "If hibuve ibed tere ind hwbej jb. Kesse jnew ohew ouweq...",
+                        "title": "Pip the Cat"
+                    }
+                },
+            "next_page": 2,
+            "next_url": "/api/v1/books?page=2&results=3",
+            "no_of_results": 3,
+            "prev_page": 1,
+            "prev_url": "/api/v1/books?page=1&results=3"
         }
 
 
-### Get All Books [/api/v1/books]
+### Get Book By ID [GET /api/v1/books/{book_id}]
 
-#### Get All Books [GET /api/v1/books]
+This action gets a specific book using its ID.
+- The response holds the queried book details in a JSON object along with a 200 status code.
 
-+ Response 200 (application/json)
-
-        {
-            1 :{
-                    "book_id": 1,
-                    "title": "book title",
-                    "book_code": 12345,
-                    "author": "mary writer",
-                    "synopsis": "iwehn owueh owunef ohew ouweq...",
-                    "genre": "fiction",
-                    "sub_genre": "xyz",
-                    "status": "borrowed"},
-        }
-
-### Get Specific Book [/api/v1/books/1]
-
-#### Get Book By ID [GET /api/v1/books/1]
-
-+ Request (application/json)
++ Parameters
+    + book_id (number) - ID of the book to be returned
 
 + Response 200 (application/json)
 
@@ -172,15 +184,41 @@ Hellobooks is a simple api for managing library books and users. It is built on 
             "sub_genre": "xyz",
             "status": "borrowed"
         }
-<<<<<<< HEAD
-
-=======
         
->>>>>>> e45ec8bfc1c5098827903f740ac7d77a95bccf79
-### Update Book [/api/v1/books/2]
+### Book search [PUT /api/v1/users/books/search{?title}]
 
-admin only
-#### Update Book [PUT /api/v1/books/2]
+This action allows for a logged in user to search for a book using ia search parameter eg. title.
+- The response contains all possible results based on search parameter
+
++ Parameters
+    + title - title of book to be searched
+    
++ Response 200 (application/json)
+
+        {
+            "books": {
+                "17": {
+                    "author": "Avi k.",
+                    "book_code": 941113109871,
+                    "book_id": 17,
+                    "ddc_code": "321.15",
+                    "genre": "fiction",
+                    "sub_genre": "NA",
+                    "synopsis": "I ind hwbej jb. Kesse jnew ohew ouweq...",
+                    "title": "Levels"
+                }
+            }
+        }
+
+### Update Book [PUT /api/v1/books/{book_id}]
+#### ADMIN ROLE
+
+This action is used to update details of a specific book by an already logged in admin.
+- The request contains details  of the book to be updated in a JSON object
+- The response holds newly updated book details in a JSON object and a 202 status code
+
++ Parameters
+    + book_id (number) - ID of book to be updated
 
 + Request (application/json)
 
@@ -209,153 +247,142 @@ admin only
             "status": "borrowed"
         }
 
-### Remove Book [/api/v1/books/3]
 
-admin only
-#### Remove a Book [DELETE /api/v1/books/3]
+### Remove a Book [DELETE /api/v1/books/{book_id}]
+#### ADMIN ROLE
 
-+ Response 204 (application/json)
+This action deletes a specified book from the library by a logged in admin.
+- The response contains a 204 status code
 
++ Parameters
+    + book_id (number) - ID of book to be deleted
 
-### Borrow/Return [/api/v1/users/books/1]
-
-### Borrow a Book [POST /api/v1/users/books/1]
-
-+ Request (applcation/json)
++ Response 204
 
 
-        {
-            "name": "John Doe",
-            "user_id": 123456,
-            "username": "Jane Doe",
-            "password": "qwerty",
-            "email": "abc@gfg.com",
-            "acc_status": "member",
-            "borrowed_books": {}
-        }
+## Borrow/Return Book [/api/v1/users/books/]
+
+### Borrow a Book [POST /api/v1/users/books/{book_id}]
+
+This action allows for a logged in user to borrow or return a book
+ - The response contains the borrowed book details and a 201 status code
+
++ Parameters
+    + book_id (number) - ID of the book to be borrowed
 
 + Response 201 (application/json)
 
         {
-            "book_id" : 1
-            "borrower_id": 123456
-            "borrow_date" : "25/04/2018 02:30",
-            "return_date" : "1/05/2018 02:30",
-            "fee_owed" : 0,
-            "borrow_status": "valid"
+            "book_id": 3,
+            "borrow_date": "Sat, 30 Jun 2018 13:56:00 GMT",
+            "due_date": "10/07/2018 13:56",
+            "fee_owed": 0,
+            "return_date": null,
+            "status": "valid"
         }
-<<<<<<< HEAD
 
-=======
-        
->>>>>>> e45ec8bfc1c5098827903f740ac7d77a95bccf79
-### Return a Book [/api/v1/users/books/1]
 
-### Return a Book [PUT /api/v1/users/books/1]
+### Return a Book [PUT /api/v1/users/books/{book_id}]
 
-<<<<<<< HEAD
+This action allows for a logged in user to borrow or return a book
+ - The response contains the returned book details and a 201 status code or the
+   reponse could return a 403 status code along with a 'reason message' in a JSON object.
+
++ Parameters
+    + book_id (number) - ID of the book to be returned
+
 + Response 202 (application/json)
 
         {
-                  "ERD": "30/04/2018 02:30",
-                  "book_code": 978962222901,
-                  "borrow_date": "25/04/2018 02:30",
-                  "borrow_status": "valid",
-                  "fee_owed": 0,
-                  "return_date": "1/05/2018 02:30",
-                  "status": "returned",
-                  "title": "book title two"
-=======
-+ Response 202 (applcation/json)
+            "book_id": 3,
+            "borrow_date": "Sat, 30 Jun 2018 13:56:00 GMT",
+            "fee_owed": 0,
+            "return_date": "Sun, 08 Jul 2018 14:58:00 GMT",
+            "status": "returned"
+        }
+
++ Response 403 (applcation/json)
 
         {
                 "msg": "cannot return book. Not borrowed by user",
                 "book_status": "borrowed"
->>>>>>> e45ec8bfc1c5098827903f740ac7d77a95bccf79
         }
 
-### Get borrowed books history [/api/v1/users/books]
+### Get borrowed books history [GET /api/v1/users/books{?order_param,returned}]
 
-<<<<<<< HEAD
-### Get borrowed books history [GET /api/v1/users/books]
-=======
-### Return borrowed books history [GET /api/v1/users/books]
->>>>>>> e45ec8bfc1c5098827903f740ac7d77a95bccf79
+This action allows for a user to access their borrow history.
+- The response payload consists of all borrowed books' details and 200 status code.
+
++ Parameters
+    + order_param (optional) - specifies parameter use in ordering results
+    + returned (optional) - boolean value specifying if history should only be for non-returned/returned books
+
++ Response 200  (applcation/json)
+
+        [
+            {
+                "book_id": 3,
+                "book_title": "Bookbook",
+                "borrow_date": "Sat, 30 Jun 2018 13:56:00 GMT",
+                "fee_owed": null,
+                "return_date": null
+            },
+            {
+                "book_id": 5,
+                "book_title": "BookTitle",
+                "borrow_date": "Sat, 30 Jun 2018 13:56:00 GMT",
+                "fee_owed": null,
+                "return_date": "Sun, 08 Jul 2018 14:58:00 GMT"
+            }
+        ]
+
+
+## Get book logs [/api/v1/users/books/logs]
+
+### Get book logs [GET]
+#### ADMIN ROLE
+
+This action enables an admin to access the book logs
+- The response payload conatins log details in JSON and a 200 status code.
 
 + Response 200 (applcation/json)
 
         {
-            '4': {
-                    'title': 'book title three',
-<<<<<<< HEAD
-                    'book_code': 978933322901,
-                    'borrow_date': '21/04/2018 02:30',
-                    'ERD': '29/04/2018 02:30',
-                    'return_date': '29/04/2018 02:30',
-                    'fee_owed': 0,
-                    'borrow_status': 'invalid'},
-            '2': {
-                    'title': 'book title two',
-                    'book_code': 978962222901,
-                    'borrow_date': '25/04/2018 02:30',
-                    'ERD': '30/04/2018 02:30',
-                    'return_date': '1/05/2018 02:30',
-                    'fee_owed': 0,
-                    'borrow_status': 'valid'}
+             "2": {
+                "action": "INSERT",
+                "book_id": 2,
+                "success": true,
+                "timestamp": "Tue, 26 Jun 2018 00:36:00 GMT"
+            },
+            "3": {
+                "action": "INSERT",
+                "book_id": 3,
+                "success": true,
+                "timestamp": "Tue, 26 Jun 2018 00:38:00 GMT"
+            },
+            "4": {
+                "action": "INSERT",
+                "book_id": 4,
+                "success": true,
+                "timestamp": "Tue, 26 Jun 2018 12:15:00 GMT"
+            },
+            "5": {
+                "action": "INSERT",
+                "book_id": 5,
+                "success": true,
+                "timestamp": "Tue, 26 Jun 2018 12:15:00 GMT"
+            }
         }
 
+## Update User Status [/api/v1/auth/users/status_change]
 
-### Get book logs [/api/v1/users/books/logs]
+### Update User Status [POST]
+#### ADMIN ROLE
 
-admin only
-### Get book logs [GET /api/v1/users/books/logs]
+This action allows for an admin to change a user's role, which can be: member, admin,banned or suspended.
+- The request holds a JSON payload with the user ans the new status/role
+- The response holds a JSON payload with a success message and 200 status cdoe
 
-+ Response 200 (application/json)
-=======
-                    'book_code': 978933322901, 
-                    'borrow_date': '21/04/2018 02:30', 
-                    'ERD': '29/04/2018 02:30', 
-                    'return_date': '29/04/2018 02:30',
-                    'fee_owed': 0, 
-                    'borrow_status': 'invalid'}, 
-            '2': {
-                    'title': 'book title two',
-                    'book_code': 978962222901, 
-                    'borrow_date': '25/04/2018 02:30', 
-                    'ERD': '30/04/2018 02:30', 
-                    'return_date': '1/05/2018 02:30', 
-                    'fee_owed': 0, 
-                    'borrow_status': 'valid'}
-        }
-
-     
-### Get book logs [/api/v1/users/books/logs]
-
-admin only
-### Return borrowed books history [GET /api/v1/users/books/logs]
-
-+ Response 200 (applcation/json)
->>>>>>> e45ec8bfc1c5098827903f740ac7d77a95bccf79
-
-        {
-            1: {
-                    'book_id': 2,
-                    'timestamp': datetime.datetime(2018, 5, 11, 17, 8),
-<<<<<<< HEAD
-                    'action': 'INSERT',
-                    success': True}
-        }
-
-=======
-                    'action': 'INSERT', 
-                    success': True}
-        }
-        
->>>>>>> e45ec8bfc1c5098827903f740ac7d77a95bccf79
-### Update User Status [/api/v1/auth/users/status_change]
-
-admin only
-#### Update User Status [POST /api/v1/auth/users/status_change]
 
 + Request (application/json)
 
@@ -363,44 +390,45 @@ admin only
             'user': 1234,
             'new_status': 'banned'
         }
-<<<<<<< HEAD
 
-=======
-        
->>>>>>> e45ec8bfc1c5098827903f740ac7d77a95bccf79
 + Response 200 (applcation/json)
 
         {
             'msg': '1234 changed to banned'
         }
 
-### Get User logs [/api/v1/auth/users/logs]
+## Get User logs [/api/v1/auth/users/logs]
 
-admin only
-####  Get User logs [GET /api/v1/auth/users/logs]
+###  Get User logs [GET]
+#### ADMIN ROLE
+
+This action gets alluser log details.
+- The response payload conatins log details in JSON and a 200 status code.
 
 + Response 200 (application/json)
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> e45ec8bfc1c5098827903f740ac7d77a95bccf79
         {
-            1: {
-                'user_id': 654321,
-                'timestamp': Fri, 11 May 2018 17:20:00 GMT,
-<<<<<<< HEAD
-                'action': 'INSERT',
-=======
-                'action': 'INSERT', 
->>>>>>> e45ec8bfc1c5098827903f740ac7d77a95bccf79
-                'success': True}
+            "2": {
+                "action": "INSERT",
+                "success": true,
+                "timestamp": "Tue, 26 Jun 2018 00:35:00 GMT",
+                "user_id": 2
+            },
+            "3": {
+                "action": "INSERT",
+                "success": true,
+                "timestamp": "Tue, 26 Jun 2018 12:06:00 GMT",
+                "user_id": 3
+            },
         }
 
 
-### Logout [/api/v1/auth/logout]
+## Logout [/api/v1/auth/logout]
 
-####  Logout [POST /api/v1/auth/logout]
+### Logout [POST /api/v1/auth/logout]
+
+This action allows for a user to log out.
+- The response contains a success message and a 200 status code.
 
 + Response 200 (application/json)
 
