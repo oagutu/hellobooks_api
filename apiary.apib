@@ -12,6 +12,7 @@ This action allows for a user to register as member.
 - It takes a JSON payload, containing the user's details, as part of the request.
 - The response returns a JSON object with registered user details and a 201 response.
 
+
 + Request (application/json)
 
         {
@@ -61,7 +62,6 @@ This action enables a logged in user to change their password.
 - The request payload holds current and new password in a JSON object.
 - The Response holds a action success message and a 200 status code.
 
-
 + Request (application/json)
 
         {
@@ -74,8 +74,7 @@ This action enables a logged in user to change their password.
         {
             "message": "Successfully changed password"
         }
-
-
+        
 ## Add/Get Books [/api/v1/books]
 
 ### Add Book [POST]
@@ -96,7 +95,7 @@ This action allows for a logged in ADMIN to add a new book to the library.
             "genre": "fiction",
             "sub_genre": "epic"
         }
-
+        
 + Response 200 (application/json)
 
         {
@@ -115,7 +114,6 @@ This action allows for a logged in ADMIN to add a new book to the library.
 This action gets all books in the library.
 - The request may contain url parameters.
 - The response contains a JSON object with queried results and 200 status code
-
 
 + Parameters
     + results (optional) - A query variable referring to no. of results tyo be returned
