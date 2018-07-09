@@ -38,10 +38,10 @@ class Book(db.Model):
         :type book_info: dict
         """
 
-        self.title = book_info['title']
+        self.title = book_info['title'].lower()
         self.book_code = book_info['book_code']
         self.ddc_code = book_info['ddc_code']
-        self.author = book_info['author']
+        self.author = book_info['author'].lower()
         self.genre = book_info['genre']
 
         if 'book_id' in book_info:
@@ -53,10 +53,25 @@ class Book(db.Model):
         if 'status' in book_info:
             self.status = book_info['status']
 
+    def book_serializer(self):
+        return {
+            "book_id": self.id,
+            "title": self.title.capitalize(),
+            "author": self.author.capitalize(),
+            "book_code": self.book_code,
+            "ddc_code": self.ddc_code,
+            "genre": self.genre.value,
+            "sub_genre": self.sub_genre,
+            "synopsis": self.synopsis
+        }
+
     def add_to_lib(self):
         """Add books to library table."""
 
         db.session.add(self)
+        db.session.commit()
+
+    def update(self):
         db.session.commit()
 
     @staticmethod
@@ -74,7 +89,7 @@ class Book(db.Model):
         elif type(param) == int:
             return Book.query.filter_by(id=param).first()
         else:
-            return Book.query.filter_by(title=param).all()
+            return Book.query.filter(Book.title.contains(param)).all()
 
     @staticmethod
     def get_all_books(entries=3, page=1):
@@ -103,25 +118,25 @@ class Book(db.Model):
         self.status = status
         db.session.commit()
 
-    def __repr__(self):
-        """
-        Return the object instance of the model when queried.
-
-        :return: list of queried book objects
-        """
-
-        return {
-            self.id: {
-                "title": self.title,
-                "author": self.author,
-                "genre": self.genre,
-                "sub_genre": self.sub_genre,
-                "synopsis": self.synopsis,
-                "book_code": self.book_code,
-                "ddc_code": self.ddc_code,
-                "status": self.status
-            }
-        }
+    # def __repr__(self):
+    #     """
+    #     Return the object instance of the model when queried.
+    #
+    #     :return: list of queried book objects
+    #     """
+    #
+    #     return str({
+    #         self.id: {
+    #             "title": self.title,
+    #             "author": self.author,
+    #             "genre": self.genre,
+    #             "sub_genre": self.sub_genre,
+    #             "synopsis": self.synopsis,
+    #             "book_code": self.book_code,
+    #             "ddc_code": self.ddc_code,
+    #             "status": self.status
+    #         }
+    #     })
 
 
 class BorrowedBook(db.Model):
@@ -136,8 +151,8 @@ class BorrowedBook(db.Model):
     return_date = db.Column(db.DateTime, nullable=True)
     status = db.Column(db.String(40), default='valid')
     fee_owed = db.Column(db.Integer, default=0)
-    user = db.relationship('User', backref=db.backref('user_borrow'))
-    book = db.relationship('Book', backref=db.backref('book_borrow'))
+    user = db.relationship('User', backref=db.backref('user_borrowed_books'))
+    book = db.relationship('Book', backref=db.backref('book_borrowed_books', cascade="all, delete"))
 
     def __init__(self, book_id, user_id):
         """Initialize BorrowedBook obj."""

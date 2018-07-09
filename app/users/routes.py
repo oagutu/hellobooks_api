@@ -126,7 +126,7 @@ def login():
         else:
             return jsonify({"message": "Incorrect password"}), 401
 
-    except (KeyError, AttributeError) as e:
+    except (KeyError, AttributeError):
         return jsonify({"message": "Account not available"})
 
 
@@ -165,7 +165,8 @@ def reset_password():
 
     user_details = User.get_user(get_jwt_identity())
 
-    if sha256_crypt.verify(user_info[1], user_details.password):
+    if sha256_crypt.verify(user_info[1], user_details.password) and not \
+            User.verify_pass(user_info[0], user_info[2]):
         user_details.set_password(user_info)
 
         if user_details.id:
@@ -177,6 +178,9 @@ def reset_password():
 
         return jsonify({"message": "Successfully changed password"}), 200
 
+    elif sha256_crypt.verify(user_info[1], user_details.password) and \
+            User.verify_pass(user_info[0], user_info[2]):
+        return jsonify({"message": "New password cannot be the same as old password"})
     else:
         return jsonify({"message": "Current password incorrect"})
 

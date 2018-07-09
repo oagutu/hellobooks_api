@@ -31,7 +31,7 @@ class UpdateBookTestCase(BookEndpointsTestCase):
 
         result = self.update(self.book_details_two, 2, self.tokens["Nickname"])
         self.assertEqual(result.status_code, 202)
-        self.assertIn(b'book title', result.data)
+        self.assertIn(b'Book title', result.data)
         self.assertIn(b'322.45', result.data)
 
     def test_update_book_unauthorised_account(self):

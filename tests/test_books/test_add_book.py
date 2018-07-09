@@ -15,7 +15,7 @@ class AddBookTestCase(BookEndpointsTestCase):
 
         result = self.add(self.tokens["Nickname"], self.book_details)
         self.assertEqual(result.status_code, 201)
-        self.assertIn(b'book title', result.data)
+        self.assertIn(b'Book title', result.data)
         self.assertIn(b'321.45', result.data)
 
     def test_add_book_invalid_title(self):

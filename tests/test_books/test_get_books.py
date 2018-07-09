@@ -22,7 +22,7 @@ class GetBookTestCase(BookEndpointsTestCase):
         result = self.client.get('/api/v1/books?results=1',
                                  headers={'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
         self.assertEqual(result.status_code, 200)
-        self.assertIn(b'book title', result.data)
+        self.assertIn(b'Book title', result.data)
 
     def test_retrieve_all_books_invalid_page(self):
         """Test retrieve_all_books() functionality for missing page."""
@@ -47,6 +47,17 @@ class GetBookTestCase(BookEndpointsTestCase):
                      'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
         self.assertEqual(result.status_code, 200)
         self.assertIn('book title', str(result.data))
+
+    def test_get_book_by_title(self):
+        """Test searching for book using title, author"""
+
+        self.add(self.tokens["Nickname"], self.book_details)
+        result = self.client.get(
+            '/api/v1/books/search?q=book title',
+            headers={"content-type": "application/json",
+                     'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
+        self.assertEqual(result.status_code, 200)
+        self.assertIn('Book title', str(result.data))
 
     def test_get_book_not_in_libary(self):
         """Test getting book not in library."""
