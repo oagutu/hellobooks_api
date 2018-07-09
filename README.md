@@ -1,11 +1,32 @@
 [![Build Status](https://travis-ci.org/oagutu/hellobooks_api.svg?branch=master)](https://travis-ci.org/oagutu/hellobooks_api)
 [![Coverage Status](https://coveralls.io/repos/github/oagutu/hellobooks_api/badge.svg?branch=master)](https://coveralls.io/github/oagutu/hellobooks_api?branch=master)
-
+<a href="https://codeclimate.com/github/oagutu/hellobooks_api/maintainability"><img src="https://api.codeclimate.com/v1/badges/d739292061baca100c02/maintainability" /></a>
 # hellobooks_api
 ---
 API endpoints for the Hello Books Flask web app project. It should allow for accessing of book and user information.
 
 ### Supported API endpoints:
+
+|Endpoint                  | Functionality              |HTTP method  |ADMIN ONLY
+|--------------------------|----------------------------|-------------|----------
+|/api/auth/register        |Creates a user account      |POST         |
+|/api/auth/login           |Log in a user               |POST         |
+|/api/auth/logout          |Log out a user              |POST         |
+|/api/books                |Add a book                  |POST         |True
+|/api/books/{*book_id*}     |modify a book’s information |PUT          |True
+|/api/books/{*book_id*}    |Get a book by id            |GET          |
+|/api/books                |Retrieves all books         |GET          |
+|/api/books/*book_id*      |Remove a book               |DELETE       |True
+|/api/users/books/{*book_id*}|Borrow a book             |POST         |
+|/api/users/books/{*book_id*}|Return a book             |PUT          |
+|/api/users/books          |Borrow history              |GET          |
+|/api/auth/reset-password  |Password reset              |POST         |
+|/api/auth/users/status_change|Change user status       |POST         |True
+|api/v1/books/search{?q}   |Search book                 |POST         |
+|api/v1/users/books/logs   |Get book logs               |POST         |True
+|api/v1/auth/users/logs    |Get user logs               |POST         |True
+
+
 
 * add book: POST  /api/v1/books
 
