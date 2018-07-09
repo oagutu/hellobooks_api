@@ -2,70 +2,12 @@
 Endpoint user models."""
 
 from app import db
-from datetime import datetime, timedelta
+from datetime import datetime
 
-from sqlalchemy.ext.mutable import Mutable
-from sqlalchemy.ext.declarative import declarative_base
-
-
-class MutableDict(Mutable, dict):
-    """
-    Represent MutableDict object.
-
-    Allows for borrowed books pickle to be mutable.
-    """
-
-    @classmethod
-    def coerce(cls, key, value):
-        """Convert dictionary to MutableDict type."""
-
-        if not isinstance(value, MutableDict):
-            if isinstance(value, dict):
-                return MutableDict(value)
-
-            return Mutable.coerce(key, value)
-        else:
-            return value
-
-    def __setitem__(self, key, value):
-        """Handle set events for MutableDict."""
-
-        dict.__setitem__(self, key, value)
-        self.changed()
-
-    def __delitem__(self, key):
-        """
-        Handle delete events for MutableDict.
-
-        :param key: dict key used to determine dict entry to be deleted
-        :tyoe key: str
-        """
-
-        dict.__delitem__(self, key)
-        self.changed()
-
-    def __getstate__(self):
-        """
-        Return dictionary contents.
-
-        :return: borrowed_book contents for queried book object
-        :rtype: dict
-        """
-        return dict(self)
-
-    def __setstate__(self, state):
-        """
-        Reset dictionary contents.
-
-        :param state: state of of queried result(ie. the borrowed book entry)
-        """
-        self.update(state)
+from passlib.hash import sha256_crypt
 
 
-Base = declarative_base()
-
-
-class User(db.Model, Base):
+class User(db.Model):
     """Represent user table"""
 
     __tablename__ = "users"
@@ -74,9 +16,9 @@ class User(db.Model, Base):
     username = db.Column(db.String, nullable=False, unique=True)
     name = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(60), unique=True, nullable=False)
-    password = db.Column(db.String(30), nullable=False)
+    password = db.Column(db.String(100), nullable=False)
     acc_status = db.Column(db.String(40), default="member")
-    borrowed_books = db.Column(MutableDict.as_mutable(db.PickleType), default={})
+    books = db.relationship('Book', secondary='borrowed_books')
 
     def __init__(self, user_info):
         """
@@ -89,14 +31,12 @@ class User(db.Model, Base):
         self.name = user_info['name']
         self.email = user_info['email']
         self.username = user_info['username']
-        self.password = user_info['password']
+        self.password = sha256_crypt.encrypt(user_info['password'])
 
         if 'user_id' in user_info:
             self.id = user_info['user_id']
         if 'acc_status' in user_info:
             self.acc_status = user_info['acc_status']
-        if 'borrowed_books' in user_info:
-            self.borrowed_books = user_info['borrowed_books']
 
     def add_to_reg(self):
         """Add books to library dict."""
@@ -121,7 +61,27 @@ class User(db.Model, Base):
         elif type(param) == str:
             return User.query.filter_by(username=param).first()
 
+    @staticmethod
+    def get_email(param):
+        """
+        Check if email already in use.
+
+        :param param: provided email
+        :type param: string
+        :return: status of email present
+        :rtpye: bool
+        """
+
+        if User.query.filter_by(email=param).first():
+            return True
+
     def change_status(self, new_status):
+        """
+        Change user status.
+
+        :param new_status: new user status/role
+        :type new_status: str
+        """
 
         self.acc_status = new_status
         db.session.add(self)
@@ -146,96 +106,28 @@ class User(db.Model, Base):
         :type user_info: dict
         """
 
-        if self.password != user_info[2]:
-            self.password = user_info[2]
-
-    def get_all_borrowed(self, order=False, order_param='return_date'):
-        """
-        Returns list of borrowed books by user.
-
-        :param order: determines ordering of results. True - ascending.
-        :type order: bool
-        :param order_param: parameter used to order query results
-        :type order_param: str
-        :return: borrowed_dict, record_details
-        :rtype: tuple
-        """
-
-        # Holds temp list of borrowed_books.
-        borrowed_two = []
-
-        # Adds key and value pairs to list borrowed_two.
-        for y, x in enumerate(self.borrowed_books):
-            borrowed_two.append({'id': x})
-            borrowed_two[y].update(self.borrowed_books[x])
-
-        # Sorts list borrowed_two in order of descending date.
-        borrowed_sorted = sorted(borrowed_two, key=lambda date: date[order_param], reverse=order)
-
-        borrowed_dict = {}
-        keys = []
-
-        # Recreates dict a sorted according to date.
-        for val in borrowed_sorted:
-            borrowed_dict[val['id']] = val
-            keys.append(val['id'])
-            del borrowed_dict[val['id']]['id']
-
-        return borrowed_dict, {'keys': keys, 'records': len(borrowed_dict)}
+        if sha256_crypt.verify(user_info[1], self.password):
+            self.password = sha256_crypt.encrypt(user_info[2])
 
     @staticmethod
-    def set_borrowed():
+    def verify_pass(username, password):
         """
-        Provides borrow/return book functionality.
+        Verifies that password entered and in DB are equal
 
-        :return: info on borrowed book
-        :rtype: dict
-        """
-
-        borrow_info = dict()
-
-        borrow_info["borrow_date"] = datetime.now().strftime("%d/%m/%Y %H:%M")
-        borrow_info["ERD"] = (datetime.now() + timedelta(days=10)).strftime(
-            "%d/%m/%Y %H:%M")
-        borrow_info["ARD"] = ''
-        borrow_info["fee_owed"] = 0
-        borrow_info["status"] = "valid"
-
-        return borrow_info
-
-    def add_to_borrowed(self, book_id, borrow_info):
-        """
-        Add borrowed book to borrowed_books dictionary.
-
-        :param book_id: id of book to be borrowed
-        :type book_id: str
-        :param borrow_info: borrow transaction details
-        :type borrow_info: dict
+        :param username: username used to login
+        :type username: str
+        :param password: password used to login
+        :type password: str
+        :return: status of verification
+        :rtype: boolean
         """
 
-        self.borrowed_books[book_id] = borrow_info
-        db.session.commit()
+        user = User.get_user(username)
 
-    def update_borrowed(self, book_id, borrow_period, get=False):
-        """
-        Update borrowed book info.
-
-        :param book_id: id of borroowed book
-        :type book_id: str
-        :param borrow_period: no. of days book borrowed for
-        :type borrow_period: int
-        :param get: determines action, ie. if borrowing book or fetching borrow history
-        :type get: bool
-        """
-
-        borrowed = self.borrowed_books[book_id]
-        if borrow_period > 0:
-            borrowed["fee_owed"] = borrow_period * 30
-            self.add_to_borrowed(book_id, borrowed)
-
-        if not get:
-            self.borrowed_books[book_id]["status"] = "returned"
-        db.session.commit()
+        if sha256_crypt.verify(password, user.password):
+            return True
+        else:
+            return None
 
     def __repr__(self):
         """
@@ -244,16 +136,14 @@ class User(db.Model, Base):
         :return: list of user object details
         :rtype: list
         """
-        return str({
-            self.username: {
+        return {
                 "user_id": self.id,
                 "name": self.name,
                 "password": self.password,
+                "username": self.username,
                 "email": self.email,
-                "acc_status": self.acc_status,
-                "borrowed_books": self.borrowed_books
-            }
-        })
+                "acc_status": self.acc_status
+        }
 
 
 class UserLog(db.Model):
@@ -280,7 +170,7 @@ class UserLog(db.Model):
         """
 
         self.user_id = user_id
-        self.timestamp = datetime.now().strftime("%d/%m/%Y %H:%M")
+        self.timestamp = datetime.now().strftime("%m/%d/%Y %H:%M")
         self.action = action
         self.success = success
 
@@ -313,11 +203,11 @@ class UserLog(db.Model):
         :return: list of user log objects
         :rtype: list
         """
-        return str({
+        return {
             self.log_id: {
                 "book_id": self.user_id,
                 "timestamp": self.timestamp,
                 "action": self.action,
                 "success": self.success
             }
-        })
+        }

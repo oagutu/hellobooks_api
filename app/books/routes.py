@@ -5,104 +5,51 @@
 
 from flask import Blueprint
 from flask import request, jsonify
-from flask_jwt_extended import (
-    jwt_required, get_jwt_identity
-)
-
-from math import ceil
-import re
-from app.books.models import Genre
-
+from flask_jwt_extended import (jwt_required, get_jwt_identity)
 
 from app.users.models import User
-from app.books.models import Book, BookLog
+from app.books.models import Book, BookLog, BorrowedBook
+from app.blacklist.helpers import admin_required, verify_status
+from app.helpers import get_genre, log, validate_input
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 books_blueprint = Blueprint('books', __name__)
 
 
 @books_blueprint.route('/books', methods=['POST'])
 @jwt_required
+@admin_required
 def add_book():
     """Add specified book to library."""
 
-    acc = User.get_user(get_jwt_identity())
+    data = request.get_json()
 
-    if request.method == "POST" and acc.acc_status == "admin":
+    invalid_msg = validate_input(data)
+    if invalid_msg:
+        return jsonify({"msg": invalid_msg}), 400
 
-        data = request.get_json()
+    book_info = {}
+    for param in ('title', 'author', 'book_code','ddc_code'):
+        book_info[param] = data[param]
 
-        if len(data['title'].strip()) < 1:
-            return jsonify({"msg": "Invalid title"}), 400
+    for param in ('book_id', 'synopsis', 'subgenre', 'status'):
+        if param in data:
+            book_info[param] = data[param]
 
-        if len(data['author'].strip()) < 1:
-            return jsonify({"msg": "Invalid author"}), 400
+    if 'genre' in data:
+        book_info['genre'] = get_genre(data["genre"])
 
-        if 'book_code' not in data:
-            return jsonify({"msg": "Missing book Code"}), 400
-        elif Book.get_book(data['book_code']):
-            return jsonify({"msg": "Book(book_code) already in lib"}), 409
+    book = Book(book_info)
+    book.add_to_lib()
+    log(book)
 
-        # Checks if given ddc_code follows Dewey Decimal Classification syst.
-        if 'ddc_code' not in data:
-            # print(data)
-            return jsonify({"msg": "Missing ddc Code"}), 400
-        else:
-            pattern = r"^[\d][\d][\d](\.*[\d])*$"
-            match = re.search(pattern, data['ddc_code'])
-            if not match:
-                return jsonify({"msg": "Invalid ddc_code. Use DDC structure."}), 400
-
-        if type(data['book_code']) != int or len(str(data['book_code'])) != 12:
-            return jsonify({"msg": "Invalid book_code"}), 400
-
-        book_info = {
-            "title": data['title'],
-            "author": data['author'],
-            "book_code": data['book_code'],
-            "ddc_code": data['ddc_code'],
-        }
-        if data['genre'] == 'fiction':
-            book_info['genre'] = Genre.Fiction
-        else:
-            book_info['genre'] = Genre.Non_fiction
-
-        if 'book_id' in data:
-            book_info['book_id'] = data['book_id']
-
-        if "synopsis" in data:
-            book_info["synopsis"] = data["synopsis"]
-
-        if "subgenre" in data:
-            book_info["subgenre"] = data["subgenre"]
-
-        if 'status' in data:
-            book_info["status"] = data["status"]
-
-        book = Book(book_info)
-        book.add_to_lib()
-        if book.id:
-            BookLog(book.id).add_to_log()
-        else:
-            BookLog(book.id, success=False).add_to_log()
-
-        return jsonify({
-            "book_id": book.id,
-            "title": book.title,
-            "author": book.author,
-            "book_code": book.book_code,
-            "ddc_code": book.ddc_code,
-            "genre": book.genre.value,
-            "sub_genre": book.sub_genre,
-            "synopsis": book.synopsis
-            }), 201
-    else:
-        return jsonify({"msg": "Account not authorised to perform selected function"}), 401
+    return jsonify({"msg": "Successfully added book", "book": book.book_serializer()}), 201
 
 
 @books_blueprint.route('/books/<int:book_id>', methods=['PUT'])
 @jwt_required
+@admin_required
 def update_book(book_id):
     """
     Update book entry in library
@@ -113,54 +60,41 @@ def update_book(book_id):
     :rtype: JSON obj
     """
 
-    acc = User.get_user(get_jwt_identity())
+    data = request.get_json()
 
-    if request.method == "PUT" and acc.acc_status == "admin":
+    try:
+        book = Book.get_book(book_id)
 
-        data = request.get_json()
+        for val in data:
+            if val == "book_code" and Book.get_book(data["book_code"]) and Book.get_book(data["book_code"]) != book:
+                return jsonify({"msg": "Book code already in use"}), 400
+            elif val == "title":
+                book.title = data["title"]
+            elif val == "book_code":
+                book.book_code = data["book_code"]
+            elif val == "ddc_code":
+                book.ddc_code = data["ddc_code"]
+            elif val == "author":
+                book.author = data["author"]
+            elif val == "synopsis":
+                book.synopsis = data["synopsis"]
+            elif val == "sub_genre":
+                book.sub_genre = data["sub_genre"]
+            elif val == 'genre':
+                book.genre = get_genre(data[val])
 
-        try:
-            book = Book.get_book(book_id)
-            book.delete_book()
-            book_info = {}
-            for val in data:
-                if val == 'genre':
-                    if data['genre'] == 'fiction':
-                        book_info['genre'] = Genre.Fiction
-                    else:
-                        book_info['genre'] = Genre.Non_fiction
-                else:
-                    book_info[val] = data[val]
-            book_info['book_id'] = book_id
-            book = Book(book_info)
-            book.add_to_lib()
+        book.update()
+        log(book, 'UPDATE')
 
-            if book.id:
-                BookLog(book.id, action='UPDATE').add_to_log()
-            else:
-                BookLog(book.id, action='UPDATE', success=False).add_to_log()
+        return jsonify({"msg": "Successfully updated book", "book": book.book_serializer()}), 202
 
-            return jsonify({
-                "book_id": book.id,
-                "title": book.title,
-                "author": book.author,
-                "book_code": book.book_code,
-                "ddc_code": book.ddc_code,
-                "genre": book.genre.value,
-                "sub_genre": book.sub_genre,
-                "synopsis": book.synopsis
-            }), 202
-
-        except AttributeError:
-            book_details = {"msg": "Book entry not available"}
-
-            return jsonify(book_details), 404
-    else:
-        return jsonify({"msg": "Account not authorised to perform selected function"}), 401
+    except AttributeError:
+        return jsonify({"msg": "Book entry not available"}), 404
 
 
 @books_blueprint.route('/books/<int:book_id>', methods=['DELETE'])
 @jwt_required
+@admin_required
 def remove_book(book_id):
     """
     Delete book entry from library.
@@ -171,29 +105,21 @@ def remove_book(book_id):
     :rtype: JSON obj
     """
 
-    acc_type = User.get_user(get_jwt_identity())
+    try:
+        if BorrowedBook.query.filter_by(book_id=book_id, return_date=None).first():
+            return jsonify({"msg": "Book entry cannot be deleted as it currently borrowed."}), 403
+        book = Book.get_book(book_id)
+        book.delete_book()
+        log(book, 'DELETE')
 
-    if request.method == 'DELETE' and acc_type.acc_status == "admin":
+        book_details = {"msg": "Book entry deleted"}
 
-        try:
-            book = Book.get_book(book_id)
-            book.delete_book()
+        return jsonify(book_details), 204
 
-            if not book.id:
-                BookLog(book.id, action='DELETE').add_to_log()
-            else:
-                BookLog(book.id, action='DELETE', success=False).add_to_log()
+    except AttributeError:
+        book_details = {"msg": "Book entry not available"}
 
-            book_details = {"msg": "Book entry deleted"}
-
-            return jsonify(book_details), 204
-
-        except AttributeError:
-            book_details = {"msg": "Book entry not available"}
-
-            return jsonify(book_details), 404
-    else:
-        return jsonify({"msg": "Account not authorised to perform selected function"}), 401
+        return jsonify(book_details), 404
 
 
 @books_blueprint.route('/books', methods=['GET'])
@@ -206,37 +132,35 @@ def retrieve_all_books():
     :rtype: JSON obj
     """
 
-    if request.method == 'GET':
+    results = request.args.get('results')
+    page = request.args.get('page')
 
-        entry_no = request.args.get('results')
-        page = request.args.get('page')
-        if entry_no and page:
-            all_books = Book.get_all_books(entry_no, int(page))
+    if not results:
+        results = 3
+    if not page:
+        page = 1
 
-        elif entry_no and not page:
-            all_books = Book.get_all_books(entry_no)
+    all_books = Book.get_all_books(int(results), int(page))
+    library = {"books": {}}
 
-        elif not entry_no and page:
-            all_books = Book.get_all_books(int(page))
+    for book in all_books.items:
+        entry = book.book_serializer()
+        library["books"][book.id] = entry
 
-        else:
-            all_books = Book.get_all_books()
-        library = {}
-
-        for book in all_books:
-            entry = {
-                "book_id": book.id,
-                "title": book.title,
-                "author": book.author,
-                "book_code": book.book_code,
-                "ddc_code": book.ddc_code,
-                "genre": book.genre.value,
-                "sub_genre": book.sub_genre,
-                "synopsis": book.synopsis
-            }
-            library[book.id] = entry
-
-        return jsonify(library), 200
+    if not all_books.has_prev:
+        prev_pg = int(page)
+    else:
+        prev_pg = all_books.prev_num
+    if not all_books.has_next:
+        next_pg = int(page)
+    else:
+        next_pg = all_books.next_num
+    library["no_of_results"]  = len(library["books"])
+    library["prev_page"] = prev_pg
+    library["prev_url"] = request.path + "?page=" + str(prev_pg) + "&results=" + str(results)
+    library["next_page"] = next_pg
+    library["next_url"] = request.path + "?page=" + str(next_pg) + "&results=" + str(results)
+    return jsonify(library), 200
 
 
 @books_blueprint.route('/books/<int:book_id>', methods=['GET'])
@@ -251,26 +175,44 @@ def get_book(book_id):
     :rtype: JSON obj
     """
 
-    if request.method == 'GET':
+    if Book.get_book(book_id):
+        book_details = Book.get_book(book_id)
 
-        if Book.get_book(book_id):
-            book_details = Book.get_book(book_id)
-            print('test point: book details\n: ', book_details)
+        return jsonify({
+            "book_id": book_details.id,
+            "title": book_details.title,
+            "author": book_details.author,
+            "book_code": book_details.book_code,
+            "genre": book_details.genre.value,
+            "sub)genre": book_details.sub_genre,
+            "synopsis": book_details.synopsis}), 200
+    else:
+        return jsonify({"msg": "Book not available"}), 404
 
-            return jsonify({
-                "book_id": book_details.id,
-                "title": book_details.title,
-                "author": book_details.author,
-                "book_code": book_details.book_code,
-                "genre": book_details.genre.value,
-                "sub)genre": book_details.sub_genre,
-                "synopsis": book_details.synopsis}), 200
-        else:
-            return jsonify({"msg": "Book not available"}), 404
+
+@books_blueprint.route('/books/search', methods=['GET'])
+@jwt_required
+def search():
+    """
+    Search for book by title/author.
+
+    :return: queried book details
+    """
+    search_param = request.args.get("q")
+    try:
+        if search_param:
+            books = Book.get_book(search_param.lower())
+            results = {}
+            for book in books:
+                results[book.id] = book.book_serializer()
+            return jsonify({"books": results}), 200
+    except AttributeError:
+        return jsonify({"msg": "No results found"}), 404
 
 
 @books_blueprint.route('/users/books/<int:book_id>', methods=['POST', 'PUT'])
 @jwt_required
+@verify_status
 def borrow_return_book(book_id):
     """
     Facilitate borrowing/returning of books.
@@ -285,57 +227,59 @@ def borrow_return_book(book_id):
         user = User.get_user(get_jwt_identity())
         book_details = Book.get_book(book_id)
         book_status = book_details.status
+
         # Borrow available book by authorised user.
+        if request.method == 'POST' and book_status == "available":
 
-        if user.acc_status == "suspended":
+            borrow = BorrowedBook(book_id, user.id)
+            borrow.save()
+            book_details.set_book_status("borrowed")
 
-            return jsonify(
-                {
-                    "msg": "Member currently not authorised to borrow book"}), 401
+            return jsonify({
+                "book_id": borrow.book_id,
+                "borrow_date": borrow.borrow_date,
+                "due_date":  (datetime.now() + timedelta(days=10)).strftime("%d/%m/%Y %H:%M"),
+                "return_date": borrow.return_date,
+                "status": borrow.status,
+                "fee_owed": borrow.fee_owed
+            }), 201
 
-        if request.method == 'POST':
-            if user.acc_status != "suspended" and book_status == "available":
-
-                borrow_info = user.set_borrowed()
-                borrow_info["book_id"] = book_id
-                user.add_to_borrowed(book_id, borrow_info)
-
-                book_details.set_book_status("borrowed")
-
-                borrowed_book = {
-                    "book_id": book_details.id,
-                    "book_code": book_details.book_code,
-                    "title": book_details.title,
-                    "status": book_details.status
-                }
-
-                borrow_info.update(borrowed_book)
-
-                return jsonify(borrow_info), 201
+        elif request.method == "POST" and book_status == "borrowed":
+            return jsonify({"msg": "Book not available for borrowing"})
 
         # Return borrowed book by authorised user.
-        elif request.method == 'PUT':
+        elif request.method == 'PUT' and book_status == "borrowed":
 
-            if user.acc_status != "suspended" and book_status == "borrowed":
-                if str(book_id) in user.borrowed_books:
-                    borrowed_book = user.borrowed_books[str(book_id)]
-                    current_day = datetime.now()
-                    return_day = datetime.strptime(
-                        borrowed_book["ERD"],  '%d/%m/%Y %H:%M')
-                    borrow_period = str(current_day - return_day).split(' ')[0]
-                    if type(borrow_period) != int:
-                        borrow_period = 0
-                    else:
-                        borrow_period = int(borrow_period)
-                    user.update_borrowed(str(book_id), borrow_period)
+            try:
+                borrowed_book = BorrowedBook.get_borrowed_by_id(book_id)
+                current_date = datetime.now()
+                borrow_date = borrowed_book.borrow_date
+                expected_return_date = (borrow_date + timedelta(days=10)).strftime("%d/%m/%Y %H:%M")
+                expected_return_date = datetime.strptime(expected_return_date, "%d/%m/%Y %H:%M")
+                borrow_period = str(current_date - expected_return_date).split(' ')[0]
+                if type(borrow_period) != int:
+                    borrow_period = 0
 
-                    return jsonify(borrowed_book), 202
+                borrowed_book.update_borrowed(int(borrow_period))
+                borrowed_book.save()
+                book_details.set_book_status("available")
 
-                else:
-                    return jsonify(
-                        {
-                            "msg": "cannot return book. Not borrowed by user",
-                            "book_status": "borrowed"})
+                return jsonify({
+                    "book_id": borrowed_book.book_id,
+                    "borrow_date": borrowed_book.borrow_date,
+                    "due_date": expected_return_date,
+                    "return_date": borrowed_book.return_date,
+                    "fee_owed": borrowed_book.fee_owed,
+                    "status": borrowed_book.status
+                }), 202
+
+            except AttributeError:
+                return jsonify({
+                        "msg": "cannot return book. Not borrowed by user",
+                        "book_status": "borrowed"}), 403
+
+        elif request.method == 'PUT' and book_status == 'available':
+            return jsonify({"msg": "Book already available"}), 403
 
     except AttributeError:
 
@@ -352,52 +296,34 @@ def get_borrow_history():
     :rtype: JSON obj
     """
 
-    if request.method == 'GET':
-        returned = request.args.get("returned")
-        entries = request.args.get("results")
-        order_param = request.args.get("order_param")
+    returned = request.args.get("returned")
+    order_param = request.args.get("order_param")
 
-        user = User.get_user(get_jwt_identity())
-        if order_param:
-            borrowed_books, record_details = user.get_all_borrowed(False, order_param)
-        else:
-            borrowed_books, record_details = user.get_all_borrowed()
+    user = User.get_user(get_jwt_identity())
+    if order_param:
+        borrowed_books = BorrowedBook.get_borrowed(user.id, order_param)
+    elif returned and not order_param:
+        borrowed_books = BorrowedBook.get_borrowed(user.id, 'borrow_date', False)
+    else:
+        borrowed_books = BorrowedBook.get_borrowed(user.id)
 
-        if not returned:
-            for key in borrowed_books:
-                current_day = datetime.now()
-                return_day = datetime.strptime(
-                    borrowed_books[key]['ERD'],  '%d/%m/%Y %H:%M')
-                borrow_period = str(current_day - return_day).split(' ')[0]
-                if current_day <= return_day:
-                    borrow_period = 0
-                else:
-                    borrow_period = int(borrow_period)
+    borrowed = []
+    for book in borrowed_books:
+        entry = {
+            "book_id": book.book_id,
+            "book_title": book.book.title,
+            "borrow_date": book.borrow_date,
+            "return_date": book.return_date,
+            "fee_owed": book.return_date
+        }
+        borrowed.append(entry)
 
-                user.update_borrowed(str(key), borrow_period, True)
-
-                if entries:
-                    entries = int(entries)
-                    record_details['tot_pages'] = ceil(record_details['records']/entries)
-                    keys = record_details['keys'][:(entries + 1)]
-                    borrowed_temp = {}
-                    for val in keys:
-                        borrowed_temp[val] = borrowed_books[val]
-                    borrowed_books = borrowed_temp
-
-            return jsonify(borrowed_books), 200
-
-        elif returned == 'false':
-            pending_books = {}
-            for key in borrowed_books:
-                if borrowed_books[key]['borrow_status'] == 'invalid':
-                    pending_books[key] = borrowed_books[key]
-
-            return jsonify(pending_books), 200
+    return jsonify(borrowed), 200
 
 
 @books_blueprint.route('/users/books/logs', methods=['GET'])
 @jwt_required
+@admin_required
 def get_log():
     """
     Enable viewing of book logs.
@@ -406,25 +332,21 @@ def get_log():
     :rtype: JSON obj
     """
 
-    acc_type = User.get_user(get_jwt_identity())
     book_id = request.args.get("book_id")
 
-    if request.method == 'GET' and acc_type.acc_status == "admin":
-        if book_id:
-            logs = BookLog.get_logs(int(book_id))
-        else:
-            logs = BookLog.get_logs()
-
-        audit_log = {}
-        for log in logs:
-            entry = {
-                "book_id": log.book_id,
-                "timestamp": log.timestamp,
-                "action": log.action,
-                "success": log.success
-                }
-            audit_log[log.log_id] = entry
-
-        return jsonify(audit_log), 200
+    if book_id:
+        logs = BookLog.get_logs(int(book_id))
     else:
-        return jsonify({'msg': 'User not authorised'}), 401
+        logs = BookLog.get_logs()
+
+    audit_log = {}
+    for entry_log in logs:
+        entry = {
+            "book_id": entry_log.book_id,
+            "timestamp": entry_log.timestamp,
+            "action": entry_log.action,
+            "success": entry_log.success
+            }
+        audit_log[entry_log.log_id] = entry
+
+    return jsonify(audit_log), 200
