@@ -3,12 +3,11 @@ config.py
 Specifies default environment settings.
 """
 
-from os import urandom
+from os import urandom,  getenv
 
 
 class Config(object):
-    """
-    Main config class."""
+    """Main config class."""
 
     DEBUG = False
     CSRF_ENABLED = True
@@ -20,23 +19,18 @@ class TestingConfig(Config):
 
     DEBUG = True
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:@postgresadmin@localhost/hb_test_db'
+    SQLALCHEMY_DATABASE_URI = getenv('TEST_DATABASE_URL')
 
 
 class DevelopmentConfig(Config):
-    """
-
-
-
-    Development config settings."""
+    """Development config settings."""
 
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:@postgresadmin@localhost/hb_dev_db'
+    SQLALCHEMY_DATABASE_URI = getenv('DATABASE_URL')
 
 
 class ProductionConfig(Config):
-    """
-    Production config settings."""
+    """Production config settings."""
 
     DEBUG = False
     TESTING = False

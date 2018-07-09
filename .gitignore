@@ -10,6 +10,7 @@ migrations/
 .DS_Store
 
 #untracked files
+.env
 temp.py
 
 #file extensions

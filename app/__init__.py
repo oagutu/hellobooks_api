@@ -47,12 +47,12 @@ def create_app(config_name):
         return check_blacklist(token)
 
     @app.errorhandler(404)
-    def invalid_method(error):
-        return make_response(jsonify({'error':'404: Resource not available'}), 404)
+    def not_found(error):
+        return make_response(jsonify({'error': '404: Resource not available'}), 404)
 
     @app.errorhandler(405)
     def invalid_method(error):
-        return make_response(jsonify({'error':'405: Invalid method'}), 405)
+        return make_response(jsonify({'error': '405: Invalid method'}), 405)
 
     @app.route('/')
     def index():
