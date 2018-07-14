@@ -1,9 +1,15 @@
 [![Build Status](https://travis-ci.org/oagutu/hellobooks_api.svg?branch=master)](https://travis-ci.org/oagutu/hellobooks_api)
 [![Coverage Status](https://coveralls.io/repos/github/oagutu/hellobooks_api/badge.svg?branch=master)](https://coveralls.io/github/oagutu/hellobooks_api?branch=master)
 <a href="https://codeclimate.com/github/oagutu/hellobooks_api/maintainability"><img src="https://api.codeclimate.com/v1/badges/d739292061baca100c02/maintainability" /></a>
+
 # hellobooks_api
----
-API endpoints for the Hello Books Flask web app project. It should allow for accessing of book and user information.
+
+API endpoints for the Hello Books Flask web app project.
+It aims to aid in user and book management in a library context.
+
+This API can be accessed at the following url:
+
+https://fast-stream-12738.herokuapp.com
 
 ### Supported API endpoints:
 
@@ -13,10 +19,10 @@ API endpoints for the Hello Books Flask web app project. It should allow for acc
 |/api/auth/login           |Log in a user               |POST         |
 |/api/auth/logout          |Log out a user              |POST         |
 |/api/books                |Add a book                  |POST         |True
-|/api/books/{*book_id*}     |modify a book’s information |PUT          |True
+|/api/books/{*book_id*}    |modify a book’s information |PUT          |True
 |/api/books/{*book_id*}    |Get a book by id            |GET          |
 |/api/books                |Retrieves all books         |GET          |
-|/api/books/*book_id*      |Remove a book               |DELETE       |True
+|/api/books/{*book_id*}    |Remove a book               |DELETE       |True
 |/api/users/books/{*book_id*}|Borrow a book             |POST         |
 |/api/users/books/{*book_id*}|Return a book             |PUT          |
 |/api/users/books          |Borrow history              |GET          |
@@ -28,29 +34,7 @@ API endpoints for the Hello Books Flask web app project. It should allow for acc
 
 
 
-* add book: POST  /api/v1/books
-
-* edit book: PUT /api/v1/books/<bookId>
-
-* Remove a book: DELETE /api/v1/books/<bookId>
-
-* Retrieves all books: GET  /api//v1books
-
-* Get a book : GET  /api/v1/books/<bookId>
-
-* Borrow a book POST  /api/v1/users/books/<bookId>
-
-* Creates a user account POST /api/v1/auth/register
-
-* Logs in a user POST /api/v1/auth/login
-
-* Logs out a user: POST /api/v1/auth/logout
-
-* Password reset: POST /api/v1/auth/reset-password
-
-
 ## Setup:
----
 
 * clone repo to local machine:
 ```
@@ -67,7 +51,6 @@ $ python run.py
 ```
 
 ## Running
----
 
 You could use postman to test API endpoints:
 
@@ -75,31 +58,66 @@ You could use postman to test API endpoints:
 
 * Send requests using Postman
 
-For the endpoints, requests submitted using JSON. Example of JSON request:
+For the endpoints, requests submitted using JSON. 
+
+Example of JSON requests include:
+
+* Create user account:
 
 ```
-{       
-        "book_id": 1,
-        "title": "book title",
-        "book_code": 12345,
-        "author": "mary writer",
-        "synopsis": "Iwehn owueh owunef ohew ouweq...",
-        "genre": "fiction",
-        "subgenre": "xyz",
-        "status": "available"
+{
+    "name": "your_name",
+    "username": "your_username",
+    "password": "your_password",
+    "email": "your_email_address"
+}  
+```
+
+* login:
+
+```
+{
+	"username": "your_username",
+	"password": "your password"
+}
+```
+
+* add book:
+
+```
+{
+    "title": "levels",
+    "book_code": 941113109871,
+    "ddc_code": "321.15",
+    "author": "Avi K.",
+    "synopsis": "I ind hwbej jb. Kesse jnew ohew ouweq...",
+    "genre": "fiction",
+    "sub_genre": "drama"
 }
 ```
 
 ## Testing
-* With nosetests, navigate to main project directory and run nosetests:
+
+* With nosetests`(recommended)`, navigate to main project directory and run nosetests:
 ```
 nosetests
 ```
-* Without nosetests, navigate to tests directory in main project directory:
+* Without nosetests, navigate to *tests/test_books* or *tests/test_users* directories
+ in main project directory and run individual test suites:
+  
+  For example:
+  
 ```
-cd tests
+cd tests/test_books
 
-python test_books.py
+python test_add_book.py
+python test_get_books.py
+python test_remove_book.py
 
-python test_users.py
+cd tests/test_users
+
+python test_crete_user.py
+python test_login.py
+python test_logout.py
+
 ```
