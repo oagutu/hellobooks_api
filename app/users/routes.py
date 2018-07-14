@@ -13,7 +13,7 @@ import re
 
 from app.users.models import User, UserLog
 from app.blacklist.models import Blacklist
-from app.helpers import already_logged_in
+from app.helpers import already_logged_in, verify_username_password, log
 from app.blacklist.helpers import admin_required
 
 users_blueprint = Blueprint('users', __name__)
@@ -32,11 +32,9 @@ def create_user_account():
 
     data = request.get_json()
 
-    if 'password' not in data or len(data['password'].strip()) < 1:
-        return jsonify({"msg": "Invalid Password"}), 400
-
-    if 'username' not in data or len(data['username'].strip()) < 1:
-        return jsonify({"msg": "Invalid Username"}), 400
+    invalid_msg = verify_username_password(data)
+    if invalid_msg:
+        return jsonify({"msg": invalid_msg}), 400
 
     try:
         email = data['email'].lower()
@@ -67,10 +65,7 @@ def create_user_account():
         user = User(user_info)
         user.add_to_reg()
 
-        if user.id:
-            UserLog(user.id, action='INSERT').add_to_log()
-        else:
-            UserLog(user.id, action='INSERT', success=False).add_to_log()
+        log(user, 'INSERT')
 
         return jsonify({
             "user_id": user.id,
@@ -99,11 +94,9 @@ def login():
 
     data = request.get_json()
 
-    if 'password' not in data or len(data['password'].strip()) < 1:
-        return jsonify({"msg": "Invalid/Missing Password"}), 400
-
-    if 'username' not in data or len(data['username'].strip()) < 1:
-        return jsonify({"msg": "Invalid/Missing Username"}), 400
+    invalid_msg = verify_username_password(data)
+    if invalid_msg:
+        return jsonify({"msg": invalid_msg}), 400
 
     try:
         isverified = User.verify_pass(data['username'], data['password'])
@@ -169,10 +162,7 @@ def reset_password():
             User.verify_pass(user_info[0], user_info[2]):
         user_details.set_password(user_info)
 
-        if user_details.id:
-            UserLog(user_details.id, action='UPDATE').add_to_log()
-        else:
-            UserLog(user_details.id, action='UPDATE', success=False).add_to_log()
+        log(user_details, 'UPDATE')
 
         flash('Successfully changed password', category='info')
 

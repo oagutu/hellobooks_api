@@ -66,6 +66,7 @@ def update_book(book_id):
         book = Book.get_book(book_id)
 
         for val in data:
+            book_details = []
             if val == "book_code" and Book.get_book(data["book_code"]) and Book.get_book(data["book_code"]) != book:
                 return jsonify({"msg": "Book code already in use"}), 400
             elif val == "title":
@@ -155,11 +156,14 @@ def retrieve_all_books():
         next_pg = int(page)
     else:
         next_pg = all_books.next_num
-    library["no_of_results"]  = len(library["books"])
-    library["prev_page"] = prev_pg
-    library["prev_url"] = request.path + "?page=" + str(prev_pg) + "&results=" + str(results)
-    library["next_page"] = next_pg
-    library["next_url"] = request.path + "?page=" + str(next_pg) + "&results=" + str(results)
+
+    library.update({
+        "no_of_results": len(library["books"]),
+        "prev_page" : prev_pg,
+        "prev_url": request.path + "?page=" + str(prev_pg) + "&results=" + str(results),
+        "next_page": next_pg,
+        "next_url": request.path + "?page=" + str(next_pg) + "&results=" + str(results)
+    })
     return jsonify(library), 200
 
 

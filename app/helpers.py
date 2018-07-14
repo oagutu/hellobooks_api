@@ -9,6 +9,7 @@ from flask import jsonify, abort
 import re
 
 from app.books.models import Genre, BookLog, Book
+from app.users.models import UserLog
 
 
 def already_logged_in(fn):
@@ -95,16 +96,40 @@ def validate_id(book_id):
         # return jsonify({"msg": "book_id must be a number/integer"}), 400
 
 
-def log(book, action="INSERT", success=True):
+def log(recipient, action="INSERT", success=True):
     """
     Updates book log
 
-    :param book: book entry on which action performed
+    :param recipient: book/user entry on which action performed
     :param action: type of action performed on Book entry
     :param success: succes ofaction
     """
 
-    if book.id:
-        BookLog(book.id, action, success).add_to_log()
-    else:
-        BookLog(book.id, action, success=False).add_to_log()
+    try:
+        book = recipient.book_code
+        log_table = BookLog
+    except AttributeError:
+        log_table = UserLoggit
+
+    if not recipient.id:
+        success=False
+
+    log_table(recipient.id, action, success).add_to_log()
+
+
+def verify_username_password(data):
+    """
+    Verifies that the username and password are valid.
+
+    :param data: holds username and password key-value pairs
+    :type data: dict
+    :return: invalid input error message
+    :rtype: str
+    """
+
+    if 'password' not in data or len(data['password'].strip()) < 1:
+        return "Invalid Password"
+
+    if 'username' not in data or len(data['username'].strip()) < 1:
+        return "Invalid Username"
+

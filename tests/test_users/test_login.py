@@ -29,7 +29,7 @@ class LoginTestCase(UserEndpointsTestCase):
         """Test login with invalid/missing password"""
 
         result = self.user({'username': 'Doe', 'password': ''}, False)
-        self.assertIn(b'Invalid/Missing Password', result.data)
+        self.assertIn(b'Invalid Password', result.data)
 
     def test_login_incorrect_password(self):
         """Test login with wrong password."""
