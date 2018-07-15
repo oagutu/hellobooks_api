@@ -9,7 +9,7 @@ from flask import jsonify, abort
 import re
 
 from app.books.models import Genre, BookLog, Book
-from app.users.models import UserLog
+from app.users.models import UserLog, User
 
 
 def already_logged_in(fn):
@@ -117,7 +117,7 @@ def log(recipient, action="INSERT", success=True):
     log_table(recipient.id, action, success).add_to_log()
 
 
-def verify_username_password(data):
+def verify_user_info(data, is_email):
     """
     Verifies that the username and password are valid.
 
@@ -127,9 +127,20 @@ def verify_username_password(data):
     :rtype: str
     """
 
-    if 'password' not in data or len(data['password'].strip()) < 1:
-        return "Invalid Password"
+    for val in ('password', 'username'):
+        if val not in data or len(data[val].strip()) < 1:
+            return 'Invalid ' + val.capitalize()
 
-    if 'username' not in data or len(data['username'].strip()) < 1:
-        return "Invalid Username"
+    if is_email:
+        try:
+            print(data)
+            email = data['email'].lower()
+            pattern = r"^[a-z0-9]+(\.*-*[a-z0-9]*)*@[a-z0-9]+(\.*-*[a-z0-9]*)*(\.[a-z0-9]+)+$"
+            match = re.search(pattern, email)
+            if not match:
+                return "Invalid Email"
+            if User.get_email(email):
+                return "Email address already in use"
+        except KeyError:
+            return "No email provided"
 

@@ -54,7 +54,6 @@ class User(db.Model):
         :return:  query obj for specified user
         :rtype: query obj
         """
-        # print(User.query.filter(User.username == username))
 
         if type(param) == int:
             return User.query.filter_by(id=param).first()
@@ -128,22 +127,6 @@ class User(db.Model):
             return True
         else:
             return None
-
-    def __repr__(self):
-        """
-        Represent the object instance of the model when queried.
-
-        :return: list of user object details
-        :rtype: list
-        """
-        return {
-                "user_id": self.id,
-                "name": self.name,
-                "password": self.password,
-                "username": self.username,
-                "email": self.email,
-                "acc_status": self.acc_status
-        }
 
 
 class UserLog(db.Model):

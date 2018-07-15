@@ -9,11 +9,10 @@ from flask_jwt_extended import (
 )
 from passlib.hash import sha256_crypt
 
-import re
 
 from app.users.models import User, UserLog
 from app.blacklist.models import Blacklist
-from app.helpers import already_logged_in, verify_username_password, log
+from app.helpers import already_logged_in, verify_user_info, log
 from app.blacklist.helpers import admin_required
 
 users_blueprint = Blueprint('users', __name__)
@@ -32,34 +31,16 @@ def create_user_account():
 
     data = request.get_json()
 
-    invalid_msg = verify_username_password(data)
-    if invalid_msg:
+    invalid_msg = verify_user_info(data, True)
+    if invalid_msg == 'Email address already in use':
+        return jsonify({"msg": invalid_msg}), 409
+    elif invalid_msg:
         return jsonify({"msg": invalid_msg}), 400
 
-    try:
-        email = data['email'].lower()
-        pattern = r"^[a-z0-9]+(\.*-*[a-z0-9]*)*@[a-z0-9]+(\.*-*[a-z0-9]*)*(\.[a-z0-9]+)+$"
-        match = re.search(pattern, email)
-        if not match:
-            return jsonify({"msg": "Invalid Email"}), 400
-        if User.get_email(email):
-            return jsonify({"msg": "Email address already in use"}), 409
-    except KeyError:
-        return jsonify({"msg": "No email provided"}), 400
-
-    user_info = {
-        "name": data['name'],
-        "email": email,
-        "username": data['username'],
-        "password": data['password']
-    }
-
-    if 'user_id' in data:
-        user_info['user_id'] = data['user_id']
-    if 'acc_status' in data:
-        user_info['acc_status'] = data['acc_status']
-    if 'borrowed_books' in data and len(data['borrowed_books']) > 0:
-        user_info["borrowed_books"] = data["borrowed_books"]
+    user_info = dict()
+    for val in ('name', 'email', 'username', 'password', 'user_id', 'acc_status'):
+        if val in data:
+            user_info[val] = data[val]
 
     if not User.get_user(data['username']):
         user = User(user_info)
@@ -76,9 +57,7 @@ def create_user_account():
         }), 201
 
     else:
-        user_details = {"msg": "Username not available. Already in use"}
-
-        return jsonify(user_details), 409
+        return jsonify({"msg": "Username not available. Already in use"}), 409
 
 
 @users_blueprint.route('/login', methods=['POST'])
@@ -94,7 +73,7 @@ def login():
 
     data = request.get_json()
 
-    invalid_msg = verify_username_password(data)
+    invalid_msg = verify_user_info(data, False)
     if invalid_msg:
         return jsonify({"msg": invalid_msg}), 400
 
