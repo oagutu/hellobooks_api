@@ -46,7 +46,7 @@ class GetBookTestCase(BookEndpointsTestCase):
             headers={"content-type": "application/json",
                      'Authorization': 'Bearer {}'.format(self.tokens["Nickname"])})
         self.assertEqual(result.status_code, 200)
-        self.assertIn('book title', str(result.data))
+        self.assertIn('book title', str(result.data).lower())
 
     def test_get_book_by_title(self):
         """Test searching for book using title, author"""
