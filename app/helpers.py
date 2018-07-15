@@ -109,10 +109,10 @@ def log(recipient, action="INSERT", success=True):
         book = recipient.book_code
         log_table = BookLog
     except AttributeError:
-        log_table = UserLoggit
+        log_table = UserLog
 
     if not recipient.id:
-        success=False
+        success = False
 
     log_table(recipient.id, action, success).add_to_log()
 

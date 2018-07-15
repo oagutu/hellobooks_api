@@ -162,7 +162,7 @@ def reset_password():
             User.verify_pass(user_info[0], user_info[2]):
         user_details.set_password(user_info)
 
-        log(user_details, 'UPDATE')
+        log(user_details, 'pipUPDATE')
 
         flash('Successfully changed password', category='info')
 

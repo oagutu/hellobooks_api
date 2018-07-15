@@ -17,6 +17,7 @@ class RemoveBookTestCase(BookEndpointsTestCase):
         checks if book status changed to borrowed.
         """
 
+        # Add book to be borrowed
         self.add(self.tokens["Nickname"], self.book_details)
 
         # Test borrow book.

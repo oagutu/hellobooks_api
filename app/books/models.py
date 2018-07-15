@@ -4,7 +4,7 @@ endpoint books models
 """
 import enum
 from app import db
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 class Genre(enum.Enum):
@@ -71,7 +71,8 @@ class Book(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def update(self):
+    @staticmethod
+    def update():
         db.session.commit()
 
     @staticmethod
@@ -89,7 +90,7 @@ class Book(db.Model):
         elif type(param) == int:
             return Book.query.filter_by(id=param).first()
         else:
-            return Book.query.filter(Book.title.contains(param)).all()
+            return Book.query.filter((Book.title.contains(param)) | (Book.author.contains(param))).all()
 
     @staticmethod
     def get_all_books(entries=3, page=1):
@@ -118,26 +119,6 @@ class Book(db.Model):
         self.status = status
         db.session.commit()
 
-    # def __repr__(self):
-    #     """
-    #     Return the object instance of the model when queried.
-    #
-    #     :return: list of queried book objects
-    #     """
-    #
-    #     return str({
-    #         self.id: {
-    #             "title": self.title,
-    #             "author": self.author,
-    #             "genre": self.genre,
-    #             "sub_genre": self.sub_genre,
-    #             "synopsis": self.synopsis,
-    #             "book_code": self.book_code,
-    #             "ddc_code": self.ddc_code,
-    #             "status": self.status
-    #         }
-    #     })
-
 
 class BorrowedBook(db.Model):
     """Associates Book and User  classes."""
@@ -160,6 +141,21 @@ class BorrowedBook(db.Model):
         self.book_id = book_id
         self.user_id = user_id
         self.borrow_date = datetime.now().strftime("%m/%d/%Y %H:%M")
+
+    def borrowed_to_dict(self):
+        """
+        Convert model class object ot dict
+
+        :return: borrowed book details dict
+        """
+        return {
+            "book_id": self.book_id,
+            "borrow_date": self.borrow_date,
+            "due_date": datetime.now() + timedelta(days=10),
+            "return_date": self.return_date,
+            "status": self.status,
+            "fee_owed": self.fee_owed
+        }
 
     def save(self):
         """Save created Borrowedbook instance."""

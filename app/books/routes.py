@@ -30,15 +30,12 @@ def add_book():
         return jsonify({"msg": invalid_msg}), 400
 
     book_info = {}
-    for param in ('title', 'author', 'book_code','ddc_code'):
-        book_info[param] = data[param]
 
-    for param in ('book_id', 'synopsis', 'subgenre', 'status'):
-        if param in data:
+    for param in ('title', 'author', 'book_code', 'ddc_code', 'book_id', 'synopsis', 'subgenre', 'status', "genre"):
+        if param in data and param == "genre":
+            book_info['genre'] = get_genre(data["genre"])
+        elif param in data:
             book_info[param] = data[param]
-
-    if 'genre' in data:
-        book_info['genre'] = get_genre(data["genre"])
 
     book = Book(book_info)
     book.add_to_lib()
@@ -65,24 +62,13 @@ def update_book(book_id):
     try:
         book = Book.get_book(book_id)
 
-        for val in data:
-            book_details = []
+        for val in book.__table__.columns._data.keys():
             if val == "book_code" and Book.get_book(data["book_code"]) and Book.get_book(data["book_code"]) != book:
                 return jsonify({"msg": "Book code already in use"}), 400
-            elif val == "title":
-                book.title = data["title"]
-            elif val == "book_code":
-                book.book_code = data["book_code"]
-            elif val == "ddc_code":
-                book.ddc_code = data["ddc_code"]
-            elif val == "author":
-                book.author = data["author"]
-            elif val == "synopsis":
-                book.synopsis = data["synopsis"]
-            elif val == "sub_genre":
-                book.sub_genre = data["sub_genre"]
-            elif val == 'genre':
+            if val == "genre":
                 book.genre = get_genre(data[val])
+            elif val in data and val:
+                book.val = data[str(val)]
 
         book.update()
         log(book, 'UPDATE')
@@ -148,18 +134,16 @@ def retrieve_all_books():
         entry = book.book_serializer()
         library["books"][book.id] = entry
 
-    if not all_books.has_prev:
-        prev_pg = int(page)
-    else:
+    prev_pg = int(page)
+    next_pg = int(page)
+    if all_books.has_prev:
         prev_pg = all_books.prev_num
-    if not all_books.has_next:
-        next_pg = int(page)
-    else:
+    if all_books.has_next:
         next_pg = all_books.next_num
 
     library.update({
         "no_of_results": len(library["books"]),
-        "prev_page" : prev_pg,
+        "prev_page": prev_pg,
         "prev_url": request.path + "?page=" + str(prev_pg) + "&results=" + str(results),
         "next_page": next_pg,
         "next_url": request.path + "?page=" + str(next_pg) + "&results=" + str(results)
@@ -182,14 +166,8 @@ def get_book(book_id):
     if Book.get_book(book_id):
         book_details = Book.get_book(book_id)
 
-        return jsonify({
-            "book_id": book_details.id,
-            "title": book_details.title,
-            "author": book_details.author,
-            "book_code": book_details.book_code,
-            "genre": book_details.genre.value,
-            "sub)genre": book_details.sub_genre,
-            "synopsis": book_details.synopsis}), 200
+        return jsonify(book_details.book_serializer())
+
     else:
         return jsonify({"msg": "Book not available"}), 404
 
@@ -239,14 +217,7 @@ def borrow_return_book(book_id):
             borrow.save()
             book_details.set_book_status("borrowed")
 
-            return jsonify({
-                "book_id": borrow.book_id,
-                "borrow_date": borrow.borrow_date,
-                "due_date":  (datetime.now() + timedelta(days=10)).strftime("%d/%m/%Y %H:%M"),
-                "return_date": borrow.return_date,
-                "status": borrow.status,
-                "fee_owed": borrow.fee_owed
-            }), 201
+            return jsonify(borrow.borrowed_to_dict()), 201
 
         elif request.method == "POST" and book_status == "borrowed":
             return jsonify({"msg": "Book not available for borrowing"})
@@ -256,11 +227,7 @@ def borrow_return_book(book_id):
 
             try:
                 borrowed_book = BorrowedBook.get_borrowed_by_id(book_id)
-                current_date = datetime.now()
-                borrow_date = borrowed_book.borrow_date
-                expected_return_date = (borrow_date + timedelta(days=10)).strftime("%d/%m/%Y %H:%M")
-                expected_return_date = datetime.strptime(expected_return_date, "%d/%m/%Y %H:%M")
-                borrow_period = str(current_date - expected_return_date).split(' ')[0]
+                borrow_period = str(datetime.now() - (borrowed_book.borrow_date + timedelta(days=10))).split(' ')[0]
                 if type(borrow_period) != int:
                     borrow_period = 0
 
@@ -268,25 +235,16 @@ def borrow_return_book(book_id):
                 borrowed_book.save()
                 book_details.set_book_status("available")
 
-                return jsonify({
-                    "book_id": borrowed_book.book_id,
-                    "borrow_date": borrowed_book.borrow_date,
-                    "due_date": expected_return_date,
-                    "return_date": borrowed_book.return_date,
-                    "fee_owed": borrowed_book.fee_owed,
-                    "status": borrowed_book.status
-                }), 202
+                return jsonify(borrowed_book.borrowed_to_dict())
 
             except AttributeError:
-                return jsonify({
-                        "msg": "cannot return book. Not borrowed by user",
-                        "book_status": "borrowed"}), 403
+                return jsonify({"msg": "cannot return book. Not borrowed by user",
+                                "book_status": "borrowed"}), 403
 
         elif request.method == 'PUT' and book_status == 'available':
             return jsonify({"msg": "Book already available"}), 403
 
     except AttributeError:
-
         return jsonify({"msg": "Book not available"}), 404
 
 
@@ -313,13 +271,8 @@ def get_borrow_history():
 
     borrowed = []
     for book in borrowed_books:
-        entry = {
-            "book_id": book.book_id,
-            "book_title": book.book.title,
-            "borrow_date": book.borrow_date,
-            "return_date": book.return_date,
-            "fee_owed": book.return_date
-        }
+        entry = {**book.borrowed_to_dict(), **{"book_title": book.book.title}}
+
         borrowed.append(entry)
 
     return jsonify(borrowed), 200
