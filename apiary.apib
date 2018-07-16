@@ -10,7 +10,8 @@ Hellobooks is a simple api for managing library books and users. It is built on 
 ### Create New User Account [POST]
 This action allows for a user to register as member.
 - It takes a JSON payload, containing the user's details, as part of the request.
-- The response returns a JSON object with registered user details and a 201 response. 
+- The response returns a JSON object with registered user details and a 201 response.
+
 
 + Request (application/json)
 
@@ -59,8 +60,7 @@ This action allows for user login.
 ### Reset Password [POST]
 This action enables a logged in user to change their password.
 - The request payload holds current and new password in a JSON object.
-- The Response holds a action success message and a 200 status code. 
- 
+- The Response holds a action success message and a 200 status code.
 
 + Request (application/json)
 
@@ -124,6 +124,7 @@ This action gets all books in the library.
 + Response 200 (application/json)
 
         {
+
             "books": {
                     "3": {
                         "author": "Booky Mcbookface",
@@ -162,7 +163,7 @@ This action gets all books in the library.
             "prev_page": 1,
             "prev_url": "/api/v1/books?page=1&results=3"
         }
-
+ 
 
 ### Get Book By ID [GET /api/v1/books/{book_id}]
 
