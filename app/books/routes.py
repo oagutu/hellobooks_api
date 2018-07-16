@@ -271,7 +271,8 @@ def get_borrow_history():
 
     borrowed = []
     for book in borrowed_books:
-        entry = {**book.borrowed_to_dict(), **{"book_title": book.book.title}}
+        entry = book.borrowed_to_dict().copy()
+        entry.update({"book_title": book.book.title})
 
         borrowed.append(entry)
 
