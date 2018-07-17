@@ -6,7 +6,8 @@ hb/
 .vscode/
 .idea/
 __pycache__/
-migrations/
+apps/books/__pycache__/
+apps/users/__pycache__/
 .DS_Store
 
 #untracked files
