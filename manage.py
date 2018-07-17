@@ -5,6 +5,8 @@ from flask_script import Manager # class for handling a set of commands
 from flask_migrate import Migrate, MigrateCommand
 from app import db, create_app
 from app.users import models
+from app.books import models
+from app.blacklist import models
 
 app = create_app(config_name='development')
 migrate = Migrate(app, db)
