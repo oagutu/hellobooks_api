@@ -11,7 +11,7 @@ apps/users/__pycache__/
 .DS_Store
 
 #untracked files
-.env
+/.env
 temp.py
 
 #file extensions
