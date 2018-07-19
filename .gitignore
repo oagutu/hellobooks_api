@@ -9,7 +9,6 @@ __pycache__/
 apps/books/__pycache__/
 apps/users/__pycache__/
 .DS_Store
-migrations/
 
 #untracked files
 .env
