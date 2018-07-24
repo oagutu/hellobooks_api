@@ -7,6 +7,7 @@ from flask_api import FlaskAPI
 from flask_jwt_extended import JWTManager
 from flask_sqlalchemy import SQLAlchemy
 from datetime import timedelta
+from flask_cors import CORS
 
 from config import app_config
 
@@ -18,6 +19,7 @@ def create_app(config_name):
     Creates instance of flask app."""
 
     app = FlaskAPI(__name__)
+    CORS(app)
     app.config.from_object(app_config[config_name])
 
     app.config['JWT_SECRET_KEY'] = '8gf%bw72biu2789)8h31hiuwefgonmOI$%N@@MP'
