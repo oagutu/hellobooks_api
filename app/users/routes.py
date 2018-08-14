@@ -187,11 +187,11 @@ def get_users():
     """Get all users"""
 
     users = User.get_all_users()
-    members = {'members': {}}
+    members = []
 
     for user in users:
         entry = user.user_serializer()
-        members["members"][user.id] = entry
+        members.append(entry)
 
     return jsonify(members), 200
 
