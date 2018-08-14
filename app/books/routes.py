@@ -23,7 +23,7 @@ books_blueprint = Blueprint('books', __name__)
 def add_book():
     """Add specified book to library."""
 
-    data = request.get_json()
+    data = request.get_json(force=True)
 
     invalid_msg = validate_input(data)
     if invalid_msg:

@@ -38,6 +38,16 @@ class User(db.Model):
         if 'acc_status' in user_info:
             self.acc_status = user_info['acc_status']
 
+    def user_serializer(self):
+        return {
+            "user_id": self.id,
+            "username": self.username,
+            "name": self.name.capitalize(),
+            "email": self.email,
+            "acc_status": self.acc_status,
+            "books": self.books
+        }
+
     def add_to_reg(self):
         """Add books to library dict."""
 
@@ -59,6 +69,11 @@ class User(db.Model):
             return User.query.filter_by(id=param).first()
         elif type(param) == str:
             return User.query.filter_by(username=param).first()
+
+    def get_all_users():
+        """Fetch all users"""
+
+        return User.query.all()
 
     @staticmethod
     def get_email(param):

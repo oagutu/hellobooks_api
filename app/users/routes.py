@@ -17,8 +17,6 @@ from app.blacklist.helpers import admin_required
 
 users_blueprint = Blueprint('users', __name__)
 
-blacklist = set()
-
 
 @users_blueprint.route('/register', methods=['POST'])
 def create_user_account():
@@ -47,14 +45,9 @@ def create_user_account():
         user.add_to_reg()
 
         log(user, 'INSERT')
+        msg = "Successfully registered {}" .format(data['username'])
 
-        return jsonify({
-            "user_id": user.id,
-            "name": user.name,
-            "email": user.email,
-            "username": user.username,
-            "account_status": user.acc_status
-        }), 201
+        return jsonify({"msg": msg}), 201
 
     else:
         return jsonify({"msg": "Username not available. Already in use"}), 409
@@ -87,19 +80,21 @@ def login():
             message = "Successfully logged in as: " + data['username']
 
             response = jsonify({
-                "message": message,
+                "role": user_details.acc_status,
+                "msg": message,
                 "access_token": access_token}
             )
 
             response.headers['Authorization'] = access_token
+            response.status_code = 200
 
             return response
 
         else:
-            return jsonify({"message": "Incorrect password"}), 401
+            return jsonify({"msg": "Incorrect password"}), 401
 
     except (KeyError, AttributeError):
-        return jsonify({"message": "Account not available"})
+        return jsonify({"msg": "Account not available"})
 
 
 @users_blueprint.route('/logout', methods=['POST'])
@@ -183,6 +178,22 @@ def update_user_status():
     user.change_status(data['new_status'])
 
     return jsonify({'msg': '{0} changed to {1}'.format(data['user'], data['new_status'])}), 200
+
+
+@users_blueprint.route('/users', methods=['GET'])
+@jwt_required
+@admin_required
+def get_users():
+    """Get all users"""
+
+    users = User.get_all_users()
+    members = {'members': {}}
+
+    for user in users:
+        entry = user.user_serializer()
+        members["members"][user.id] = entry
+
+    return jsonify(members), 200
 
 
 @users_blueprint.route('/users/logs', methods=['GET'])

@@ -28,6 +28,7 @@ class UserEndpointsTestCase(unittest.TestCase):
             "user_id": 123456,
             "username": "JD",
             "password": "qwerty",
+            "confirm_password": "qwerty",
             "email": "abc@gfg.com",
             "acc_status": "member",
             "borrowed_books": {}
@@ -38,6 +39,7 @@ class UserEndpointsTestCase(unittest.TestCase):
             "user_id": 1234,
             "username": "John",
             "password": "qwerty",
+            "confirm_password": "qwerty",
             "email": "qwerty@keyboard.com",
             "acc_status": "suspended",
             "borrowed_books": {}}
@@ -47,6 +49,7 @@ class UserEndpointsTestCase(unittest.TestCase):
             "user_id": 654321,
             "username": "Doe",
             "password": "qwerty",
+            "confirm_password": "qwerty",
             "email": "abc@test.com",
             "acc_status": "admin",
             "borrowed_books": {}

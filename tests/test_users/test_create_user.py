@@ -17,7 +17,6 @@ class CreateUserTestCase(UserEndpointsTestCase):
         result = self.user(self.user_details)
         self.assertEqual(result.status_code, 201)
         self.assertIn(b'JD', result.data)
-        self.assertIn(b'Jane Doe', result.data)
 
     def test_create_user_account_with_conflict(self):
         """Test if username already in use when creating an account."""
@@ -26,6 +25,7 @@ class CreateUserTestCase(UserEndpointsTestCase):
                 "name": "John Doe",
                 "username": "Doe",
                 "password": "qwerty",
+                "confirm_password": "qwerty",
                 "email": "another@test.com",
         }
         result = self.user(data)
@@ -40,6 +40,7 @@ class CreateUserTestCase(UserEndpointsTestCase):
                 "user_id": "44",
                 "username": "m",
                 "password": "",
+                "confirm_password": "",
                 "email": "gmail@mary.com"
         }
         result = self.user(data)

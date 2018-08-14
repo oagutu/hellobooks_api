@@ -123,6 +123,8 @@ def verify_user_info(data, is_email):
 
     :param data: holds username and password key-value pairs
     :type data: dict
+    :param is_email: determines if login or signup
+    :type data: bool
     :return: invalid input error message
     :rtype: str
     """
@@ -133,14 +135,19 @@ def verify_user_info(data, is_email):
 
     if is_email:
         try:
-            print(data)
             email = data['email'].lower()
             pattern = r"^[a-z0-9]+(\.*-*[a-z0-9]*)*@[a-z0-9]+(\.*-*[a-z0-9]*)*(\.[a-z0-9]+)+$"
             match = re.search(pattern, email)
+            msg = False
             if not match:
-                return "Invalid Email"
-            if User.get_email(email):
-                return "Email address already in use"
+                msg = "Invalid Email"
+            elif User.get_email(email):
+                msg = "Email address already in use"
+            elif 'name' not in data or len(data['name'].strip()) < 3:
+                msg = 'Invalid Name'
+            elif 'confirm_password' not in data or data['confirm_password'] != data['password']:
+                msg = 'Confirm password must be equal to password'
+            return msg
         except KeyError:
             return "No email provided"
 
