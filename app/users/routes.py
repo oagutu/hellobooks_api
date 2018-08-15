@@ -160,7 +160,7 @@ def update_user_status():
     :rtype: json obj
     """
 
-    data = request.get_json()
+    data = request.get_json(force=True)
     status_options = ['banned', 'suspended', 'admin', 'member']
 
     if 'new_status' not in data or data['new_status'] not in status_options:
