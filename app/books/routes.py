@@ -23,7 +23,7 @@ books_blueprint = Blueprint('books', __name__)
 def add_book():
     """Add specified book to library."""
 
-    data = request.get_json(force=True)
+    data = request.get_json()
 
     invalid_msg = validate_input(data)
     if invalid_msg:
@@ -62,13 +62,16 @@ def update_book(book_id):
     try:
         book = Book.get_book(book_id)
 
-        for val in book.__table__.columns._data.keys():
-            if val == "book_code" and Book.get_book(data["book_code"]) and Book.get_book(data["book_code"]) != book:
-                return jsonify({"msg": "Book code already in use"}), 400
-            if val == "genre":
-                book.genre = get_genre(data[val])
-            elif val in data and val:
-                book.val = data[str(val)]
+        if "book_code" and Book.get_book(data["book_code"]) and Book.get_book(data["book_code"]) != book:
+            return jsonify({"msg": "Book code already in use"}), 400
+
+        book.genre = get_genre(data['genre'])
+        book.sub_genre = data['genre']
+        book.synopsis = data['synopsis']
+        book.title = data['title']
+        book.author = data['author']
+        book.book_code = data['book_code']
+        book.ddc_code = data['ddc_code']
 
         book.update()
         log(book, 'UPDATE')
@@ -123,16 +126,16 @@ def retrieve_all_books():
     page = request.args.get('page')
 
     if not results:
-        results = 3
+        results = 10
     if not page:
         page = 1
 
     all_books = Book.get_all_books(int(results), int(page))
-    library = {"books": {}}
+    library = {"books": []}
 
     for book in all_books.items:
         entry = book.book_serializer()
-        library["books"][book.id] = entry
+        library["books"].append(entry)
 
     prev_pg = int(page)
     next_pg = int(page)
