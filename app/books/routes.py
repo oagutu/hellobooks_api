@@ -303,10 +303,12 @@ def get_log():
     audit_log = []
     for entry_log in logs:
         audit_log.append({
+            "log_id": entry_log.log_id,
             "book_id": entry_log.book_id,
             "timestamp": entry_log.timestamp,
             "action": entry_log.action,
             "success": entry_log.success
             })
+    audit_log = {'logs': audit_log, 'count': len(audit_log)}
 
     return jsonify(audit_log), 200
