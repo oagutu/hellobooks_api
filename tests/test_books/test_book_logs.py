@@ -5,7 +5,7 @@
 
 import unittest
 import json
-from test_books import BookEndpointsTestCase
+from tests.test_books.test_books import BookEndpointsTestCase
 
 
 class BookLogsTestCase(BookEndpointsTestCase):

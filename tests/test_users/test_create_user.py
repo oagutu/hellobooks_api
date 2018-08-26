@@ -81,6 +81,7 @@ class CreateUserTestCase(UserEndpointsTestCase):
                 "user_id": "44",
                 "username": "m",
                 "password": "123",
+                "confirm_password": "123",
                 "email": "gmail@mary.com"}
         self.assertEqual(self.user(data).status_code, 201)
 

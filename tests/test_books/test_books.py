@@ -38,6 +38,7 @@ class BookEndpointsTestCase(unittest.TestCase):
             "title": "book title two",
             "book_code": 978962222901,
             "ddc_code": "322.45",
+            "synopsis": "",
             "author": "poppins",
             "genre": "non-fiction",
             "status": "borrowed"
@@ -48,6 +49,7 @@ class BookEndpointsTestCase(unittest.TestCase):
             "book_code": 978962221234,
             "ddc_code": "322.00",
             "author": "po",
+            "synopsis": "",
             "genre": "fiction",
             "subgenre": "legal-drama",
             "status": "borrowed"
@@ -59,6 +61,7 @@ class BookEndpointsTestCase(unittest.TestCase):
             'email': 'name@email.co.ke',
             'username': 'Nickname',
             'password': 'qwerty',
+            'confirm_password': 'qwerty',
             'acc_status': 'admin'
         }
 
@@ -67,6 +70,7 @@ class BookEndpointsTestCase(unittest.TestCase):
             'user_id': '1234',
             'username': 'thatguy',
             'password': 'qwerty',
+            'confirm_password': 'qwerty',
             'email': 'jina@email.co.ke',
             'acc_status': 'suspended',
             'borrowed_books': {}}
@@ -74,7 +78,7 @@ class BookEndpointsTestCase(unittest.TestCase):
         self.tokens = {}
 
         # Register user.
-        self.user(self.user_details)
+        r = self.user(self.user_details)
         # User login
         result = self.user({'username': 'Nickname', 'password': 'qwerty'}, False)
         self.tokens['Nickname'] = result.headers['Authorization']

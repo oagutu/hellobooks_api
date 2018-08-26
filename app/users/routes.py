@@ -214,14 +214,13 @@ def get_log():
     else:
         logs = UserLog.get_logs()
 
-    audit_log = {}
-    for log in logs:
-        entry = {
-            "user_id": log.user_id,
-            "timestamp": log.timestamp,
-            "action": log.action,
-            "success": log.success
-            }
-        audit_log[log.log_id] = entry
+    audit_log = []
+    for entry_log in logs:
+        audit_log.append({
+            "user_id": entry_log.user_id,
+            "timestamp": entry_log.timestamp,
+            "action": entry_log.action,
+            "success": entry_log.success
+            })
 
     return jsonify(audit_log), 200

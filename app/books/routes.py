@@ -300,14 +300,13 @@ def get_log():
     else:
         logs = BookLog.get_logs()
 
-    audit_log = {}
+    audit_log = []
     for entry_log in logs:
-        entry = {
+        audit_log.append({
             "book_id": entry_log.book_id,
             "timestamp": entry_log.timestamp,
             "action": entry_log.action,
             "success": entry_log.success
-            }
-        audit_log[entry_log.log_id] = entry
+            })
 
     return jsonify(audit_log), 200
