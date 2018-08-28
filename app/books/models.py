@@ -149,6 +149,7 @@ class BorrowedBook(db.Model):
         :return: borrowed book details dict
         """
         return {
+            "borrow_id": self.id,
             "book_id": self.book_id,
             "borrow_date": self.borrow_date,
             "due_date": datetime.now() + timedelta(days=10),

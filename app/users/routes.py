@@ -82,7 +82,8 @@ def login():
             response = jsonify({
                 "role": user_details.acc_status,
                 "msg": message,
-                "access_token": access_token}
+                "access_token": access_token,
+                "user": user_details.email},
             )
 
             response.headers['Authorization'] = access_token
@@ -191,9 +192,24 @@ def get_users():
 
     for user in users:
         entry = user.user_serializer()
+        del entry['books']
         members.append(entry)
 
     return jsonify(members), 200
+
+
+@users_blueprint.route('/users/profile', methods=['GET'])
+@jwt_required
+@admin_required
+def get_user():
+    """Get single user"""
+
+    user_param = request.args.get("q")
+    user = User.get_user(user_param)
+    user = user.user_serializer()
+    del user['books']
+
+    return jsonify(user), 200
 
 
 @users_blueprint.route('/users/logs', methods=['GET'])
