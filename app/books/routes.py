@@ -146,6 +146,8 @@ def retrieve_all_books():
 
     library.update({
         "no_of_results": len(library["books"]),
+        "pages": all_books.pages,
+        "current_page": int(page),
         "prev_page": prev_pg,
         "prev_url": request.path + "?page=" + str(prev_pg) + "&results=" + str(results),
         "next_page": next_pg,
@@ -187,10 +189,12 @@ def search():
     try:
         if search_param:
             books = Book.get_book(search_param.lower())
-            results = {}
+            results = {'books': []}
             for book in books:
-                results[book.id] = book.book_serializer()
-            return jsonify({"books": results}), 200
+                results['books'].append(book.book_serializer())
+
+            results['no_of_results'] = len(books)
+            return jsonify(results), 200
     except AttributeError:
         return jsonify({"msg": "No results found"}), 404
 
