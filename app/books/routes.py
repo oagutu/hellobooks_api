@@ -66,7 +66,7 @@ def update_book(book_id):
             return jsonify({"msg": "Book code already in use"}), 400
 
         book.genre = get_genre(data['genre'])
-        book.sub_genre = data['subgenre']
+        book.sub_genre = data['sub_genre']
         book.synopsis = data['synopsis']
         book.title = data['title']
         book.author = data['author']

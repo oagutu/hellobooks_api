@@ -68,8 +68,9 @@ class User(db.Model):
         if type(param) == int:
             return User.query.filter_by(id=param).first()
         elif type(param) == str:
-            return User.query.filter_by(username=param).first()
+            return User.query.filter_by(username=param).first() or User.query.filter_by(email=param).first()
 
+    @staticmethod
     def get_all_users():
         """Fetch all users"""
 

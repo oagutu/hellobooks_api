@@ -129,9 +129,12 @@ def verify_user_info(data, is_email):
     :rtype: str
     """
 
-    for val in ('password', 'username'):
-        if val not in data or len(data[val].strip()) < 1:
+    for val in ('username', 'password'):
+        username = val == 'username' and len(data['username'].split(' ')) >1
+        if 'username' not in data or len(data[val].strip()) < 1 or username:
             return 'Invalid ' + val.capitalize()
+        if 'password' not in data or val == 'password' and len(data['password'].strip()) < 6:
+            return 'Password must be at least 6 characters long'
 
     if is_email:
         try:

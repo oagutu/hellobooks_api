@@ -23,7 +23,7 @@ def create_app(config_name):
     app.config.from_object(app_config[config_name])
 
     app.config['JWT_SECRET_KEY'] = '8gf%bw72biu2789)8h31hiuwefgonmOI$%N@@MP'
-    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=120)
+    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=360)
     app.config['JWT_BLACKLIST_ENABLED'] = True
     app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access']
     jwt = JWTManager(app)

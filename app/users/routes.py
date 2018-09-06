@@ -40,7 +40,8 @@ def create_user_account():
         if val in data:
             user_info[val] = data[val]
 
-    if not User.get_user(data['username']):
+    user_info['username'] = user_info['username'].lower()
+    if not User.get_user(data['username'].lower()):
         user = User(user_info)
         user.add_to_reg()
 
@@ -94,8 +95,9 @@ def login():
         else:
             return jsonify({"msg": "Incorrect password"}), 401
 
-    except (KeyError, AttributeError):
-        return jsonify({"msg": "Account not available"})
+    except (KeyError, AttributeError) as e:
+        print(e)
+        return jsonify({"msg": "Account not available"}), 404
 
 
 @users_blueprint.route('/logout', methods=['POST'])
@@ -128,8 +130,12 @@ def reset_password():
     user_info = [
         get_jwt_identity(),
         data['current_password'],
-        data['new_password']
+        data['new_password'],
+        data['confirm_password']
     ]
+
+    if data['new_password'] != data['confirm_password']:
+        return jsonify({"message": "invalid confirm password input"}), 400
 
     user_details = User.get_user(get_jwt_identity())
 
@@ -137,7 +143,7 @@ def reset_password():
             User.verify_pass(user_info[0], user_info[2]):
         user_details.set_password(user_info)
 
-        log(user_details, 'pipUPDATE')
+        log(user_details, 'UPDATE')
 
         flash('Successfully changed password', category='info')
 
@@ -145,9 +151,9 @@ def reset_password():
 
     elif sha256_crypt.verify(user_info[1], user_details.password) and \
             User.verify_pass(user_info[0], user_info[2]):
-        return jsonify({"message": "New password cannot be the same as old password"})
+        return jsonify({"message": "New password cannot be the same as old password"}), 400
     else:
-        return jsonify({"message": "Current password incorrect"})
+        return jsonify({"message": "Current password incorrect"}), 403
 
 
 @users_blueprint.route('/users/status_change', methods=['POST'])
@@ -200,7 +206,6 @@ def get_users():
 
 @users_blueprint.route('/users/profile', methods=['GET'])
 @jwt_required
-@admin_required
 def get_user():
     """Get single user"""
 
@@ -208,8 +213,9 @@ def get_user():
     user = User.get_user(user_param)
     user = user.user_serializer()
     del user['books']
+    user_result = {'user_data': user, 'msg': f'User {user_param} successfully found'}
 
-    return jsonify(user), 200
+    return jsonify(user_result), 200
 
 
 @users_blueprint.route('/users/logs', methods=['GET'])
