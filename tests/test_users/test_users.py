@@ -57,7 +57,7 @@ class UserEndpointsTestCase(unittest.TestCase):
 
         self.tokens = {}
 
-        self.client.post(
+        r = self.client.post(
             "/api/v1/auth/register",
             data=json.dumps(self.user_details_four),
             headers={"content-type": "application/json"})
